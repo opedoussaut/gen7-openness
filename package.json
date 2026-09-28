@@ -1,0 +1,14 @@
+{
+  "name": "gen7-openness",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A visual MCP and A2A workshop: tools connect, specialists collaborate.",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node --watch server.mjs",
+    "test": "node --test",
+    "build": "node scripts/build.mjs"
+  }
+}

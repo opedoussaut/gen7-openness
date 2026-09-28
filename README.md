@@ -7,6 +7,10 @@ A two-tab workshop experience for **horizontal openness**: understand MCP and A2
 - Restrained blue industrial styling, soft surfaces, a rack illustration and animated protocol connections.
 - Pause, step, replay, inspect every exchange, export the trace, and use presentation mode.
 
+![Understand MCP and A2A](docs/understand.jpg)
+
+![Specialist cooling demo](docs/demo.jpg)
+
 ## Run the live HTTP version
 
 Install **Node.js 22 or later**, then:
