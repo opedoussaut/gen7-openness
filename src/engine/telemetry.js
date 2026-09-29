@@ -143,3 +143,23 @@ export function checkInvariants(run, metrics, value) {
   }
   return checks.map(c => ({ ...c, ok: Math.abs(c.lhs - c.rhs) <= eps * Math.max(1, Math.abs(c.rhs)) }));
 }
+
+/**
+ * Plain-language receipt of what a set of model calls cost: reading (fresh input),
+ * re-reading instructions (cached prefix) and writing (output), per the model price list.
+ */
+export function receipt(calls, models) {
+  const line = (tokens, price) => ({ tokens, cost: tokens * price / 1e6 });
+  const acc = { reading: { tokens: 0, cost: 0 }, instructions: { tokens: 0, cost: 0 }, writing: { tokens: 0, cost: 0 } };
+  for (const c of calls) {
+    const p = models[c.model];
+    for (const [k, t, price] of [['reading', c.inputTokens, p.inPerM], ['instructions', c.cachedTokens, p.cachedPerM], ['writing', c.outputTokens, p.outPerM]]) {
+      const l = line(t, price); acc[k].tokens += l.tokens; acc[k].cost += l.cost;
+    }
+  }
+  return acc;
+}
+
+/** Tokens → printed pages, for non-expert audiences: ≈0.75 English words per token, ≈500 words per page. */
+export const TOKENS_PER_PAGE = Math.round(500 / 0.75);
+export const pages = tokens => tokens / TOKENS_PER_PAGE;

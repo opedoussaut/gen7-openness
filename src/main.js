@@ -7,8 +7,9 @@ import { mountLearn } from './ui/learn.js';
 import { mountDemo } from './ui/demo.js';
 import { mountEconomics } from './ui/economics.js';
 import { mountTechnical } from './ui/technical.js';
+import { mountScale } from './ui/scale.js';
 
-const PAGES = ['learn', 'demo', 'economics', 'technical'];
+const PAGES = ['learn', 'demo', 'economics', 'scale', 'technical'];
 const engine = new DemoEngine(scenario);
 const reference = new DemoEngine(scenario);
 
@@ -52,6 +53,7 @@ const views = {
   learn: mountLearn($('#page-learn'), app),
   demo: mountDemo($('#page-demo'), app),
   economics: mountEconomics($('#page-economics'), app),
+  scale: mountScale($('#page-scale'), app),
   technical: mountTechnical($('#page-technical'), app)
 };
 

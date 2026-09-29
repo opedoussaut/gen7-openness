@@ -1,6 +1,7 @@
 // AI ECONOMICS — was using AI economically justified?
 import { icon } from './icons.js';
-import { esc, int, compact, eur, ms, times } from './format.js';
+import { esc, int, compact, eur, ms, times, pct } from './format.js';
+import { receipt, pages, TOKENS_PER_PAGE } from '../engine/telemetry.js';
 
 const fmtUnit = (unit, v) => unit === 'eur' ? eur(v, { precise: true }) : unit === 'ms' ? ms(v) : unit === 'wh' ? `${v.toFixed(v < 10 ? 2 : 1)} Wh` : compact(v);
 
@@ -18,7 +19,6 @@ export function mountEconomics(el, app) {
     const banner = source === 'live'
       ? `<span class="tag ok">${icon('check', 12)} Your run</span> Illustrative run ${esc(run.id)} · completed · simulated industrial scenario`
       : `<span class="tag neutral">Reference run</span> Computed instantly with the same engine${running ? ' · your live run is in progress and will replace it when the decision is reached' : ' · start the live demo to replay it'}`;
-    const byCost = naive.comparison.find(r => r.id === 'cost'), byLat = naive.comparison.find(r => r.id === 'latency'), byCtx = naive.comparison.find(r => r.id === 'context');
     el.innerHTML = `
     <div class="page-head">
       <div><span class="eyebrow"><i class="pip"></i>AI economics</span><h1 class="display" style="font-size:clamp(32px,3.6vw,50px);margin-top:12px">Was using AI <span>economically justified?</span></h1>
@@ -60,25 +60,7 @@ export function mountEconomics(el, app) {
       </section>
     </div>
 
-    <section class="versus" aria-labelledby="vs-h">
-      <span class="eyebrow"><i class="pip"></i>Naive AI vs lean AI</span>
-      <h2 class="h2" id="vs-h">Context engineering, <span>in five seconds.</span></h2>
-      <p class="lede" style="font-size:16px;margin-top:6px"><b>Naive:</b> each specialist receives the raw records of its domain. <b>Lean:</b> deterministic grooming first, then agents reason over the evidence pack through MCP. Same orchestration, same messages.</p>
-      <div class="factor-row">
-        <div class="factor"><b>${times(byCtx.factor)}</b><span>less context sent to models</span></div>
-        <div class="factor"><b>${times(byCost.factor)}</b><span>lower AI execution cost</span></div>
-        <div class="factor"><b>${times(byLat.factor)}</b><span>faster end-to-end</span></div>
-      </div>
-      <div class="panel cmp">
-        <div class="cmp-head"><span>METRIC</span><span>NAIVE AI (raw context) vs LEAN AI (groomed)</span><span style="text-align:right">FACTOR</span></div>
-        ${naive.comparison.map(r => `<div class="cmp-row"><b>${esc(r.label)}</b><div class="cmp-bars">
-          <div class="cmp-bar naive"><em>NAIVE</em><div class="track"><i style="width:100%"></i></div><span>${fmtUnit(r.unit, r.naive)}</span></div>
-          <div class="cmp-bar lean"><em>LEAN</em><div class="track"><i style="width:${Math.max(0.4, r.lean / r.naive * 100)}%"></i></div><span>${fmtUnit(r.unit, r.lean)}</span></div></div>
-          <span class="fx">${times(r.factor)}</span></div>`).join('')}
-        <div class="cmp-row"><b>Business decision</b><div class="small muted">Assumed equivalent for this comparison. In practice, burying the relevant evidence among ${int(m.context.rawRecords)} raw records also raises the risk of a worse decision; that effect is not quantified here.</div><span class="fx" style="color:var(--muted)">=</span></div>
-        <p class="cmp-note">${naive.totals.windowOverflows.map(o => `The naive ${esc(label(sc, o.agent))} context (${compact(o.tokens)} tokens) exceeds the ${compact(sc.models[naive.calls.find(c => c.agent === o.agent).model].contextWindow)}-token window and must be split into ${o.chunks} chunked calls.`).join(' ')} Bars are linear. Energy uses indicative per-token factors (${sc.energy.whPer1kInputTokens} Wh / 1k input, ${sc.energy.whPer1kOutputTokens} Wh / 1k output) — order of magnitude only.</p>
-      </div>
-    </section>
+    ${savingsSection(view, sc)}
 
     <details class="more">
       <summary>Pricing, performance and value assumptions</summary>
@@ -90,7 +72,88 @@ export function mountEconomics(el, app) {
           <tr><td>Rack online earlier</td><td>${sc.value.daysEarlier} days</td></tr><tr><td>Internal GPU-hour rate</td><td>€${sc.value.gpuHourEur.toFixed(2)}</td></tr><tr><td>Manual study → review</td><td>${sc.value.manualStudyHours} h → ${sc.value.reviewHours} h</td></tr><tr><td>Engineering rate</td><td>€${sc.value.engineeringRateEur} / h</td></tr></tbody></table></div>
       </div>
     </details>`;
+    el.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => app.go(b.dataset.go)));
   }
   return { update };
 }
 const label = (sc, id) => sc.agents.find(a => a.id === id)?.name ?? id;
+const sumBy = (list, fn) => list.reduce((a, x) => a + fn(x), 0);
+
+/** Plain-language, three-step explanation of the brute-force vs lean saving. Every number comes from the run. */
+function savingsSection(view, sc) {
+  const { metrics: m, naive: n } = view;
+  const bf = n.totals, ln = m.totals;
+  const rBF = receipt(n.calls, sc.models), rLN = receipt(view.run.modelCalls, sc.models);
+  const saving = bf.totalCost - ln.totalCost;
+  const ctx = n.comparison.find(r => r.id === 'context');
+  const pBF = pages(ctx.naive), pLN = pages(ctx.lean);
+  const agents = sc.agents.map(a => ({ a, bf: sumBy(n.calls.filter(c => c.agent === a.id), c => c.cost), ln: m.agents.find(x => x.id === a.id).modelCost })).sort((x, y) => (y.bf - y.ln) - (x.bf - x.ln));
+  const maxBF = Math.max(...agents.map(x => x.bf));
+  const top = agents[0];
+  const leanCall = view.run.modelCalls.find(c => c.agent === top.a.id), bfCall = n.calls.find(c => c.id === leanCall.id), p = sc.models[leanCall.model];
+  const perChunk = Math.floor(p.contextWindow * 0.9) - leanCall.cachedTokens;
+  const fmt = v => eur(v, { precise: true });
+  const rcpt = (title, cls, r, infra, total, note) => `<div class="receipt ${cls}"><div class="receipt-head"><b>${title}</b><span>${note}</span></div>
+    <table><tbody>
+      <tr><td>Reading the data<small>${int(r.reading.tokens)} tokens</small></td><td>${fmt(r.reading.cost)}</td></tr>
+      <tr><td>Re-reading its instructions<small>${int(r.instructions.tokens)} tokens · cached, 90% cheaper</small></td><td>${fmt(r.instructions.cost)}</td></tr>
+      <tr><td>Writing answers &amp; reasoning<small>${int(r.writing.tokens)} tokens · 5× the reading price</small></td><td>${fmt(r.writing.cost)}</td></tr>
+      <tr><td>Tools, messages, data extraction<small>fixed small fees</small></td><td>${fmt(infra)}</td></tr>
+      <tr class="total"><td>Total for one decision</td><td>${fmt(total)}</td></tr>
+    </tbody></table></div>`;
+  return `<section class="savings" aria-labelledby="sv-h">
+    <span class="eyebrow"><i class="pip"></i>Brute force vs lean</span>
+    <h2 class="h2" id="sv-h">Where the saving comes from, <span>in three steps.</span></h2>
+    <p class="lede" style="font-size:16px;margin-top:8px"><b>Brute force:</b> give each AI specialist all the raw data of its domain and let it sort through it. <b>Lean:</b> sort the data first with ordinary software, then give the AI only the evidence. Same agents, same questions, same decision.</p>
+
+    <div class="step">
+      <div class="step-copy"><span class="step-n">1</span><h3>The AI reads far less.</h3><p>AI providers bill by the <b>token</b> — roughly three quarters of a word. Brute force makes the models read the equivalent of <b>≈${int(pBF)} pages</b>. After grooming, they read <b>≈${Math.max(1, Math.round(pLN))} pages</b>.</p><p class="fine">Pages: 1 page ≈ 500 words ≈ ${TOKENS_PER_PAGE} tokens. Tokens: estimated at 4 bytes of text per token.</p></div>
+      <div class="step-visual pages-visual">
+        <div class="pv-row bf"><em>Brute force</em><div class="pv-track"><i style="width:100%"></i></div><b>≈${int(pBF)} pages</b><small>${compact(ctx.naive)} tokens</small></div>
+        <div class="pv-row ln"><em>Lean</em><div class="pv-track"><i style="width:${Math.max(0.6, pLN / pBF * 100)}%"></i></div><b>≈${Math.max(1, Math.round(pLN))} pages</b><small>${compact(ctx.lean)} tokens</small></div>
+        <p class="pv-note">${times(ctx.factor)} less to read — the grooming that removed it ran in ${ms(ln.groomCpuMs)} of ordinary computing, no AI.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-copy"><span class="step-n">2</span><h3>Reading and writing have a price.</h3><p>Reading one million tokens costs <b>€${sc.models['reasoning-large'].inPerM.toFixed(2)}</b> on the large model and <b>€${sc.models['specialist-small'].inPerM.toFixed(2)}</b> on the small one. Writing costs five times more. So the bill is simply <b>tokens × price</b>, plus small fixed fees for tools and messages.</p><p class="fine">Illustrative prices, typical of current models; not a vendor quote.</p></div>
+      <div class="step-visual receipts">
+        ${rcpt('Brute force', 'bf', rBF, bf.infraCost, bf.totalCost, `${bf.modelCalls} model calls`)}
+        ${rcpt('Lean', 'ln', rLN, ln.infraCost, ln.totalCost, `${ln.modelCalls} model calls`)}
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-copy"><span class="step-n">3</span><h3>The saving is the difference.</h3>
+        <div class="saving-eq"><span>${fmt(bf.totalCost)}</span><i>−</i><span>${fmt(ln.totalCost)}</span><i>=</i><b>${fmt(saving)}</b></div>
+        <p>saved on <b>this one decision</b>: ${pct(saving / bf.totalCost, 0)} less, and ${times(bf.latencyMs / ln.latencyMs)} faster (${ms(bf.latencyMs)} → ${ms(ln.latencyMs)}). Almost all of it comes from the agents whose raw data is largest.</p>
+        <button class="btn sm" data-go="scale" style="margin-top:14px">What does this mean at scale? ${icon('arrow', 14)}</button></div>
+      <div class="step-visual">
+        <div class="eyebrow" style="margin-bottom:12px">Cost per agent · brute force vs lean</div>
+        ${agents.map(x => `<div class="ag-row"><b>${esc(x.a.name)}</b><div class="ag-bars"><div class="ag-bar bf"><i style="width:${x.bf / maxBF * 100}%"></i><span>${fmt(x.bf)}</span></div><div class="ag-bar ln"><i style="width:${Math.max(0.5, x.ln / maxBF * 100)}%"></i><span>${fmt(x.ln)}</span></div></div></div>`).join('')}
+        <div class="stack-legend"><span><i style="background:#c77f3c"></i>brute force</span><span><i style="background:var(--lean)"></i>lean</span></div>
+      </div>
+    </div>
+
+    <details class="more worked">
+      <summary>Show the arithmetic for the ${esc(top.a.name)} (largest saving)</summary>
+      <div class="worked-grid">
+        <div class="panel"><div class="eyebrow">Lean · one call</div>
+          <p class="calc">${int(leanCall.cachedTokens)} cached × €${p.cachedPerM.toFixed(2)}<br>+ ${int(leanCall.inputTokens)} read × €${p.inPerM.toFixed(2)}<br>+ ${int(leanCall.outputTokens)} written × €${p.outPerM.toFixed(2)}<br>÷ 1,000,000 = <b>${fmt(leanCall.cachedTokens * p.cachedPerM / 1e6 + leanCall.inputTokens * p.inPerM / 1e6 + leanCall.outputTokens * p.outPerM / 1e6)}</b></p>
+          <p class="small muted">${int(leanCall.evidenceTokens)} of the ${int(leanCall.inputTokens)} tokens read are groomed evidence returned by MCP tools.</p></div>
+        <div class="panel"><div class="eyebrow">Brute force · same step</div>
+          <p class="calc">Evidence replaced by raw data: ${int(leanCall.inputTokens)} − ${int(leanCall.evidenceTokens)} + ${int(bfCall.rawTokens)} = <b>${int(bfCall.inputTokens)}</b> tokens to read<br>Model window ${compact(p.contextWindow)}, usable per call ${int(perChunk)} → <b>${bfCall.chunks} call${bfCall.chunks > 1 ? 's' : ''}</b>, each re-reading instructions and writing<br>${int(bfCall.cachedTokens)} × €${p.cachedPerM.toFixed(2)} + ${int(bfCall.inputTokens)} × €${p.inPerM.toFixed(2)} + ${int(bfCall.outputTokens)} × €${p.outPerM.toFixed(2)} ÷ 1,000,000 = <b>${fmt(bfCall.cost)}</b></p></div>
+      </div>
+    </details>
+
+    <div class="panel cmp" style="margin-top:18px">
+      <div class="cmp-head"><span>METRIC · ONE DECISION</span><span>BRUTE FORCE (raw data) vs LEAN (groomed first)</span><span style="text-align:right">FACTOR</span></div>
+      ${n.comparison.map(r => `<div class="cmp-row"><b>${esc(r.label)}</b><div class="cmp-bars">
+        <div class="cmp-bar naive"><em>BRUTE</em><div class="track"><i style="width:100%"></i></div><span>${fmtUnit(r.unit, r.naive)}</span></div>
+        <div class="cmp-bar lean"><em>LEAN</em><div class="track"><i style="width:${Math.max(0.4, r.lean / r.naive * 100)}%"></i></div><span>${fmtUnit(r.unit, r.lean)}</span></div></div>
+        <span class="fx">${times(r.factor)}</span></div>`).join('')}
+      <div class="cmp-row"><b>Business decision</b><div class="small muted">Assumed identical for this comparison. In practice, burying the relevant evidence among ${int(m.context.rawRecords)} raw records also raises the risk of a worse decision; that effect is not quantified here.</div><span class="fx" style="color:var(--muted)">=</span></div>
+      <p class="cmp-note">${n.totals.windowOverflows.map(o => `The brute-force ${esc(label(sc, o.agent))} context (${compact(o.tokens)} tokens) exceeds the model's ${compact(sc.models[n.calls.find(c => c.agent === o.agent).model].contextWindow)}-token window, so it must be split into ${o.chunks} calls.`).join(' ')} Bars are linear. Energy uses indicative per-token factors (${sc.energy.whPer1kInputTokens} Wh / 1k tokens read, ${sc.energy.whPer1kOutputTokens} Wh / 1k written) — order of magnitude only.</p>
+    </div>
+  </section>`;
+}

@@ -1,4 +1,4 @@
-# GEN7 Openness · 12-minute presenter script
+# GEN7 Openness · 14-minute presenter script
 
 The sentence to leave with the audience: **“Groom deterministically, reason sparingly, connect openly, measure everything.”**
 
@@ -34,7 +34,16 @@ Recommendation panel: conditional approval, the disagreement and its resolution,
 
 ## 10:00–11:30 · Measure
 
-AI economics: €0.046 of AI for an estimated €12k of value — and naive vs lean: 250× less context, ~33× cheaper, 3× faster. Stress the labels: telemetry is recorded per call; value is **estimated** from stated assumptions.
+AI economics: €0.046 of AI for an estimated €12k of value. Stress the labels: telemetry is recorded per call; value is **estimated** from stated assumptions.
+
+Then scroll to **Brute force vs lean — three steps** (for non-experts):
+1. **The AI reads far less.** “Brute force makes the AI read about 1,100 pages; lean, about 5.” (1 page ≈ 500 words ≈ 667 tokens.)
+2. **Reading and writing have a price.** Point at the two receipts: tokens × price per million, plus small fixed fees. “Reading is cheap, writing is five times dearer — but reading 1,100 pages still dominates.”
+3. **The saving is the difference.** €1.51 − €0.046 ≈ €1.46 per decision; the per-agent bars show it comes from the two agents with the largest raw data.
+
+## · At scale (2 minutes)
+
+Choose **Business unit** (5 sites × 80 decisions a day): “€1.46 per decision × 146,000 decisions a year ≈ €214k of AI spend avoided — for the same decisions.” Switch to **Enterprise** to show the order of magnitude, then **Model prices ×0.5** to show the saving survives cheaper models. Close on the three telemetry cards: unit cost per decision, drift caught the same day, value per euro of AI. Read the dark “How to say it” box if you need a closing sentence. Always call it a **projection** from one decision.
 
 ## 11:30–12:00 · Technical view (optional)
 

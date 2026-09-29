@@ -7,7 +7,8 @@ An executive-quality, engineer-inspectable demonstrator of four ideas:
 1. **MCP** — agents discover and use tools and data through one standard interface.
 2. **A2A** — specialised agents collaborate through bounded, structured messages.
 3. **Lean AI** — deterministic grooming of plant data *before* any AI reasoning.
-4. **AI economics** — the recorded execution cost of a run, compared with the estimated value it enabled.
+4. **AI economics** — the recorded execution cost of a run, compared with the estimated value it enabled, and a three-step explanation of the brute-force vs lean saving.
+5. **At scale** — a projection of per-decision savings across sites and volumes, and why telemetry matters.
 
 | Learn | Live demo |
 | --- | --- |
@@ -45,7 +46,7 @@ A 12-minute presenter script is in [PRESENTER.md](PRESENTER.md).
 - The six grooming stages (filter, normalise, deduplicate, correlate, aggregate, rank) really execute; record counts, bytes and CPU time are measured.
 - MCP tools are deterministic handlers over the groomed evidence pack, called through JSON-RPC 2.0 `tools/list` / `tools/call` envelopes. Payload sizes are measured from the responses.
 - A2A messages are `message/send` envelopes with one sentence plus a data part, bounded to 200 tokens.
-- Every figure (tokens, cost, latency, naive-vs-lean, value, value/cost) is derived from one run model; ten consistency checks are shown in the Technical view.
+- Every figure (tokens, cost, latency, brute-force-vs-lean, value, value/cost) is derived from one run model; ten consistency checks are shown in the Technical view.
 
 **Simulated or assumed (labelled in the UI)**
 
@@ -66,8 +67,8 @@ src/
   adapters/                   mcp.js · a2a.js · model.js — replaceable transports
   engine/
     engine.js                 DemoEngine: single state machine and clock (start, pause, step, reset, 1×/2×/4×)
-    telemetry.js              Metrics, naive comparison, business value, invariants
-  ui/                         learn · demo · economics · technical (render engine.run only)
+    telemetry.js              Metrics, brute-force comparison, receipts, business value, invariants
+  ui/                         learn · demo · economics · scale · technical (render engine.run only)
 styles/app.css                Design system
 ```
 

@@ -8,6 +8,7 @@ export const int = v => (v == null || Number.isNaN(v) ? '—' : nf.format(Math.r
 export function compact(v) {
   if (v == null) return '—';
   const a = Math.abs(v);
+  if (a >= 1e9) return `${(v / 1e9).toFixed(a >= 1e10 ? 0 : 1)}B`;
   if (a >= 1e6) return `${(v / 1e6).toFixed(a >= 1e7 ? 1 : 2)}M`;
   if (a >= 1e4) return `${Math.round(v / 1e3)}k`;
   if (a >= 1e3) return `${(v / 1e3).toFixed(1)}k`;
