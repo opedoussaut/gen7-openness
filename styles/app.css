@@ -1076,3 +1076,17 @@ dialog .term-tip { position: fixed; }
 .st-honest ul { margin: 8px 0 0; padding-left: 20px; display: grid; gap: 8px; font-size: 15px; line-height: 1.6; color: var(--ink-2); }
 @media (max-width: 900px) { .st-steps li { grid-template-columns: minmax(0, 1fr); gap: 4px; } .st-figs { grid-template-columns: repeat(2, minmax(0, 1fr)); } .st-block { padding: 18px; } }
 @media (max-width: 1520px) { .brand-text small { display: none; } }
+/* Learn · behind the agents: custom connectors vs MCP standard */
+.openness-svg .conn-custom path { stroke: #d0a08a; stroke-width: 1.1; fill: none; stroke-dasharray: 3 3; }
+.openness-svg .mcp-bus rect { fill: var(--mcp-soft); stroke: #b9d9f3; }
+.openness-svg .mcp-bus text { fill: var(--mcp); font-weight: 750; letter-spacing: 1.2px; font-size: 10px; }
+.openness-svg .conn-custom, .openness-svg .conn-mcp { transition: opacity .5s var(--ease); }
+.openness-svg[data-conn=mcp] .conn-custom { opacity: 0; } .openness-svg[data-conn=custom] .conn-mcp { opacity: 0; }
+.conn-switch { display: flex; gap: 10px; align-items: center; margin-top: 12px; flex-wrap: wrap; font-size: 13px; font-weight: 650; color: var(--ink-2); }
+.conn-switch[hidden], .conn-compare[hidden] { display: none; }
+.conn-compare { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+.conn-compare > div { background: var(--mcp-soft); border-radius: 12px; padding: 10px 12px; min-width: 0; }
+.conn-compare b { display: block; font-family: var(--display); font-size: 22px; color: #0a5a99; }
+.conn-compare > div > span { font-size: 12.5px; color: var(--ink-2); line-height: 1.35; display: block; }
+.conn-compare p { grid-column: 1 / -1; font-size: 13px; color: var(--ink-2); }
+@media (max-width: 520px) { .conn-compare { grid-template-columns: minmax(0, 1fr); } }

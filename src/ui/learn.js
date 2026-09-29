@@ -17,11 +17,15 @@ function opennessSvg(servers, agents) {
   const toolLines = servers.flatMap((s, i) => s.tools.map((_, k) => { const x = sx[i] + (k - (s.tools.length - 1) / 2) * 18; return `<path d="M${cx} 56 C${cx} 150 ${x} 150 ${x} ${SY}"/>`; })).join('');
   const agentBoxes = agents.map((a, i) => `<g class="agt"><rect x="${ax[i] - 70}" y="${AY}" width="140" height="40" rx="12"/><text x="${ax[i]}" y="${AY + 25}" text-anchor="middle">${esc(a.name.replace(' Agent', ''))}</text></g>`).join('');
   const a2aLines = ax.map(x => `<path d="M${cx} 56 C${cx} 90 ${x} 86 ${x} ${AY}"/>`).join('');
+  const customLines = agents.flatMap((a, i) => servers.map((_, j) => `<path d="M${ax[i]} ${AY + 40} C${ax[i]} ${AY + 90} ${sx[j]} ${SY - 50} ${sx[j]} ${SY}"/>`)).join('');
+  const mcpBus = ax.map(x => `<path d="M${x} ${AY + 40} V204"/>`).join('') + sx.map(x => `<path d="M${x} 224 V${SY}"/>`).join('');
   const mcpLines = agents.flatMap((a, i) => (a.servers ?? []).map(sid => { const j = servers.findIndex(s => s.id === sid); return `<path d="M${ax[i]} ${AY + 40} C${ax[i]} ${AY + 80} ${sx[j]} ${SY - 40} ${sx[j]} ${SY}"/>`; })).join('');
-  return `<svg class="openness-svg" id="openness-svg" data-mode="tool" viewBox="0 0 ${W} 296" role="img" aria-label="Openness at the tool level versus openness at the agent level">
+  return `<svg class="openness-svg" id="openness-svg" data-mode="tool" data-conn="mcp" viewBox="0 0 ${W} 296" role="img" aria-label="Openness at the tool level versus openness at the agent level">
     <g class="lvl-agent"><rect class="band a2a" x="0" y="64" width="${W}" height="104" rx="12"/><text class="band-t a2a" x="12" y="80">OPEN INTERFACE · A2A</text>
-      <rect class="band mcp" x="0" y="172" width="${W}" height="120" rx="12"/><text class="band-t mcp" x="12" y="188">BEHIND THE AGENTS · MCP</text>
-      <g class="a2a-l">${a2aLines}</g><g class="mcp-l">${mcpLines}</g>${agentBoxes}</g>
+      <rect class="band mcp" x="0" y="172" width="${W}" height="120" rx="12"/><text class="band-t mcp" x="12" y="188">BEHIND THE AGENTS</text>
+      <g class="a2a-l">${a2aLines}</g>
+      <g class="conn-mcp"><g class="mcp-l">${mcpBus}</g><g class="mcp-bus"><rect x="24" y="204" width="${W - 48}" height="20" rx="10"/><text x="${cx}" y="218" text-anchor="middle">MCP · ONE STANDARD PROTOCOL · DISCOVER + CALL</text></g></g>
+      <g class="conn-custom">${customLines}</g>${agentBoxes}</g>
     <g class="lvl-tool"><g class="tool-l">${toolLines}</g><text class="warn-t" x="${cx}" y="${AY + 26}" text-anchor="middle">the caller must learn every tool, choose the order, read every raw result</text></g>
     ${sysBoxes}
     <g class="caller"><rect x="${cx - 110}" y="12" width="220" height="44" rx="22"/><text x="${cx}" y="39" text-anchor="middle">Any AI client · or a person</text></g>
@@ -85,7 +89,9 @@ export function mountLearn(el, app) {
       <div class="visual-top"><span class="eyebrow">Same ${nS} systems · two ways to open them</span>
         <div class="seg" role="group" aria-label="Openness level"><button type="button" data-mode="tool" aria-pressed="true">Open at the tool</button><button type="button" data-mode="agent" aria-pressed="false">Open at the agent</button></div></div>
       ${opennessSvg(scenario.servers, specialists)}
+      <div class="conn-switch" id="conn-switch" hidden><span>Behind the agents:</span><div class="seg" role="group" aria-label="How agents reach their systems"><button type="button" data-conn="custom" aria-pressed="false">Custom connectors</button><button type="button" data-conn="mcp" aria-pressed="true">MCP standard</button></div></div>
       <div class="open-compare" id="open-compare"></div>
+      <div class="conn-compare" id="conn-compare" hidden></div>
     </div>
   </section>
 
@@ -191,7 +197,23 @@ export function mountLearn(el, app) {
       : row(1, 'goal stated, in business terms') + row(open.agents, 'governed domain agents answer') + row(`≈${int(open.answerTokens)}`, `tokens of bounded answers to read — ${Math.round(open.toolTokens / Math.max(open.answerTokens, 1))}× less`) + `<p>Rules, units and tool sequencing live inside each agent, where the domain owner governs them. People approve at the same layer.</p>`;
   };
   el.querySelectorAll('.seg [data-mode]').forEach(b => b.addEventListener('click', () => setOpen(b.dataset.mode)));
-  setOpen('tool');
+  // Behind the agents: why MCP still matters — one standard instead of a connector per agent × system.
+  const nA = specialists.length, used = new Set(ref.mcpCalls.map(c => `${c.agent}|${c.server}`)).size;
+  const shared = scenario.servers.filter(s => new Set(ref.mcpCalls.filter(c => c.server === s.id).map(c => c.agent)).size > 1);
+  const setConn = conn => {
+    svg.dataset.conn = conn;
+    el.querySelectorAll('[data-conn]').forEach(x => { if (x.tagName === 'BUTTON') x.setAttribute('aria-pressed', String(x.dataset.conn === conn)); });
+    const row = (v, l) => `<div><b>${v}</b><span>${l}</span></div>`;
+    $('#conn-compare', el).innerHTML = conn === 'custom'
+      ? row(nA * nS, `custom connectors to build and maintain if every agent may need every system (${nA} × ${nS})`) + row(nS, 'different interfaces, formats and security models to learn') + row('0', 'reuse: each new agent means new connectors') + `<p>Every system is integrated again for every agent that needs it — the integration bill grows with agents × systems.</p>`
+      : row(nA + nS, `standard connections (${nA} + ${nS}): each system wrapped once, each agent speaks one protocol`) + row(nS, 'MCP servers, each discovered with tools/list and called with tools/call') + row(shared.length ? shared.map(s => s.short).join(', ') : '—', shared.length ? `shared by several agents through one server in this run (${used} agent–system links, ${nS} servers)` : 'shared servers') + `<p>MCP is the shared plumbing: standard, reusable, governed. It stays behind the agents — the open interface for people and other agents is the agent layer above.</p>`;
+  };
+  el.querySelectorAll('.conn-switch [data-conn]').forEach(b => b.addEventListener('click', () => setConn(b.dataset.conn)));
+  const baseSetOpen = setOpen;
+  const setOpenAll = mode => { baseSetOpen(mode); $('#conn-switch', el).hidden = mode !== 'agent'; $('#conn-compare', el).hidden = mode !== 'agent'; };
+  el.querySelectorAll('.seg [data-mode]').forEach(b => b.addEventListener('click', () => setOpenAll(b.dataset.mode)));
+  setConn('mcp');
+  setOpenAll('tool');
   el.addEventListener('click', e => {
     const at = e.target.closest('[data-attr]');
     if (at) { el.querySelectorAll('[data-attr]').forEach(x => x.setAttribute('aria-selected', String(x === at))); el.querySelector('#attr-detail').innerHTML = attributeDetail(f7, at.dataset.attr); return; }
