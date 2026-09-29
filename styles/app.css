@@ -978,3 +978,53 @@ dialog .term-tip { position: fixed; }
 .now-grid small .tag.sg { display: inline-flex; margin-left: 4px; }
 .sg-line { margin-top: 12px; font-size: 13.5px; color: var(--ink-2); display: flex; gap: 8px; align-items: flex-start; background: var(--ok-soft); border: 1px solid #cfe9dd; border-radius: 12px; padding: 10px 14px; line-height: 1.5; }
 .sg-line svg { flex: none; color: var(--ok); margin-top: 2px; }
+/* Economics · value, step by step */
+.vd-link { display: inline-flex; gap: 6px; align-items: center; margin-top: 12px; font-size: 13px; font-weight: 650; color: var(--mcp); }
+.vd { margin-top: 14px; }
+.vd-lede { font-size: 15px; line-height: 1.6; color: var(--ink-2); max-width: 900px; }
+.vd-legend span { white-space: nowrap; }
+.vd-legend { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 12px 0 4px; font-size: 12.5px; color: var(--ink-2); }
+.vd-legend i { display: inline-block; width: 12px; height: 12px; border-radius: 4px; margin-right: 6px; vertical-align: -2px; }
+.vd-legend i.fact, .vd .f { background: var(--ok-soft); } .vd-legend i.fact { border: 1px solid var(--ok); }
+.vd-legend i.asm, .vd .a { background: var(--warn-soft); } .vd-legend i.asm { border: 1px solid var(--warn); }
+.vd-legend i.calc, .vd .c { background: var(--mcp-soft); } .vd-legend i.calc { border: 1px solid var(--mcp); }
+.vd .f, .vd .a, .vd .c { padding: 1px 6px; border-radius: 6px; font-weight: 650; white-space: nowrap; }
+.vd .f { color: var(--ok); } .vd .a { color: #8a560f; } .vd .c { color: #0a5a99; }
+.vd-step { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 14px; margin-top: 22px; }
+.vd-n { width: 30px; height: 30px; border-radius: 50%; background: var(--ink); color: #fff; display: grid; place-items: center; font-weight: 750; }
+.vd-step h3 { font-family: var(--display); font-size: 19px; margin-bottom: 6px; }
+.vd-step > div > p { font-size: 14px; color: var(--ink-2); line-height: 1.6; }
+.vd-timeline { margin-top: 12px; display: grid; gap: 10px; }
+.tl-row { display: grid; grid-template-columns: 70px minmax(0, 1fr) 100px; gap: 12px; align-items: center; font-size: 13px; }
+.tl-row em { font-style: normal; color: var(--muted); font-size: 12.5px; }
+.tl-track { position: relative; display: flex; height: 34px; background: var(--line-2); border-radius: 9px; overflow: hidden; }
+.tl-track i { font-style: normal; display: flex; align-items: center; padding: 0 10px; font-size: 11.5px; font-weight: 650; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tl-track .study { background: #f3dfc3; color: #7a4d10; } .tl-track .ai { background: var(--a2a-soft); color: var(--a2a); } .tl-track .install { background: #d9e6f0; color: var(--ink-2); }
+.tl-track .gain { position: absolute; top: 0; bottom: 0; display: grid; place-items: center; font-size: 11.5px; font-weight: 750; color: var(--ok); background: repeating-linear-gradient(135deg, var(--ok-soft) 0 6px, #d7efe5 6px 12px); border-left: 2px solid var(--ok); }
+.tl-note { font-size: 12px; color: var(--muted); }
+.vd-comp { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+.vd-card { border: 1px solid var(--line); border-radius: 16px; padding: 16px; background: #fff; min-width: 0; }
+.vd-card-h { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.vd-card-h b { font-size: 15px; } .vd-card-h strong { font-family: var(--display); font-size: 22px; }
+.vd-calc { margin: 10px 0 0; padding-left: 20px; display: grid; gap: 8px; font-size: 14px; line-height: 1.55; }
+.vd-calc small { display: block; font-size: 12px; color: var(--muted); }
+.vd-why { margin-top: 12px; font-size: 13px; color: var(--ink-2); line-height: 1.55; background: var(--line-2); border-radius: 10px; padding: 10px 12px; }
+.vd-total { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: baseline; padding: 14px 16px; border-radius: 14px; background: linear-gradient(120deg, #0d3a5c, #0a5f9a); color: #fff; font-size: 14px; }
+.vd-total b { font-family: var(--display); font-size: 22px; } .vd-total .f { background: rgba(255,255,255,.16); color: #fff; }
+.vd-stress { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+.vd-stress > div { border: 1px solid var(--line); border-radius: 14px; padding: 14px; background: #fff; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.vd-stress small { font-size: 10.5px; font-weight: 750; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); }
+.vd-stress p { font-size: 14px; line-height: 1.55; }
+.vd-stress em { font-style: normal; margin-top: auto; font-size: 11.5px; color: var(--muted); font-family: var(--mono); overflow-wrap: anywhere; }
+.vd-whatif { margin-top: 22px; border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; background: #fbfdff; }
+.vd-whatif summary { cursor: pointer; font-weight: 700; display: flex; gap: 8px; align-items: center; }
+.wi-grid { display: grid; gap: 10px; margin: 12px 0; }
+.wi-row { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(120px, 1fr) 130px; gap: 14px; align-items: center; }
+.wi-row b { display: block; font-size: 13.5px; } .wi-row small { font-size: 12px; color: var(--muted); line-height: 1.4; }
+.wi-row output { font-weight: 700; font-variant-numeric: tabular-nums; font-size: 13.5px; }
+.wi-out { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 12px; }
+.wi-out > div { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+.wi-out small { display: block; font-size: 10.5px; font-weight: 750; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+.wi-out b { font-family: var(--display); font-size: 20px; } .wi-out em { display: block; font-style: normal; font-size: 12px; color: var(--muted); }
+.wi-out .hl { border-color: var(--ok); background: var(--ok-soft); }
+@media (max-width: 900px) { .vd-comp, .vd-stress { grid-template-columns: minmax(0, 1fr); } .wi-out { grid-template-columns: repeat(2, minmax(0, 1fr)); } .wi-row { grid-template-columns: minmax(0, 1fr); gap: 6px; } .tl-row { grid-template-columns: minmax(0, 1fr); gap: 4px; } }

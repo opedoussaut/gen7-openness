@@ -56,6 +56,12 @@ Then part 3, **Brute force vs lean** in three steps (A, B, C) for non-experts:
 
 End on the green **part 4** band (“This was one decision…”) and click **Explore it in the At scale tab**.
 
+
+**What was it worth? — step by step** (the most challenged part; take 90 seconds):
+- **A · What changed:** the timeline. Without: a ≈4-working-day cross-team study, then install. With: AI check in seconds + about a day for people to review and approve → live **3 days earlier** (assumption, stated).
+- **B · What it is worth:** colour code — green = from the run, amber = assumption, blue = arithmetic. “72 GPUs × 72 hours = 5,184 GPU-hours × €2.10 = €10,886. Study: 14 h − 1 h review = 13 h × €110 = €1,430. Total €12,316, for €0.046 of AI.”
+- **C · How sure:** break-even — the AI cost is repaid if the rack goes live **1.1 seconds** earlier. Pessimistic case — no earlier go-live at all, still €1,430. Not counted — CO₂ and the overheating risk avoided.
+- If someone says “our numbers are different”: open **Challenge the assumptions** and move the sliders with them. Only that box changes.
 ## · At scale (2 minutes)
 
 Choose **Business unit** (5 sites × 80 decisions a day): “€1.46 per decision × 146,000 decisions a year ≈ €214k of AI spend avoided — for the same decisions.” Switch to **Enterprise** to show the order of magnitude, then **Model prices ×0.5** to show the saving survives cheaper models. Close on the three telemetry cards: unit cost per decision, drift caught the same day, value per euro of AI. Read the dark “How to say it” box if you need a closing sentence. Always call it a **projection** from one decision.

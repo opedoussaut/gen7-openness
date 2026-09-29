@@ -129,3 +129,13 @@ test('GEN7: every agent is a competence of a Virtual Companion, and prerequisite
   assert.deepEqual([f.head1, f.head2], [-13.1, 25.6]);
   assert.ok(f.toolTokens > f.answerTokens, 'agent-level openness reads less than tool-level');
 });
+
+test('value explainer reproduces the estimated value and its break-even', async () => {
+  const { valueModel } = await import('../src/ui/value.js');
+  const { run, metrics, value } = await runOnce();
+  const o = run.recommendation.outcome, vm = valueModel(sc.value, o.gpus, metrics.totals.totalCost);
+  assert.ok(Math.abs(vm.total - value.total) < 1e-9, `${vm.total} vs ${value.total}`);
+  assert.equal(vm.gpuHours, sc.value.daysEarlier * 24 * o.gpus);
+  const pess = valueModel({ ...sc.value, daysEarlier: 0 }, o.gpus, metrics.totals.totalCost);
+  assert.ok(pess.total > 0 && pess.ratio > 1, 'still worth it with no earlier go-live');
+});

@@ -3,6 +3,7 @@ import { icon } from './icons.js';
 import { esc, int, compact, eur, ms, times, pct } from './format.js';
 import { receipt, pages, TOKENS_PER_PAGE } from '../engine/telemetry.js';
 import { PRESETS, perDecisionOf, decisionsPerYear, bigEur, bigNum } from './scale.js';
+import { valueDetailMarkup, bindValueDetail } from './value.js';
 
 const fmtUnit = (unit, v) => unit === 'eur' ? eur(v, { precise: true }) : unit === 'ms' ? ms(v) : unit === 'wh' ? `${v.toFixed(v < 10 ? 2 : 1)} Wh` : compact(v);
 
@@ -29,7 +30,7 @@ export function mountEconomics(el, app) {
 
     <nav class="journey" aria-label="How to read this page">
       <a href="#part-cost"><i>1</i><span><b>What did it cost?</b><small>measured by telemetry</small></span></a>
-      <a href="#part-value"><i>2</i><span><b>What was it worth?</b><small>estimated value</small></span></a>
+      <a href="#value-detail"><i>2</i><span><b>What was it worth?</b><small>estimated value</small></span></a>
       <a href="#sv-h"><i>3</i><span><b>Why so cheap?</b><small>brute force vs lean</small></span></a>
       <button type="button" data-go="scale" class="go"><i>4</i><span><b>What about thousands a day?</b><small>open the At scale tab</small></span>${icon('arrow', 16)}</button>
     </nav>
@@ -74,8 +75,11 @@ export function mountEconomics(el, app) {
         </tbody></table>
         <div class="assumption"><b>Baseline assumed:</b> ${esc(value.baseline)}</div>
         <div class="co2">${icon('leaf', 18)}<span>Not monetised: timing the burn-in to the low-carbon window avoids ≈ <b>${Math.round(value.co2SavedKg)} kgCO₂e</b> (grid forecast, IT energy only).</span></div>
+        <a class="vd-link" href="#value-detail">How these two figures are built — step by step, with break-even and a live what-if ${icon('arrow', 13)}</a>
       </section>
     </div>
+
+    ${valueDetailMarkup(view, sc)}
 
     ${savingsSection(view, sc)}
 
@@ -92,6 +96,8 @@ export function mountEconomics(el, app) {
       </div>
     </details>`;
     el.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => app.go(b.dataset.go)));
+    bindValueDetail(el, view, sc);
+    el.querySelector('.vd-link')?.addEventListener('click', e => { e.preventDefault(); const d = el.querySelector('#value-detail'); d?.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
     el.querySelectorAll('.journey a').forEach(a => a.addEventListener('click', e => { e.preventDefault(); el.querySelector(a.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
   }
   return { update };
