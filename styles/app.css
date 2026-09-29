@@ -1,5 +1,5 @@
 @charset "UTF-8";
-/* GEN7 Openness — design system
+/* LeanAI — design system
    Blue = MCP (agent ↔ tools & data) · Violet = A2A (agent ↔ agent) · Cyan = LEAN (deterministic grooming)
    Slate = model reasoning · Green = value / success. */
 :root {

@@ -47,7 +47,7 @@ export function mountLearn(el, app) {
 
   el.innerHTML = `
   <div class="hero">
-    <span class="eyebrow"><i class="pip"></i>GEN7 Openness · industrial AI, made observable</span>
+    <span class="eyebrow"><i class="pip"></i>LeanAI · Less noise. Less cost. More value.</span>
     <h1 class="display">Open. Lean. Orchestrate. <span>Measure.</span></h1>
     <p class="lede">See AI agents discover industrial tools, work together, spend tokens — and whether it was worth it. Read the ideas here in a few minutes, then watch them run on a simulated AI-factory decision.</p>
     <div class="pillars">${PILLARS.map((p, i) => `<div class="pillar" style="--c:${PILLAR_COLOR[p.id]}"><i>0${i + 1}</i><b>${p.word}</b><p>${esc(p.line)}</p></div>`).join('')}</div>

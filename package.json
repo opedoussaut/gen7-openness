@@ -1,9 +1,9 @@
 {
-  "name": "gen7-openness",
+  "name": "leanai",
   "version": "3.0.0",
   "private": true,
   "type": "module",
-  "description": "GEN7 Openness \u2014 an industrial AI orchestration observatory: MCP, A2A, lean context engineering and AI economics.",
+  "description": "LeanAI — Less noise. Less cost. More value. An interactive demonstrator of MCP, A2A, lean data preparation and AI economics.",
   "engines": {
     "node": ">=22"
   },

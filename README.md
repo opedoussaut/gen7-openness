@@ -1,6 +1,12 @@
-# GEN7 Openness · Industrial AI observatory
+# LeanAI
 
-An executive-quality, engineer-inspectable demonstrator of four ideas:
+**Less noise. Less cost. More value.**
+
+Live demo: https://opedoussaut.github.io/gen7-openness/ *(the address follows the repository name)*
+
+An interactive demonstrator of what happens behind an AI decision — and what it really costs.
+
+Executive-friendly, engineer-inspectable. Four ideas:
 
 **OPEN → LEAN → ORCHESTRATE → MEASURE**
 
@@ -78,6 +84,6 @@ To connect real systems: pass an `mcpTransport` that POSTs the same JSON-RPC req
 
 `lab.html` keeps the original two-tab cooling-capacity workshop (Rack Deployment Planner ↔ Liquid Cooling Engineer) with live JSON-RPC over HTTP when served by `npm start`. It is linked from the page footer. Presenter script: [PROTOCOL-LAB-PRESENTER.md](PROTOCOL-LAB-PRESENTER.md).
 
-This is a demonstrator, not a claim about deployed customer systems, and not an official 3DS product.
+This is a personal demonstrator with a simulated scenario, illustrative data and illustrative prices. It is not a claim about deployed customer systems and not an official product of any company.
 
 Protocol references: [MCP specification](https://modelcontextprotocol.io/specification/2025-11-25) · [A2A specification](https://a2a-protocol.org/v0.3.0/specification/).
