@@ -1028,3 +1028,4 @@ dialog .term-tip { position: fixed; }
 .wi-out b { font-family: var(--display); font-size: 20px; } .wi-out em { display: block; font-style: normal; font-size: 12px; color: var(--muted); }
 .wi-out .hl { border-color: var(--ok); background: var(--ok-soft); }
 @media (max-width: 900px) { .vd-comp, .vd-stress { grid-template-columns: minmax(0, 1fr); } .wi-out { grid-template-columns: repeat(2, minmax(0, 1fr)); } .wi-row { grid-template-columns: minmax(0, 1fr); gap: 6px; } .tl-row { grid-template-columns: minmax(0, 1fr); gap: 4px; } }
+@media (max-width: 520px) { .vd-legend span { white-space: normal; } }
