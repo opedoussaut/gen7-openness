@@ -81,3 +81,7 @@ Flip *Without the platform / With Industry World Models*. Pillar 1: ≈760k toke
 Open one MCP row (JSON-RPC request/response) and one A2A row. Show *10 / 10 consistency checks*.
 
 Rehearse once: run at 1×, then Reset. If asked “is this a real LLM?” — no: agents use scripted reasoners; tokens are estimated from the actual context; adapters are swappable for real MCP servers, A2A endpoints and model usage.
+
+## · In plain words (closing, 1–2 minutes)
+
+Tab 07 retells the run without jargon: the situation, the five things tested (right, cheap, fast, people in charge, checkable), the eleven steps from question to decision, the result and what the demo is and is not. Use it to close, or as a leave-behind for a non-technical audience. Every number comes from the run shown (your live run once completed).

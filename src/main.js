@@ -10,8 +10,9 @@ import { mountEconomics } from './ui/economics.js';
 import { mountTechnical } from './ui/technical.js';
 import { mountScale } from './ui/scale.js';
 import { mountPrereq } from './ui/prereq.js';
+import { mountStory } from './ui/story.js';
 
-const PAGES = ['learn', 'demo', 'economics', 'scale', 'prereq', 'technical'];
+const PAGES = ['learn', 'demo', 'economics', 'scale', 'prereq', 'technical', 'story'];
 const engine = new DemoEngine(scenario);
 const reference = new DemoEngine(scenario);
 
@@ -58,7 +59,8 @@ const views = {
   economics: mountEconomics($('#page-economics'), app),
   scale: mountScale($('#page-scale'), app),
   prereq: mountPrereq($('#page-prereq'), app),
-  technical: mountTechnical($('#page-technical'), app)
+  technical: mountTechnical($('#page-technical'), app),
+  story: mountStory($('#page-story'), app)
 };
 
 function setPage(page, focus = false) {

@@ -1051,3 +1051,28 @@ dialog .term-tip { position: fixed; }
 .attr-card p i, .ad-example i { font-style: normal; font-weight: 700; color: var(--muted); }
 .attr-card p { font-size: 13px; color: var(--ink-2); }
 .ad-example { margin-top: 8px; font-size: 15px; line-height: 1.6; color: var(--ink-2); max-width: 980px; }
+/* In plain words */
+.st-block { margin-top: 18px; background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 24px 26px; box-shadow: var(--shadow-s); }
+.st-block > small { display: block; font-size: 11px; font-weight: 750; letter-spacing: 1.4px; text-transform: uppercase; color: var(--mcp); }
+.st-block h2 { font-family: var(--display); font-size: clamp(20px, 2vw, 26px); line-height: 1.3; margin: 6px 0 10px; letter-spacing: -.3px; }
+.st-block > p { font-size: 16px; line-height: 1.65; color: var(--ink-2); max-width: 980px; }
+.st-question { background: linear-gradient(160deg, #fff 55%, #eef6fd); }
+.st-tests { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-top: 8px; }
+.st-test { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: start; border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+.st-test b { font-size: 15px; } .st-test p { font-size: 14px; line-height: 1.55; color: var(--ink-2); margin-top: 4px; }
+.st-ic { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; } .st-ic.ok { background: var(--ok-soft); color: var(--ok); } .st-ic.bad { background: var(--bad-soft); color: var(--bad); }
+.st-steps { list-style: none; counter-reset: st; margin: 8px 0 0; padding: 0; display: grid; gap: 0; }
+.st-steps li { counter-increment: st; position: relative; display: grid; grid-template-columns: 270px minmax(0, 1fr); gap: 16px; padding: 12px 0 12px 44px; border-top: 1px solid var(--line-2); }
+.st-steps li::before { content: counter(st); position: absolute; left: 0; top: 12px; width: 28px; height: 28px; border-radius: 50%; background: var(--ink); color: #fff; display: grid; place-items: center; font-size: 12.5px; font-weight: 750; }
+.st-steps li.person::before { background: var(--human); } .st-steps li.agent::before { background: var(--a2a); } .st-steps li.tool::before, .st-steps li.data::before { background: var(--lean); }
+.st-who { display: flex; gap: 8px; align-items: center; font-weight: 700; font-size: 14.5px; }
+.st-who i { color: var(--muted); display: inline-flex; }
+.st-steps p { font-size: 15px; line-height: 1.6; color: var(--ink-2); }
+.st-steps li.bad p { color: var(--bad); } .st-steps li.ok p { color: var(--ok); }
+.st-result { background: linear-gradient(160deg, #fff 55%, #f1faf6); border-color: #cfe9dd; }
+.st-figs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 8px; }
+.st-figs > div { border: 1px solid var(--line); background: #fff; border-radius: 14px; padding: 14px; }
+.st-figs b { display: block; font-family: var(--display); font-size: 24px; } .st-figs span { font-size: 13px; color: var(--ink-2); line-height: 1.45; }
+.st-honest ul { margin: 8px 0 0; padding-left: 20px; display: grid; gap: 8px; font-size: 15px; line-height: 1.6; color: var(--ink-2); }
+@media (max-width: 900px) { .st-steps li { grid-template-columns: minmax(0, 1fr); gap: 4px; } .st-figs { grid-template-columns: repeat(2, minmax(0, 1fr)); } .st-block { padding: 18px; } }
+@media (max-width: 1520px) { .brand-text small { display: none; } }
