@@ -3,6 +3,7 @@ import { scenario } from './scenarios/ai-factory/scenario.js';
 import { DemoEngine } from './engine/engine.js';
 import { computeMetrics, computeNaive, computeValue, checkInvariants } from './engine/telemetry.js';
 import { $, $$, esc } from './ui/format.js';
+import { annotate, installTermTips, glossaryMarkup } from './ui/glossary.js';
 import { mountLearn } from './ui/learn.js';
 import { mountDemo } from './ui/demo.js';
 import { mountEconomics } from './ui/economics.js';
@@ -42,6 +43,7 @@ const app = {
     $('#inspector-kicker').textContent = kicker;
     $('#inspector-title').textContent = title;
     $('#inspector-body').innerHTML = html;
+    annotate($('#inspector-body'));
     if (!$('#inspector').open) $('#inspector').showModal();
   },
   json: value => `<pre class="code">${esc(JSON.stringify(value, null, 2))}</pre>`
@@ -68,6 +70,7 @@ function setPage(page, focus = false) {
   }
   if (location.hash.slice(1) !== page) history.replaceState(null, '', `#${page}`);
   views[page].update?.();
+  annotate($(`#page-${page}`));
   if (focus) $(`#tab-${page}`).focus();
   window.scrollTo({ top: 0 });
 }
@@ -82,6 +85,12 @@ $$('.tabs [role=tab]').forEach(tab => {
 });
 $('.brand').addEventListener('click', e => { e.preventDefault(); setPage('learn'); });
 $('#run-pill').addEventListener('click', () => setPage('demo'));
+$('#glossary-btn').addEventListener('click', () => app.inspect('Plain-language glossary', 'Words used in this demonstrator', glossaryMarkup()));
+installTermTips();
+// Re-annotate after in-page interactions that re-render content (steppers, sliders, filters).
+let annotateTimer = 0;
+document.addEventListener('click', () => { clearTimeout(annotateTimer); annotateTimer = setTimeout(() => annotate($(`#page-${app.page}`)), 60); });
+document.addEventListener('input', () => { clearTimeout(annotateTimer); annotateTimer = setTimeout(() => annotate($(`#page-${app.page}`)), 60); });
 window.addEventListener('hashchange', () => setPage(location.hash.slice(1)));
 $('#inspector-close').addEventListener('click', () => $('#inspector').close());
 $('#inspector').addEventListener('click', e => { if (e.target === $('#inspector')) $('#inspector').close(); });
@@ -100,7 +109,7 @@ let frame = 0;
 engine.subscribe(run => {
   updatePill(run);
   if (frame) return;
-  frame = requestAnimationFrame(() => { frame = 0; views[app.page].update?.(); });
+  frame = requestAnimationFrame(() => { frame = 0; views[app.page].update?.(); annotate($(`#page-${app.page}`)); });
 });
 
 // Keyboard: Space toggles the demo, → steps, when focus is not in a control.

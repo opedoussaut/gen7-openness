@@ -70,7 +70,7 @@ function gaugeMarkup(inc, run) {
   const headroom = load == null ? null : inc.loopCapacityKw - load - target;
   const head = p95 == null ? `<span class="muted">measured load not yet computed</span>` : `<b style="color:${headroom >= 0 ? 'var(--ok)' : 'var(--bad)'}">${headroom >= 0 ? '+' : '−'}${Math.abs(headroom).toFixed(1)} kW</b>`;
   const seg = (a, b, cls, title) => `<div class="cap-seg ${cls}" style="left:${x(a)}%;width:${Math.max(0, x(b) - x(a))}%" title="${esc(title)}"></div>`;
-  return `<div class="gauge"><div class="gauge-head"><span>Loop A · load p95 + new rack vs ${int(inc.loopCapacityKw)} kW usable</span>${head}</div>
+  return `<div class="gauge"><div class="gauge-head"><span>Loop A · normal peak load (p95) + new rack vs ${int(inc.loopCapacityKw)} kW usable</span>${head}</div>
     <div class="cap-track" role="img" aria-label="Loop A capacity gauge">
       ${load == null ? seg(lo, hi, 'unknown', 'Measured during grooming') : seg(lo, load, 'load', `p95 ${load.toFixed(1)} kW`)}
       ${confirmed ? seg(load, p95, 'freed', `released ${releasedKw} kW`) : ''}
@@ -78,7 +78,7 @@ function gaugeMarkup(inc, run) {
       <div class="cap-limit" style="left:${x(inc.loopCapacityKw)}%"></div>
     </div>
     <div class="gauge-scale">${[700, 800, 900, 1000].map(v => `<span style="left:${x(v)}%">${v}</span>`).join('')}<span style="left:${x(1052)}%">kW</span></div>
-    <div class="cap-legend"><span><i class="load"></i>measured p95</span><span><i class="rack"></i>R-17 + 20 % (${target} kW)</span>${confirmed ? '<span><i class="freed"></i>released</span>' : ''}<span><i class="limit"></i>usable capacity</span></div></div>`;
+    <div class="cap-legend"><span><i class="load"></i>measured normal peak (p95)</span><span><i class="rack"></i>R-17 + 20 % (${target} kW)</span>${confirmed ? '<span><i class="freed"></i>released</span>' : ''}<span><i class="limit"></i>usable capacity</span></div></div>`;
 }
 
 export function mountDemo(el, app) {

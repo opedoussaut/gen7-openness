@@ -818,3 +818,17 @@ pre.code { margin: 0; padding: 14px 16px; background: #0f2233; color: #d7e6f2; b
 @media (max-width: 900px) { .gx-steps { grid-template-columns: 1fr 1fr; } .gx-pair { grid-template-columns: minmax(0, 1fr); } .gx-body { padding: 20px; } .gx-table.conv td:nth-child(3) { display: none; } }
 .gx-example { grid-template-columns: minmax(0, 1fr); }
 @media (max-width: 900px) { .gx-table { display: block; overflow-x: auto; white-space: nowrap; } .gx-table td { white-space: normal; min-width: 90px; } }
+
+/* Jargon: dotted terms with plain-language tooltips */
+.term { border-bottom: 1.5px dotted currentColor; cursor: help; text-decoration: none; border-radius: 2px; }
+.term:hover, .term:focus-visible { background: rgba(8, 150, 173, .12); outline: none; }
+.term-tip { position: fixed; z-index: 1000; padding: 12px 14px; border-radius: 12px; background: #0f2233; color: #e7f0f7; font-size: 13px; line-height: 1.5; box-shadow: 0 12px 34px rgba(10, 30, 50, .3); pointer-events: none; }
+.term-tip b { display: block; color: #7fd3e0; font-size: 12px; letter-spacing: .6px; margin-bottom: 3px; }
+.nav-actions { justify-self: end; display: flex; gap: 8px; align-items: center; }
+.nav-actions .run-pill { justify-self: auto; }
+.glossary-btn { border: 1px solid var(--line); background: var(--glass); border-radius: 999px; padding: 7px 12px; font-size: 12px; font-weight: 650; color: var(--ink-2); }
+.glossary-btn:hover { border-color: #b7dfe6; color: #056472; }
+.glossary-list { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 8px 16px; margin: 14px 0 0; font-size: 14px; }
+.glossary-list dt { font-weight: 700; color: #056472; } .glossary-list dd { margin: 0; color: var(--ink-2); }
+dialog .term-tip { position: fixed; }
+@media (max-width: 900px) { .glossary-btn { padding: 6px 10px; } .glossary-list { grid-template-columns: minmax(0, 1fr); gap: 2px; } .glossary-list dd { margin-bottom: 8px; } }

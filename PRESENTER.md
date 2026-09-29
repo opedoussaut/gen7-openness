@@ -1,5 +1,7 @@
 # GEN7 Openness · 14-minute presenter script
 
+**Jargon help:** every technical term in the application (p95, MCP, A2A, token, CDU, headroom, checkpoint…) has a dotted underline. Hover, focus or tap it to show a plain-language definition. The **? Glossary** button at the top right lists all terms — useful when someone in the audience asks.
+
 The sentence to leave with the audience: **“Groom deterministically, reason sparingly, connect openly, measure everything.”**
 
 Run locally (`npm start`, http://127.0.0.1:3000). Set speed to **1×** for narration; use **Pause** and **→** (one step) freely.
