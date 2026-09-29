@@ -15,6 +15,10 @@ Run locally (`npm start`, http://127.0.0.1:3000). Set speed to **1×** for narra
   Optional (+2 min): click a step in the pipeline card, or scroll to **Inside the lean pipeline**, and walk the six steps with the *Next* button. Best three for a non-expert audience: **Normalize** (85.6 °F → 29.78 °C; heat computed with flow × density × specific heat × ΔT), **Aggregate** (16 readings → one 15-minute value, 97 windows → one p95), **Rank** (explicit rules with scores; 0.55 threshold). In the live demo, clicking a step in the Lean context pipeline opens the same worked example.
 - **Measure**: “Every token, call and euro is counted per agent.”
 
+- **Five attributes** (strip under the hero): each card names where the demo proves it — click to jump there.
+- **Companion → Competence → Skill**: “LEO, Mechanical Engineer, skill *Calculate cooling headroom*. People work with Companions and Competences; Skills run inside, through MCP.” MARIE is listed as not involved in this decision.
+- **Industry World Models** (before the architecture): the three pillars in official wording, with what the demo measured in each. Say the pillar 2 caveat out loud: here physics is a formula; in production it is MODSIM simulation and the Virtual Twin.
+
 ## 2:30–3:30 · The question
 
 Live demo. Read the request: *Can Loop A take a new 120 kW AI rack on Thursday?* Point at the gauge: the load is unknown — hatched — until it is measured.
@@ -55,6 +59,10 @@ End on the green **part 4** band (“This was one decision…”) and click **Ex
 ## · At scale (2 minutes)
 
 Choose **Business unit** (5 sites × 80 decisions a day): “€1.46 per decision × 146,000 decisions a year ≈ €214k of AI spend avoided — for the same decisions.” Switch to **Enterprise** to show the order of magnitude, then **Model prices ×0.5** to show the saving survives cheaper models. Close on the three telemetry cards: unit cost per decision, drift caught the same day, value per euro of AI. Read the dark “How to say it” box if you need a closing sentence. Always call it a **projection** from one decision.
+
+## · Prerequisites (2 minutes)
+
+Flip *Without the platform / With Industry World Models*. Pillar 1: ≈760k tokens, 2 context overflows, €1.51 → 60 evidence records, €0.046. Pillar 2: figures generated vs computed and verified (−13.1 → +25.6 kW). Pillar 3: 9 raw tools and ≈1,989 tokens vs 1 goal, 4 competences, 3 people approving. “Agents are the visible part; the platform is the prerequisite.” Items tagged *qualitative* are consequences, not measurements — say so.
 
 ## 11:30–12:00 · Technical view (optional)
 

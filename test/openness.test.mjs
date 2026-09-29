@@ -113,3 +113,19 @@ test('GEN7: the loop stops when the deterministic acceptance test passes', async
   assert.ok(checks.slice(0, -1).every(c => !c.criterionMet), 'no iteration after acceptance');
   assert.deepEqual(checks.map(c => c.headroomKw), [-13.1, 25.6]);
 });
+
+test('GEN7: every agent is a competence of a Virtual Companion, and prerequisite figures come from the run', async () => {
+  const { COMPANIONS } = await import('../src/domain/positioning.js');
+  const { gen7Facts } = await import('../src/ui/gen7.js');
+  for (const a of sc.agents) {
+    assert.ok(COMPANIONS[a.companion], `${a.id} has a known companion`);
+    assert.ok(COMPANIONS[a.companion].competences.includes(a.competence.split(' · ')[0]), `${a.id}: ${a.competence} is a listed ${a.companion} competence`);
+  }
+  const { run, metrics, naive } = await runOnce();
+  const f = gen7Facts(sc, run);
+  assert.equal(f.leanCost, metrics.totals.totalCost);
+  assert.equal(f.bfCost, naive.totals.totalCost);
+  assert.equal(f.skillCalls, run.mcpCalls.length);
+  assert.deepEqual([f.head1, f.head2], [-13.1, 25.6]);
+  assert.ok(f.toolTokens > f.answerTokens, 'agent-level openness reads less than tool-level');
+});

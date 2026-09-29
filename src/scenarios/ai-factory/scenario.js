@@ -123,7 +123,7 @@ export const LOOP = {
 
 export const scenario = {
   id: 'ai-factory', title: 'AI factory', domain: 'Rack deployment · liquid cooling', status: 'ready', icon: 'rack',
-  incident: INCIDENT, agents: AGENTS, humans: HUMANS, loop: LOOP, reasoners: REASONERS, servers: SERVERS, sources: SOURCE_META,
+  incident: INCIDENT, agents: AGENTS, humans: HUMANS, loop: LOOP, scienceTools: ['getLoopHeatLoad', 'calculateCoolingHeadroom'], reasoners: REASONERS, servers: SERVERS, sources: SOURCE_META,
   models: MODELS, infra: INFRA, energy: ENERGY, value: VALUE_ASSUMPTIONS, valueComponents, outcomeLine, naiveRouting: NAIVE_ROUTING,
   story: STORY, stages: STAGES, pipeline: { flatten, runStage },
   generateDataset, buildScript

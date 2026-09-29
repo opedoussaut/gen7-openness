@@ -22,8 +22,8 @@ export function mountEconomics(el, app) {
       : `<span class="tag neutral">Reference run</span> Computed instantly with the same engine${running ? ' · your live run is in progress and will replace it when the decision is reached' : ' · start the live demo to replay it'}`;
     el.innerHTML = `
     <div class="page-head">
-      <div><span class="eyebrow"><i class="pip"></i>AI economics</span><h1 class="display" style="font-size:clamp(32px,3.6vw,50px);margin-top:12px">Was using AI <span>economically justified?</span></h1>
-      <p class="lede">Token cost alone says little. Here the recorded execution cost of one run is set against the industrial outcome it enabled — with recorded run telemetry and estimated value kept strictly apart.</p></div>
+      <div><span class="eyebrow"><i class="pip"></i>AI economics</span><h1 class="display" style="font-size:clamp(32px,3.6vw,50px);margin-top:12px">AI you can afford to run <span>on every decision.</span></h1>
+      <p class="lede">The point is not a cheaper task: it is a decision that can now be taken on evidence every time, not only when it justifies an expert’s day. Here the recorded execution cost of one run is set against the industrial outcome it enabled — with recorded run telemetry and estimated value kept strictly apart.</p></div>
       <div class="run-banner">${banner}</div>
     </div>
 

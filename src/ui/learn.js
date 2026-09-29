@@ -5,6 +5,7 @@ import { explainGrooming } from '../scenarios/ai-factory/explain.js';
 import { esc, $, int, compact, eur, pct, bytes, ms } from './format.js';
 import { computeMetrics } from '../engine/telemetry.js';
 import { PILLARS } from '../domain/models.js';
+import { gen7Facts, attributesMarkup, iwmMarkup, companionsMarkup } from './gen7.js';
 
 const PILLAR_COLOR = { open: 'var(--mcp)', lean: 'var(--lean)', orchestrate: 'var(--a2a)', measure: 'var(--ok)' };
 
@@ -35,6 +36,7 @@ export function mountLearn(el, app) {
   const specialists = scenario.agents.filter(a => a.id !== 'orchestrator');
   const ref = app.reference.run, refM = computeMetrics(ref, scenario);
   const gx = explainGrooming(app.reference.dataset);
+  const f7 = gen7Facts(scenario, ref);
   const sample = ref.a2aMessages.find(m => m.from === 'cooling' && m.to === 'workload') ?? ref.a2aMessages[0];
   const nS = scenario.servers.length;
   // Tool-level vs agent-level openness, measured on the reference run.
@@ -63,6 +65,12 @@ export function mountLearn(el, app) {
     <p class="lede">See people and AI agents work as one team: agents open at the agent layer, a lean evidence pack, an engineered loop, every euro measured — and whether it was worth it. Read the ideas here in a few minutes, then watch them run on a simulated AI-factory decision.</p>
     <div class="pillars">${PILLARS.map((p, i) => `<div class="pillar" style="--c:${PILLAR_COLOR[p.id]}"><i>0${i + 1}</i><b>${p.word}</b><p>${esc(p.line)}</p></div>`).join('')}</div>
   </div>
+
+  <section class="attr-section" aria-labelledby="attr-title">
+    <span class="eyebrow"><i class="pip"></i>Dassault Systèmes Industrial AI</span>
+    <h2 class="h2" id="attr-title">Five attributes. <span>Each one visible in this demo.</span></h2>
+    ${attributesMarkup(f7)}
+  </section>
 
   <section class="learn-section" aria-labelledby="open-title">
     <div class="learn-copy">
@@ -99,6 +107,13 @@ export function mountLearn(el, app) {
     <div class="duo-card mcp">${glyphMcp}<div><h3><em>MCP</em> works inside an agent:<br>agent ↔ its own tools.</h3><p>Plumbing, governed by the agent’s owner. “Read this measurement. Run this check.”</p></div></div>
     <div class="duo-card a2a">${glyphA2a}<div><h3><em>A2A</em> is the open layer:<br>people and agents together.</h3><p>Goal in, verified answer out. “Can you assess this? Here is what I found.”</p></div></div>
   </div>
+
+  <section class="cmp-section" aria-labelledby="cmp-title">
+    <span class="eyebrow"><i class="pip"></i>Virtual Companions of the 3DEXPERIENCE platform</span>
+    <h2 class="h2" id="cmp-title">Companion → Competence → Skill: <span>the agent layer, in our own words.</span></h2>
+    <p class="lede" style="font-size:16px;margin-top:8px">People work with Companions and their Competences at the open layer. Skills run inside the competence, through MCP, where they are governed. Each agent in the live demo is a competence of AURA or LEO.</p>
+    ${companionsMarkup(scenario, ref)}
+  </section>
 
   <section class="learn-section" aria-labelledby="lean-title">
     <div class="learn-copy">
@@ -144,6 +159,14 @@ export function mountLearn(el, app) {
     </div>
   </section>
 
+  <section class="iwm-section" aria-labelledby="iwm-title">
+    <span class="eyebrow"><i class="pip"></i>Industry World Models</span>
+    <h2 class="h2" id="iwm-title">Three pillars. <span>Where every step of the demo sits.</span></h2>
+    <p class="lede" style="font-size:16px;margin-top:8px">Industry World Models do not rely on a single model: they combine knowledge, science and reasoning. Official wording in each pillar; underneath, what this demonstrator does in it, measured on the reference run.</p>
+    ${iwmMarkup(f7)}
+    <div class="iwm-cta"><p>Take one pillar away and AI at scale breaks down. <b>See the prerequisites</b>, with and without, on this demo’s own numbers.</p><button class="btn primary" data-go="prereq">Prerequisites for AI at scale ${icon('arrow', 15)}</button></div>
+  </section>
+
   <section class="architecture" aria-labelledby="arch-title">
     <span class="eyebrow"><i class="pip"></i>The complete architecture</span>
     <h2 class="h2" id="arch-title">From raw facility data <span>to value per euro of AI.</span></h2>
@@ -168,7 +191,7 @@ export function mountLearn(el, app) {
   };
   el.querySelectorAll('.seg [data-mode]').forEach(b => b.addEventListener('click', () => setOpen(b.dataset.mode)));
   setOpen('tool');
-  el.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => app.go(b.dataset.go)));
+  el.addEventListener('click', e => { const b = e.target.closest('[data-go]'); if (b) app.go(b.dataset.go); });
   $('#learn-cta', el).addEventListener('click', () => app.go('demo'));
   const host = el.querySelector('#gx-host');
   el.addEventListener('click', e => {

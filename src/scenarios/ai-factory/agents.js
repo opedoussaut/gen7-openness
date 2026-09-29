@@ -11,7 +11,7 @@ const signed = v => `${v >= 0 ? '+' : '−'}${Math.abs(v).toFixed(1)}`;
 
 export const AGENTS = [
   {
-    id: 'orchestrator', name: 'Orchestrator', short: 'ORCH', model: 'reasoning-large', icon: 'orbit', servers: [], tagline: 'Plans · coordinates · decides',
+    id: 'orchestrator', companion: 'AURA', competence: 'Project Manager', name: 'Orchestrator', short: 'ORCH', model: 'reasoning-large', icon: 'orbit', servers: [], tagline: 'Plans · coordinates · decides',
     role: 'Decides which specialists are needed, coordinates them, resolves disagreements, recommends.',
     functions: ['Determine which agents are needed', 'Coordinate agent interactions', 'Consolidate evidence', 'Identify disagreements', 'Produce the final recommendation'],
     reasoningBudget: { plan: 160, consolidate: 480 },
@@ -19,7 +19,7 @@ export const AGENTS = [
     summarize: o => o.decision ?? `${o.agentsNeeded?.length ?? 0} specialists selected`
   },
   {
-    id: 'deployment', name: 'Rack Deployment Agent', short: 'DEP', model: 'specialist-small', icon: 'rack', servers: ['dcim', 'power'], tagline: 'Space · power · spec',
+    id: 'deployment', companion: 'LEO', competence: 'System Engineer', name: 'Rack Deployment Agent', short: 'DEP', model: 'specialist-small', icon: 'rack', servers: ['dcim', 'power'], tagline: 'Space · power · spec',
     role: 'Checks that the new rack fits: specification, position, loop and power feed.',
     functions: ['Read the rack specification', 'Confirm position and loop', 'Check busway power capacity', 'Request the cooling assessment'],
     reasoningBudget: { assess: 220 },
@@ -27,7 +27,7 @@ export const AGENTS = [
     summarize: o => `space ${o.spaceOk ? 'OK' : 'not OK'} · power ${o.power.fits ? 'fits' : 'short'} (${o.power.availableKw} kW free) · cooling delegated`
   },
   {
-    id: 'workload', name: 'Workload Agent', short: 'WKL', model: 'specialist-small', icon: 'cpu', servers: ['scheduler', 'power'], tagline: 'Jobs · GPUs · migration',
+    id: 'workload', companion: 'AURA', competence: 'Project Manager · capacity planning', name: 'Workload Agent', short: 'WKL', model: 'specialist-small', icon: 'cpu', servers: ['scheduler', 'power'], tagline: 'Jobs · GPUs · migration',
     role: 'Finds workload that can move to free capacity, without touching critical jobs.',
     functions: ['List running jobs and priorities', 'Read measured rack power', 'Find checkpointable, low-priority jobs', 'Find idle capacity elsewhere'],
     reasoningBudget: { assess: 300 },
@@ -35,7 +35,7 @@ export const AGENTS = [
     summarize: o => o.proposal ? `move ${o.proposal.job} ${o.proposal.fromRack} → ${o.proposal.toRack}, releases ${o.proposal.releasedKw} kW` : 'no movable workload'
   },
   {
-    id: 'cooling', name: 'Liquid Cooling Agent', short: 'COOL', model: 'reasoning-large', icon: 'drop', servers: ['bms'], tagline: 'Loop heat · headroom',
+    id: 'cooling', companion: 'LEO', competence: 'Mechanical Engineer', name: 'Liquid Cooling Agent', short: 'COOL', model: 'reasoning-large', icon: 'drop', servers: ['bms'], tagline: 'Loop heat · headroom',
     role: 'Judges whether the loop can absorb the new rack, from measured heat — not nameplates.',
     functions: ['Measure loop heat from CDU telemetry', 'Apply the planning allowance', 'Calculate headroom', 'Re-check after any change'],
     reasoningBudget: { assess: 260, recheck: 180 },
@@ -43,7 +43,7 @@ export const AGENTS = [
     summarize: o => `${o.phase}: headroom ${signed(o.headroomKw)} kW (${o.criterionMet ? 'target met' : 'short'})`
   },
   {
-    id: 'sustainability', name: 'Sustainability Agent', short: 'SUS', model: 'specialist-small', icon: 'leaf', servers: ['carbon'], tagline: 'Carbon · energy timing',
+    id: 'sustainability', companion: 'AURA', competence: 'Compliance Officer', name: 'Sustainability Agent', short: 'SUS', model: 'specialist-small', icon: 'leaf', servers: ['carbon'], tagline: 'Carbon · energy timing',
     role: 'Times energy-intensive steps to the lowest-carbon window.',
     functions: ['Read the grid carbon forecast', 'Estimate burn-in energy', 'Choose the lowest-carbon window', 'Quantify the difference'],
     reasoningBudget: { assess: 140 },

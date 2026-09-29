@@ -9,6 +9,7 @@ An executive-quality, engineer-inspectable demonstrator of four ideas:
 3. **Lean AI** — deterministic grooming of plant data *before* any AI reasoning.
 4. **AI economics** — the recorded execution cost of a run, compared with the estimated value it enabled, and a three-step explanation of the brute-force vs lean saving.
 5. **At scale** — a projection of per-decision savings across sites and volumes, and why telemetry matters.
+6. **Dassault Systèmes Industrial AI framing** — the five attributes (Transformative, Scientific, Actionable, Open, Trusted), the Virtual Companions (each agent is a Competence of AURA or LEO; each MCP tool call is a Skill), the three Industry World Models pillars, and a **Prerequisites** tab showing each pillar with and without the platform on the demo's own numbers. Wording comes from internal program material in `src/domain/positioning.js` — **keep this repository private**.
 
 | Learn | Live demo |
 | --- | --- |

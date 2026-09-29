@@ -9,8 +9,9 @@ import { mountDemo } from './ui/demo.js';
 import { mountEconomics } from './ui/economics.js';
 import { mountTechnical } from './ui/technical.js';
 import { mountScale } from './ui/scale.js';
+import { mountPrereq } from './ui/prereq.js';
 
-const PAGES = ['learn', 'demo', 'economics', 'scale', 'technical'];
+const PAGES = ['learn', 'demo', 'economics', 'scale', 'prereq', 'technical'];
 const engine = new DemoEngine(scenario);
 const reference = new DemoEngine(scenario);
 
@@ -56,6 +57,7 @@ const views = {
   demo: mountDemo($('#page-demo'), app),
   economics: mountEconomics($('#page-economics'), app),
   scale: mountScale($('#page-scale'), app),
+  prereq: mountPrereq($('#page-prereq'), app),
   technical: mountTechnical($('#page-technical'), app)
 };
 

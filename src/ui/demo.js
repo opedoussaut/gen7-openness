@@ -4,6 +4,7 @@ import { esc, $, int, compact, eur, bytes, ms, pct, clock, signedMm } from './fo
 import { modelCost } from '../engine/telemetry.js';
 import { explainerMarkup, STEP_TEXT } from './grooming.js';
 import { explainGrooming } from '../scenarios/ai-factory/explain.js';
+import { COMPANIONS, skillName } from '../domain/positioning.js';
 
 const STATES = [
   { id: 'INGESTING', label: 'Ingest', c: '#7e95a8' }, { id: 'GROOMING', label: 'Groom', c: 'var(--lean)' }, { id: 'ORCHESTRATING', label: 'Orchestrate', c: 'var(--a2a)' },
@@ -12,7 +13,7 @@ const STATES = [
 const KIND_TAG = { human: ['human', 'PEOPLE'], mcp: ['mcp', 'MCP'], a2a: ['a2a', 'A2A'], model: ['model', 'MODEL'], groom: ['lean', 'LEAN'], ingest: ['neutral', 'DATA'], discover: ['mcp', 'MCP'], incident: ['bad', 'INCIDENT'], decision: ['ok', 'DECISION'] };
 
 // ---------- Canvas geometry (viewBox 800 × 450) ----------
-const AG_Y = 196, AG_H = 70, AG_W = 164, SV_Y = 382, SV_H = 54;
+const AG_Y = 196, AG_H = 84, AG_W = 176, SV_Y = 382, SV_H = 54;
 let AGENT_X = {}, SERVER_X = {}, MCP_EDGES = [], PAIRS = [];
 const pairId = (a, b) => [a, b].sort().join('--');
 /** Layout derived from the scenario: specialists in slots, servers in slots, edges from the run script. */
@@ -32,7 +33,7 @@ function arcPath(a, b) {
   return `M${s} ${AG_Y} Q${(s + e) / 2} ${AG_Y - 2 * h} ${e} ${AG_Y}`;
 }
 const spokePath = id => `M400 70 C400 138 ${AGENT_X[id]} 128 ${AGENT_X[id]} ${AG_Y}`;
-const mcpPath = (a, sid) => { const ax = AGENT_X[a], sx = SERVER_X[sid]; return `M${ax} ${AG_Y + AG_H} C${ax} 326 ${sx} 332 ${sx} ${SV_Y}`; };
+const mcpPath = (a, sid) => { const ax = AGENT_X[a], sx = SERVER_X[sid]; return `M${ax} ${AG_Y + AG_H} C${ax} 332 ${sx} 336 ${sx} ${SV_Y}`; };
 const SV_W = 138;
 
 function nodeIcon(name, x, y, size = 18) { return `<g transform="translate(${x} ${y})">${icon(name, size, 1.7)}</g>`; }
@@ -59,21 +60,21 @@ function humansSvg(sc) {
 function canvasSvg(sc) {
   const agents = sc.agents.filter(a => a.id !== 'orchestrator');
   const orch = sc.agents.find(a => a.id === 'orchestrator');
-  const agentNode = a => { const x = AGENT_X[a.id] - AG_W / 2; return `<g class="node agent" id="n-${a.id}" data-agent="${a.id}"><rect class="box" x="${x}" y="${AG_Y}" width="${AG_W}" height="${AG_H}" rx="14"/><rect class="ic-bg" x="${x + 12}" y="${AG_Y + 13}" width="30" height="30" rx="9"/><g class="ic">${nodeIcon(a.icon, x + 18, AG_Y + 19)}</g><text class="name" x="${x + 52}" y="${AG_Y + 27}">${esc(a.name.replace(' Agent', ''))}</text><text class="role" x="${x + 52}" y="${AG_Y + 42}">${esc(a.tagline)}</text><text class="meta" x="${x + 12}" y="${AG_Y + 60}" id="m-${a.id}">idle</text><circle class="think" cx="${x + AG_W - 13}" cy="${AG_Y + 13}" r="4"/></g>`; };
+  const agentNode = a => { const x = AGENT_X[a.id] - AG_W / 2; return `<g class="node agent" id="n-${a.id}" data-agent="${a.id}"><title>${esc(`${a.companion} · ${a.competence} — ${COMPANIONS[a.companion]?.line ?? ''}`)}</title><rect class="box" x="${x}" y="${AG_Y}" width="${AG_W}" height="${AG_H}" rx="14"/><rect class="ic-bg" x="${x + 12}" y="${AG_Y + 12}" width="30" height="30" rx="9"/><g class="ic">${nodeIcon(a.icon, x + 18, AG_Y + 18)}</g><text class="name" x="${x + 50}" y="${AG_Y + 25}">${esc(a.name.replace(' Agent', ''))}</text><text class="role" x="${x + 50}" y="${AG_Y + 40}">${esc(a.tagline)}</text><text class="companion" x="${x + 12}" y="${AG_Y + 59}"><tspan class="cmp ${a.companion.toLowerCase()}">${esc(a.companion)}</tspan> · ${esc(a.competence.split(' · ')[0])}</text><text class="meta" x="${x + 12}" y="${AG_Y + 75}" id="m-${a.id}">idle</text><circle class="think" cx="${x + AG_W - 13}" cy="${AG_Y + 13}" r="4"/></g>`; };
   const serverNode = s => { const x = SERVER_X[s.id] - SV_W / 2; return `<g class="node server" id="n-${s.id}"><rect class="box" x="${x}" y="${SV_Y}" width="${SV_W}" height="${SV_H}" rx="12"/><rect class="ic-bg" x="${x + 10}" y="${SV_Y + 12}" width="28" height="28" rx="8"/><g class="ic">${nodeIcon(s.icon, x + 15, SV_Y + 17)}</g><text class="name" x="${x + 46}" y="${SV_Y + 24}" style="font-size:12px">${esc(s.short)}</text><text class="role" x="${x + 46}" y="${SV_Y + 38}">${esc(s.system)}</text><text class="meta" x="${x + 46}" y="${SV_Y + 50}" id="m-${s.id}"></text></g>`; };
   return `<svg class="orch-svg" viewBox="0 0 800 ${450 + OY}" role="img" aria-label="People, agents, tools; A2A messages at the agent layer and MCP calls inside each agent">
     ${humansSvg(sc)}
     <g transform="translate(0 ${OY})">
     <rect class="band-a2a" x="0" y="84" width="800" height="104" rx="14"/><text class="band-label a2a" x="14" y="101">OPEN LAYER · AGENT ↔ AGENT (A2A)</text>
     <line class="open-boundary" x1="0" x2="800" y1="188" y2="188"/>
-    <rect class="band-mcp" x="0" y="274" width="800" height="100" rx="14"/><text class="band-label mcp" x="14" y="291">INSIDE EACH AGENT · ITS OWN TOOLS (MCP)</text>
+    <rect class="band-mcp" x="0" y="286" width="800" height="90" rx="14"/><text class="band-label mcp" x="14" y="303">SKILLS · INSIDE EACH COMPETENCE · EXECUTED VIA MCP</text>
     <g id="edges">
       ${agents.map(a => `<path class="edge a2a" id="e-orch--${a.id}" d="${spokePath(a.id)}"/>`).join('')}
       ${PAIRS.map(([a, b]) => `<path class="edge a2a idle-arc" id="e-${pairId(a, b)}" d="${arcPath(a, b)}"/>`).join('')}
       ${MCP_EDGES.map(([a, sv]) => `<path class="edge mcp" id="e-${a}--${sv}" d="${mcpPath(a, sv)}"/>`).join('')}
     </g>
-    ${MCP_EDGES.map(([a, sv]) => { const mx = (AGENT_X[a] + SERVER_X[sv]) / 2; return `<g class="mcp-pill" id="p-${a}--${sv}"><rect x="${mx - 17}" y="320" width="34" height="15" rx="7.5"/><text x="${mx}" y="330.6" text-anchor="middle">MCP</text></g>`; }).join('')}
-    <g class="node orch" id="n-orchestrator"><rect class="box" x="260" y="14" width="280" height="56" rx="14"/><rect class="ic-bg" x="272" y="27" width="30" height="30" rx="9"/><g class="ic">${nodeIcon(orch.icon, 278, 33)}</g><text class="name" x="312" y="38">${esc(orch.name)}</text><text class="role" x="312" y="53">${esc(orch.tagline)}</text><text class="meta" x="526" y="38" text-anchor="end" id="m-orchestrator"></text><circle class="think" cx="530" cy="22" r="3.5"/></g>
+    ${MCP_EDGES.map(([a, sv]) => { const mx = (AGENT_X[a] + SERVER_X[sv]) / 2; return `<g class="mcp-pill" id="p-${a}--${sv}"><rect x="${mx - 17}" y="328" width="34" height="15" rx="7.5"/><text x="${mx}" y="338.6" text-anchor="middle">MCP</text></g>`; }).join('')}
+    <g class="node orch" id="n-orchestrator"><rect class="box" x="260" y="14" width="280" height="56" rx="14"/><rect class="ic-bg" x="272" y="27" width="30" height="30" rx="9"/><g class="ic">${nodeIcon(orch.icon, 278, 33)}</g><text class="name" x="312" y="38">${esc(orch.name)}</text><text class="role" x="312" y="53"><tspan class="cmp ${orch.companion.toLowerCase()}">${esc(orch.companion)}</tspan> · ${esc(orch.competence)} · plans &amp; coordinates</text><text class="meta" x="526" y="38" text-anchor="end" id="m-orchestrator"></text><circle class="think" cx="530" cy="22" r="3.5"/></g>
     ${agents.map(agentNode).join('')}
     ${sc.servers.map(serverNode).join('')}
     <g id="pulses"></g>
@@ -285,7 +286,8 @@ export function mountDemo(el, app) {
     let body = '';
     if (ev.kind === 'mcp') {
       const c = run.mcpCalls.find(x => x.id === ev.ref.mcpCall);
-      body = head() + `<div class="now-grid"><div><small>Tool</small><span class="mono">${esc(c.tool)}</span></div><div class="wide"><small>Input</small><span class="mono">${esc(Object.entries(c.args).map(([k, v]) => `${k} = ${Array.isArray(v) ? `[${v.length}]` : v}`).join(', '))}</span></div><div><small>Latency · payload</small><span>${ms(c.latencyMs)} · ${bytes(c.payloadBytes)}</span></div><div class="full"><small>Result</small><span class="result">${esc(c.summary)}</span></div></div>`;
+      const ag = sc.agents.find(a => a.id === c.agent);
+      body = head() + `<div class="now-grid"><div><small>Skill · ${esc(ag?.companion ?? '')} ${esc(ag?.competence.split(' · ')[0] ?? '')}</small><span>${esc(skillName(c.tool))}</span><span class="mono small muted">via MCP · ${esc(c.tool)}</span></div><div class="wide"><small>Input</small><span class="mono">${esc(Object.entries(c.args).map(([k, v]) => `${k} = ${Array.isArray(v) ? `[${v.length}]` : v}`).join(', '))}</span></div><div><small>Latency · payload</small><span>${ms(c.latencyMs)} · ${bytes(c.payloadBytes)}</span></div><div class="full"><small>Result${sc.scienceTools?.includes(c.tool) ? ' · <span class="tag ok sg">science-grounded · computed, not generated</span>' : ''}</small><span class="result">${esc(c.summary)}</span></div></div>`;
     } else if (ev.kind === 'a2a') {
       const m = run.a2aMessages.find(x => x.id === ev.ref.message);
       body = head(`<span class="tag a2a">${esc(m.intent)}</span>`) + `<p class="now-message">“${esc(m.text)}”</p><div class="now-grid"><div><small>Payload</small><span>${m.tokens} tokens · ${Object.keys(m.data).length} fields</span></div><div class="wide"><small>Data</small><span class="mono">${esc(Object.keys(m.data).join(' · '))}</span></div><div><small>Transport</small><span>${ms(m.latencyMs)}</span></div></div>`;
@@ -359,7 +361,7 @@ export function mountDemo(el, app) {
       const act = i === 0 ? `Measure p95 loop heat${v ? ` · ${v.p95HeatKw} kW` : ''}` : `${v?.releasedKw ? `Release ${v.releasedKw} kW` : 'Apply the correction'}${approvals.length ? ` · approved by ${approvals.map(h => kindOf(sc, h.from)).join(', ')}` : ''}`;
       const verdict = !v ? '' : v.criterionMet ? `Met → stop` : `Short by ${Math.abs(v.headroomKw)} kW → correct`;
       cards.push(`<div class="loop-iter ${v ? (v.criterionMet ? 'ok' : 'bad') : 'on'}"><div class="li-head"><span class="li-n">${i + 1}</span><b>Iteration ${i + 1}</b>${v ? `<span class="tag ${v.criterionMet ? 'ok' : 'bad'}">${verdict}</span>` : '<span class="tag neutral">running</span>'}</div>
-        <ol class="li-phases">${phase(true, true, 'Plan', i === 0 ? 'Split the goal across the specialist agents' : 'Find load that can be released')}${phase(true, !!v, 'Act', esc(act))}${phase(!!it.verify, !!v, 'Verify', v ? `<span class="mono">${esc(v.formula)} = ${v.headroomKw > 0 ? '+' : ''}${v.headroomKw} kW</span>` : `${esc(L.verifyTool)}`)}${phase(!!v, it.closed, 'Decide', v ? (v.criterionMet ? 'Acceptance test passed' : 'Loop again with a correction') : '…')}</ol>
+        <ol class="li-phases">${phase(true, true, 'Plan', i === 0 ? 'Split the goal across the specialist agents' : 'Find load that can be released')}${phase(true, !!v, 'Act', esc(act))}${phase(!!it.verify, !!v, 'Verify', v ? `<span class="tag ok sg">science-grounded</span> <span class="mono">${esc(v.formula)} = ${v.headroomKw > 0 ? '+' : ''}${v.headroomKw} kW</span>` : `${esc(L.verifyTool)}`)}${phase(!!v, it.closed, 'Decide', v ? (v.criterionMet ? 'Acceptance test passed' : 'Loop again with a correction') : '…')}</ol>
         <div class="li-foot"><span>${it.calls.length} model call${it.calls.length === 1 ? '' : 's'} · ${int(tok)} tok</span><b>${eur(cost, { precise: true })}</b></div></div>`);
     }
     const status = accepted ? `<span class="tag ok">${icon('check', 12)} goal reached in ${loopIters.indexOf(accepted) + 1} of ${L.maxIterations} iterations</span>` : run.status === 'idle' ? '<span class="tag neutral">not started</span>' : `<span class="tag a2a">iteration ${Math.max(1, loopIters.length)} of ${L.maxIterations}</span>`;
@@ -383,6 +385,7 @@ export function mountDemo(el, app) {
         ${r.items.map(it => `<div class="rec-item"><small>${esc(it.label)}</small><p>${esc(it.text)}</p></div>`).join('')}
         <div class="rec-item"><small>Actions</small><ol>${r.actions.map(x => `<li>${esc(x)}</li>`).join('')}</ol></div>
       </div>
+      <p class="sg-line">${icon('shield', 14)} <b>Science-grounded.</b> Every figure behind this decision — loop heat, target, headroom before and after — was computed by deterministic, physics-based tools and verified again after the change. None was generated by a model. <span class="muted">In production: MODSIM simulation and the Virtual Twin.</span></p>
       ${peopleBlock(sc, run)}
       ${d ? `<div class="disagree"><span class="ic">${icon('alert', 16)}</span><div><b>Disagreement detected · ${esc(d.topic)}</b><div class="pos">${d.positions.map(p => `<span class="chip"><b>${esc(label(sc, p.agent))}</b> ${esc(p.position)}</span>`).join('')}</div><p><b>Resolution:</b> ${esc(d.resolution)}</p></div></div>` : ''}
       <div class="spine"><div class="spine-words"><span style="--c:var(--mcp)">OPEN.</span><span style="--c:var(--lean)">LEAN.</span><span style="--c:var(--a2a)">ORCHESTRATE.</span><span style="--c:var(--ok)">MEASURE.</span></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-go="technical">Inspect the trace</button><button class="btn primary" data-go="economics">Was it worth it? ${icon('arrow', 15)}</button></div></div>

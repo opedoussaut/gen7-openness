@@ -3,6 +3,7 @@
 // run model, and paces playback for narration. The UI only renders `engine.run`; it never keeps timers
 // that could disagree with the engine.
 import { RUN_STATES } from '../domain/models.js';
+import { skillName } from '../domain/positioning.js';
 import { jsonBytes, estimateTokens, uid, now } from '../lib/util.js';
 import { createMcpClient, inProcessMcpTransport } from '../adapters/mcp.js';
 import { createA2AClient, inProcessA2ATransport } from '../adapters/a2a.js';
@@ -228,7 +229,7 @@ export class DemoEngine {
         const record = { id: uid('mcp'), agent: step.agent, server: step.server, serverName: server.name, system: server.system, tool: step.tool, args, ...call };
         run.mcpCalls.push(record);
         run.agents[step.agent].inbox.evidence.push({ callId: record.id, tool: step.tool, server: step.server, data: call.data });
-        return { lane: step.agent, durationMs: call.latencyMs, event: { kind: 'mcp', title: `${label(sc, step.agent)} → ${server.name} · ${step.tool}`, detail: call.summary, ref: { mcpCall: record.id } } };
+        return { lane: step.agent, durationMs: call.latencyMs, event: { kind: 'mcp', title: `${label(sc, step.agent)} · skill “${skillName(step.tool)}” · MCP ${server.name}`, detail: call.summary, ref: { mcpCall: record.id } } };
       }
       case 'human': {
         // People in the loop: assign, request approval, coordinate, approve, sign off.
