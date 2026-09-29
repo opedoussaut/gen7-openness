@@ -83,6 +83,7 @@ Open one MCP row (JSON-RPC request/response) and one A2A row. Show *10 / 10 cons
 
 Rehearse once: run at 1×, then Reset. If asked “is this a real LLM?” — no: agents use scripted reasoners; tokens are estimated from the actual context; adapters are swappable for real MCP servers, A2A endpoints and model usage.
 
-## · In plain words (closing, 1–2 minutes)
+## · The story (tab 01) — open and close with it
 
-Tab 07 retells the run without jargon: the situation, the five things tested (right, cheap, fast, people in charge, checkable), the eleven steps from question to decision, the result and what the demo is and is not. Use it to close, or as a leave-behind for a non-technical audience. Every number comes from the run shown (your live run once completed).
+- **Opening (1 minute):** the site opens on *The story · before the demo*: the situation, who takes part (3 people, a coordinator, 4 specialists, ordinary software) and the five questions we will test, each with a *watch for* hint. No answers yet — do not spoil the moment the cooling check fails.
+- **Closing (1–2 minutes):** after your live run, the recommendation panel has *The story: what happened*; the tab now shows the answers from your run — the eleven steps, the five questions ticked, the result and what the demo is and is not. The switch at the top lets you flip between the two moments at any time.

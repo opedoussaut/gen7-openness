@@ -1057,7 +1057,7 @@ dialog .term-tip { position: fixed; }
 .st-block h2 { font-family: var(--display); font-size: clamp(20px, 2vw, 26px); line-height: 1.3; margin: 6px 0 10px; letter-spacing: -.3px; }
 .st-block > p { font-size: 16px; line-height: 1.65; color: var(--ink-2); max-width: 980px; }
 .st-question { background: linear-gradient(160deg, #fff 55%, #eef6fd); }
-.st-tests { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-top: 8px; }
+.st-tests { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-top: 8px; }
 .st-test { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: start; border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
 .st-test b { font-size: 15px; } .st-test p { font-size: 14px; line-height: 1.55; color: var(--ink-2); margin-top: 4px; }
 .st-ic { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; } .st-ic.ok { background: var(--ok-soft); color: var(--ok); } .st-ic.bad { background: var(--bad-soft); color: var(--bad); }
@@ -1090,3 +1090,10 @@ dialog .term-tip { position: fixed; }
 .conn-compare > div > span { font-size: 12.5px; color: var(--ink-2); line-height: 1.35; display: block; }
 .conn-compare p { grid-column: 1 / -1; font-size: 13px; color: var(--ink-2); }
 @media (max-width: 520px) { .conn-compare { grid-template-columns: minmax(0, 1fr); } }
+.st-switch { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 4px; }
+.st-cast { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 8px; }
+.st-cast > div { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+.st-cast b { font-size: 15px; } .st-cast p { font-size: 14px; line-height: 1.55; color: var(--ink-2); margin-top: 4px; }
+.st-cast .person .st-ic { background: var(--human-soft); color: var(--human); } .st-cast .agent .st-ic { background: var(--a2a-soft); color: var(--a2a); } .st-cast .tool .st-ic { background: var(--lean-soft); color: var(--lean); }
+.st-ic.q { background: var(--mcp-soft); color: var(--mcp); font-weight: 800; font-size: 13px; }
+.st-test p i { font-style: normal; font-weight: 700; color: var(--mcp); }

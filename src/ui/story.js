@@ -1,5 +1,6 @@
-// IN PLAIN WORDS — what the demo tests and what happened during the run, told without jargon.
-// Every number is read from the run shown (your live run once completed, otherwise the reference run).
+// THE STORY — told without jargon, in two moments.
+// Before the demo: the situation, the cast and the five questions we will test (no answers).
+// After the demo: what happened, step by step, and the answers. Every number is read from the run shown.
 import { icon } from './icons.js';
 import { esc, int, eur } from './format.js';
 import { gen7Facts } from './gen7.js';
@@ -7,8 +8,58 @@ import { gen7Facts } from './gen7.js';
 const r0 = v => Math.round(Math.abs(v));
 
 export function mountStory(el, app) {
-  let key = '';
+  let key = '', view = null;
+  const autoView = () => app.engine.run.status === 'completed' ? 'after' : 'before';
+  function switcher(cur) {
+    return `<div class="st-switch"><div class="seg" role="group" aria-label="Moment"><button type="button" data-view="before" aria-pressed="${cur === 'before'}">Before the demo · what we will test</button><button type="button" data-view="after" aria-pressed="${cur === 'after'}">After the demo · what happened</button></div><span class="small muted">${cur === 'before' ? 'Opens here. After your live run, this tab switches to the answers.' : app.engine.run.status === 'completed' ? 'Answers from your live run.' : 'Answers from the reference run — start the live demo to use your own.'}</span></div>`;
+  }
+  function renderBefore() {
+    const sc = app.scenario, inc = sc.incident;
+    const tests = [
+      { q: 'Is the answer right?', watch: 'the moment the cooling check fails — and what the team does about it.' },
+      { q: 'Is it cheap enough to use every day?', watch: 'the cost counter on the right of the live demo: it stays in cents.' },
+      { q: 'Is it fast?', watch: 'the simulated clock: the whole analysis takes seconds, not days.' },
+      { q: 'Do people stay in charge?', watch: 'the three people at the top: nothing is decided until they approve.' },
+      { q: 'Can we check afterwards what happened?', watch: 'the exchange log under the demo: every step can be opened.' }
+    ];
+    const cast = [
+      ['person', 'Three people', 'The Program Owner who asks the question; the Cluster Ops Lead who runs the computing jobs; the Facility Manager who runs the building.'],
+      ['agent', 'A coordinator (AI)', 'Splits the question, passes it to the right specialists and gathers their answers.'],
+      ['agent', 'Four specialist AI assistants', 'Installation, workload, cooling and sustainability — each only looks at its own systems.'],
+      ['tool', 'Ordinary software', 'Sorts and cleans the raw measurements before any AI sees them, and does all the physics calculations.']
+    ];
+    return `
+    <section class="st-block st-question">
+      <small>The situation</small>
+      <h2>A new AI equipment cabinet arrives on ${esc(inc.plannedForLabel)}. Can the building keep it cool, safely?</h2>
+      <p>It holds 72 AI chips and uses about ${inc.itKw} kW of electricity, and almost all of it turns into heat. That heat must be carried away by a water-cooling circuit that is already busy. Get it wrong and equipment overheats; be too cautious and expensive chips sit idle. Today, answering it can take several teams several days.</p>
+    </section>
+    <section class="st-block">
+      <small>Who takes part</small>
+      <h2>A mixed team: people and AI assistants, working together.</h2>
+      <div class="st-cast">${cast.map(([k, t, d]) => `<div class="${k}"><span class="st-ic">${icon(k === 'person' ? 'person' : k === 'tool' ? 'funnel' : 'orbit', 16)}</span><div><b>${esc(t)}</b><p>${esc(d)}</p></div></div>`).join('')}</div>
+    </section>
+    <section class="st-block">
+      <small>What we are going to test</small>
+      <h2>Can this team answer a real engineering question — correctly, cheaply, quickly, and under human control?</h2>
+      <div class="st-tests">${tests.map((t, i) => `<div class="st-test"><span class="st-ic q">${i + 1}</span><div><b>${esc(t.q)}</b><p><i>Watch for</i> ${esc(t.watch)}</p></div></div>`).join('')}</div>
+    </section>
+    <div class="cta-band"><div><p>Keep these five questions in mind. We come back to this tab at the end to answer them, with the numbers from the run.</p></div><button class="btn" data-go="demo">Start the live demo ${icon('arrow', 16)}</button></div>`;
+  }
   function render() {
+    const cur = view ?? autoView();
+    if (cur === 'before') { el.innerHTML = head(cur) + renderBefore(); return; }
+    el.innerHTML = head(cur) + renderAfter();
+  }
+  function head(cur) {
+    const v = app.completed();
+    return `<div class="page-head">
+      <div><span class="eyebrow"><i class="pip"></i>The story · in plain words</span><h1 class="display" style="font-size:clamp(32px,3.6vw,50px);margin-top:12px">${cur === 'before' ? 'What we are going to test.' : 'What we tested.'} <span>${cur === 'before' ? 'And what to watch for.' : 'What happened.'}</span></h1>
+      <p class="lede">${cur === 'before' ? 'The whole demonstration in plain words, before it starts.' : 'The whole demonstration, told without technical words. Every number comes from the run.'}</p></div>
+      ${cur === 'after' ? `<div class="run-banner"><span class="tag ${v.source === 'live' ? 'ok' : 'neutral'}">${v.source === 'live' ? 'Your run' : 'Reference run'}</span> ${esc(v.run.id)}</div>` : ''}
+    </div>${switcher(cur)}`;
+  }
+  function renderAfter() {
     const v = app.completed(), run = v.run, sc = app.scenario, f = gen7Facts(sc, run);
     const out = id => run.agents[id]?.outputs.at(-1)?.output ?? {};
     const dep = out('deployment'), wl = out('workload'), sus = out('sustainability');
@@ -39,13 +90,7 @@ export function mountStory(el, app) {
       { who: 'Facility Manager, then Program Owner', kind: 'person', text: 'approve the installation and sign off.' }
     ];
 
-    el.innerHTML = `
-    <div class="page-head">
-      <div><span class="eyebrow"><i class="pip"></i>In plain words</span><h1 class="display" style="font-size:clamp(32px,3.6vw,50px);margin-top:12px">What we tested. <span>What happened.</span></h1>
-      <p class="lede">The whole demonstration, told without technical words. Every number comes from the run you just watched.</p></div>
-      <div class="run-banner"><span class="tag ${v.source === 'live' ? 'ok' : 'neutral'}">${v.source === 'live' ? 'Your run' : 'Reference run'}</span> ${esc(run.id)}</div>
-    </div>
-
+    return `
     <section class="st-block st-question">
       <small>The situation</small>
       <h2>A new AI equipment cabinet arrives on ${esc(inc.plannedForLabel)}. Can the building keep it cool, safely?</h2>
@@ -86,6 +131,16 @@ export function mountStory(el, app) {
 
     <div class="cta-band"><div><p>Want the details behind any of these sentences? The Live demo replays it step by step, AI economics shows every euro, and the Technical view shows every exchange.</p></div><button class="btn" data-go="demo">Replay the live demo ${icon('arrow', 16)}</button></div>`;
   }
-  el.addEventListener('click', e => { const g = e.target.closest('[data-go]'); if (g) app.go(g.dataset.go); });
-  return { update() { const v = app.completed(); const k = `${v.run.id}:${v.source}`; if (k !== key || !el.innerHTML) { key = k; render(); } } };
+  el.addEventListener('click', e => {
+    const b = e.target.closest('[data-view]'); if (b) { view = b.dataset.view; key = ''; render(); return; }
+    const g = e.target.closest('[data-go]'); if (g) app.go(g.dataset.go);
+  });
+  let lastStatus = app.engine.run.status;
+  return { update() {
+    const st = app.engine.run.status;
+    if (st !== lastStatus && (st === 'completed' || st === 'idle')) view = null; // follow the run: answers once it completes
+    lastStatus = st;
+    const v = app.completed(); const k = `${v.run.id}:${v.source}:${view ?? autoView()}`;
+    if (k !== key || !el.innerHTML) { key = k; render(); }
+  } };
 }

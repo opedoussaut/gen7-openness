@@ -12,7 +12,7 @@ import { mountScale } from './ui/scale.js';
 import { mountPrereq } from './ui/prereq.js';
 import { mountStory } from './ui/story.js';
 
-const PAGES = ['learn', 'demo', 'economics', 'scale', 'prereq', 'technical', 'story'];
+const PAGES = ['story', 'learn', 'demo', 'economics', 'scale', 'prereq', 'technical'];
 const engine = new DemoEngine(scenario);
 const reference = new DemoEngine(scenario);
 
@@ -27,7 +27,7 @@ function analyse(run) {
 
 const app = {
   scenario, engine, reference,
-  page: 'learn',
+  page: 'story',
   live: () => analyse(engine.run),
   /** Run shown on analysis pages: the live run once started, otherwise the instant reference run. */
   focus() {
@@ -64,7 +64,7 @@ const views = {
 };
 
 function setPage(page, focus = false) {
-  if (!PAGES.includes(page)) page = 'learn';
+  if (!PAGES.includes(page)) page = 'story';
   app.page = page;
   for (const p of PAGES) {
     $(`#page-${p}`).hidden = p !== page;
@@ -87,7 +87,7 @@ $$('.tabs [role=tab]').forEach(tab => {
     if (e.key in map) { e.preventDefault(); setPage(PAGES[map[e.key]], true); }
   });
 });
-$('.brand').addEventListener('click', e => { e.preventDefault(); setPage('learn'); });
+$('.brand').addEventListener('click', e => { e.preventDefault(); setPage('story'); });
 $('#run-pill').addEventListener('click', () => setPage('demo'));
 $('#glossary-btn').addEventListener('click', () => app.inspect('Plain-language glossary', 'Words used in this demonstrator', glossaryMarkup()));
 installTermTips();
@@ -124,4 +124,4 @@ window.addEventListener('keydown', e => {
 });
 
 updatePill(engine.run);
-setPage(location.hash.slice(1) || 'learn');
+setPage(location.hash.slice(1) || 'story');
