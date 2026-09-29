@@ -79,3 +79,16 @@ test('server serves the app and its modules, not repository internals', async ()
     assert.equal((await fetch(`${base}/package.json`)).status, 404);
   } finally { await new Promise(r => server.close(r)); }
 });
+
+test('grooming explanations are derived from the run and agree with the pipeline', async () => {
+  const { explainGrooming } = await import('../src/scenarios/ai-factory/explain.js');
+  const e = new DemoEngine(sc); const run = await e.runInstant();
+  const ex = explainGrooming(e.dataset);
+  const stages = run.grooming.stages;
+  assert.equal(ex.counts.raw, run.raw.records);
+  for (const s of stages) assert.equal(ex.counts[s.id], s.recordsOut, s.id);
+  assert.equal(ex.filter.reasons.reduce((a, r) => a + r.removed, 0), ex.counts.raw - ex.counts.filter);
+  const w = ex.aggregate.window;
+  assert.ok(Math.abs(w.perCdu.reduce((a, p) => a + p.meanKw, 0) - w.heatKw) <= 0.11, 'window heat = sum of CDU means');
+  assert.equal(ex.rank.table.reduce((a, t) => a + t.kept, 0), ex.counts.rank);
+});

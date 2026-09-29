@@ -112,10 +112,14 @@ function score(x, ctx) {
   }
   return 0.1;
 }
-function rank(items) {
+/** Score every record (kept or not); also used to explain the ranking step. */
+export function scoreAll(items) {
   const heats = items.filter(x => x.type === 'LOOP_WINDOW').map(x => x.v.heatKw);
   const ctx = { p90: heats.length ? pctl(heats, 0.9) : Infinity };
-  return items.map(x => ({ ...x, relevance: Math.round(score(x, ctx) * 100) / 100 })).filter(x => x.relevance >= RELEVANCE_THRESHOLD).sort((a, b) => b.relevance - a.relevance);
+  return { ctx, items: items.map(x => ({ ...x, relevance: Math.round(score(x, ctx) * 100) / 100 })) };
+}
+function rank(items) {
+  return scoreAll(items).items.filter(x => x.relevance >= RELEVANCE_THRESHOLD).sort((a, b) => b.relevance - a.relevance);
 }
 
 export const STAGES = [

@@ -2,6 +2,8 @@
 import { icon } from './icons.js';
 import { esc, $, int, compact, eur, bytes, ms, pct, clock, signedMm } from './format.js';
 import { modelCost } from '../engine/telemetry.js';
+import { explainerMarkup, STEP_TEXT } from './grooming.js';
+import { explainGrooming } from '../scenarios/ai-factory/explain.js';
 
 const STATES = [
   { id: 'INGESTING', label: 'Ingest', c: '#7e95a8' }, { id: 'GROOMING', label: 'Groom', c: 'var(--lean)' }, { id: 'ORCHESTRATING', label: 'Orchestrate', c: 'var(--a2a)' },
@@ -135,6 +137,10 @@ export function mountDemo(el, app) {
   el.querySelectorAll('[data-speed]').forEach(b => b.addEventListener('click', () => { engine.setSpeed(Number(b.dataset.speed)); el.querySelectorAll('[data-speed]').forEach(x => x.setAttribute('aria-pressed', String(x === b))); }));
   $('#to-technical', el).addEventListener('click', () => app.go('technical'));
   $('#log', el).addEventListener('click', e => { const r = e.target.closest('[data-ev]'); if (r) inspectEvent(app, engine.run, r.dataset.ev); });
+  let gxCache = null;
+  const openStage = id => { gxCache ??= explainGrooming(app.reference.dataset); app.inspect('Lean pipeline · worked example', `${STEP_TEXT[id].title}: what it does`, explainerMarkup(gxCache, id, { compact: true })); };
+  el.addEventListener('click', e => { const r = e.target.closest('[data-gx-stage]'); if (r) openStage(r.dataset.gxStage); });
+  el.addEventListener('keydown', e => { const r = e.target.closest('[data-gx-stage]'); if (r && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openStage(r.dataset.gxStage); } });
   $('#now', el).addEventListener('click', e => { const r = e.target.closest('[data-ev]'); if (r) inspectEvent(app, engine.run, r.dataset.ev); });
 
   function update() {
@@ -181,7 +187,7 @@ export function mountDemo(el, app) {
     const currentStage = run.current?.kind === 'groom' ? run.current.stage : null;
     $('#funnel', el).innerHTML = sc.stages.map(st => {
       const s = done.find(x => x.id === st.id);
-      return `<div class="funnel-row ${s ? 'on' : ''} ${currentStage === st.id ? 'active' : ''}" title="${esc(st.operation)}"><span class="dotx"></span><b>${esc(st.label)}</b><span>${s ? `${int(s.recordsIn)} → ${int(s.recordsOut)}` : ''}</span><div class="bar"><i style="width:${s ? Math.max(1.5, (s.recordsOut / s.recordsIn) * 100) : 0}%"></i></div></div>`;
+      return `<div class="funnel-row ${s ? 'on' : ''} ${currentStage === st.id ? 'active' : ''}" title="${esc(st.operation)} — click for a worked example" data-gx-stage="${st.id}" role="button" tabindex="0"><span class="dotx"></span><b>${esc(st.label)}</b><span>${s ? `${int(s.recordsIn)} → ${int(s.recordsOut)}` : ''}</span><div class="bar"><i style="width:${s ? Math.max(1.5, (s.recordsOut / s.recordsIn) * 100) : 0}%"></i></div></div>`;
     }).join('');
     const c = metrics.context;
     $('#lean-result', el).className = `lean-result ${run.grooming.done ? '' : 'pending'}`;

@@ -10,6 +10,7 @@ Run locally (`npm start`, http://127.0.0.1:3000). Set speed to **1×** for narra
 - **MCP**: toggle *Without MCP / With MCP*. “3 agents × 5 systems = 15 custom integrations; with MCP, 8 standard connections.”
 - **A2A**: point at the sample message. “One sentence and the data. No essays.”
 - **Lean**: “11,825 raw records become 60 — in milliseconds, with no AI at all.”
+  Optional (+2 min): click a step in the pipeline card, or scroll to **Inside the lean pipeline**, and walk the six steps with the *Next* button. Best three for a non-expert audience: **Normalize** (85.6 °F → 29.78 °C; heat computed with flow × density × specific heat × ΔT), **Aggregate** (16 readings → one 15-minute value, 97 windows → one p95), **Rank** (explicit rules with scores; 0.55 threshold). In the live demo, clicking a step in the Lean context pipeline opens the same worked example.
 - **Measure**: “Every token, call and euro is counted per agent.”
 
 ## 2:30–3:30 · The question

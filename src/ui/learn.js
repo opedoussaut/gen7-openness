@@ -1,5 +1,7 @@
 // LEARN — MCP + A2A for everyone, then the complete architecture.
 import { icon } from './icons.js';
+import { explainerMarkup } from './grooming.js';
+import { explainGrooming } from '../scenarios/ai-factory/explain.js';
 import { esc, $, int, compact, eur, pct, bytes, ms } from './format.js';
 import { computeMetrics } from '../engine/telemetry.js';
 import { PILLARS } from '../domain/models.js';
@@ -27,6 +29,7 @@ export function mountLearn(el, app) {
   const { scenario } = app;
   const specialists = scenario.agents.filter(a => a.id !== 'orchestrator');
   const ref = app.reference.run, refM = computeMetrics(ref, scenario);
+  const gx = explainGrooming(app.reference.dataset);
   const sample = ref.a2aMessages.find(m => m.from === 'cooling' && m.to === 'workload') ?? ref.a2aMessages[0];
   const diagramAgents = specialists.slice(0, 3);
   const nA = diagramAgents.length, nS = scenario.servers.length;
@@ -98,11 +101,19 @@ export function mountLearn(el, app) {
       <div class="visual-top"><span class="eyebrow">Lean context pipeline · reference run</span><span class="tag lean">no AI involved</span></div>
       <div class="lean-mini">
         <div class="lm-col raw"><small>RAW TELEMETRY</small><b>${int(refM.context.rawRecords)}</b><span>records · ${bytes(refM.context.rawBytes)}</span><em>≈${compact(refM.context.rawTokens)} tokens</em></div>
-        <div class="lm-steps">${ref.grooming.stages.map(st => `<div><span>${esc(st.label)}</span><i>${int(st.recordsOut)}</i></div>`).join('')}</div>
+        <div class="lm-steps">${ref.grooming.stages.map(st => `<button type="button" data-gx-jump="${st.id}" title="See what this step does"><span>${esc(st.label)}</span><i>${int(st.recordsOut)}</i></button>`).join('')}</div>
         <div class="lm-col lean"><small>EVIDENCE PACK</small><b>${int(refM.context.evidenceRecords)}</b><span>records · ${bytes(refM.context.evidenceBytes)}</span><em>≈${compact(refM.context.evidenceTokens)} tokens</em></div>
       </div>
       <div class="lean-mini-foot"><b>${pct(refM.context.reduction)}</b> less context · ${ms(refM.totals.groomCpuMs)} of CPU · €0 of tokens</div>
+      <button class="btn sm" data-gx-jump="filter" style="margin-top:12px">See what each step does, with real records ${icon('arrow', 14)}</button>
     </div>
+  </section>
+
+  <section class="gx-section" id="gx-section" aria-labelledby="gx-title">
+    <span class="eyebrow"><i class="pip"></i>Inside the lean pipeline</span>
+    <h2 class="h2" id="gx-title">What each grooming step actually does, <span>shown on real records.</span></h2>
+    <p class="lede" style="font-size:16px;margin-top:8px">Six ordinary data operations — no AI — turn ${int(gx.counts.raw)} raw records into ${int(gx.counts.rank)} pieces of evidence. Click a step: every example below is a real record from the reference run, and every number is recomputed in your browser.</p>
+    <div id="gx-host">${explainerMarkup(gx, 'filter')}</div>
   </section>
 
   <section class="learn-section reverse" aria-labelledby="measure-title">
@@ -145,6 +156,13 @@ export function mountLearn(el, app) {
   }));
   el.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => app.go(b.dataset.go)));
   $('#learn-cta', el).addEventListener('click', () => app.go('demo'));
+  const host = el.querySelector('#gx-host');
+  el.addEventListener('click', e => {
+    const step = e.target.closest('[data-gx]');
+    if (step && host.contains(step)) { host.innerHTML = explainerMarkup(gx, step.dataset.gx); host.querySelector(`.gx-steps [data-gx="${step.dataset.gx}"]`)?.focus(); return; }
+    const jump = e.target.closest('[data-gx-jump]');
+    if (jump) { host.innerHTML = explainerMarkup(gx, jump.dataset.gxJump); el.querySelector('#gx-section').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  });
   return { update() {} };
 }
 
