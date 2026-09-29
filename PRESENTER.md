@@ -9,8 +9,8 @@ Run locally (`npm start`, http://127.0.0.1:3000). Set speed to **1×** for narra
 ## 0:00–2:30 · Learn
 
 - Hero: *Open. Lean. Orchestrate. Measure.* — one line per word.
-- **MCP**: toggle *Without MCP / With MCP*. “3 agents × 5 systems = 15 custom integrations; with MCP, 8 standard connections.”
-- **A2A**: point at the sample message. “One sentence and the data. No essays.”
+- **Open at the agent layer**: toggle *Open at the tool / Open at the agent*. “Opened at the tool, any AI must learn 9 tools, sequence 10 calls and read ≈2,000 tokens of definitions and raw results — that is how brute force starts. Opened at the agent, you state one goal and 4 governed agents answer in ≈236 tokens. MCP is still there — inside each agent.”
+- **Hybrid team**: point at the sample message and the people paragraph. “Agents exchange one sentence and the data. People keep collaborating with people — and they approve."
 - **Lean**: “11,825 raw records become 60 — in milliseconds, with no AI at all.”
   Optional (+2 min): click a step in the pipeline card, or scroll to **Inside the lean pipeline**, and walk the six steps with the *Next* button. Best three for a non-expert audience: **Normalize** (85.6 °F → 29.78 °C; heat computed with flow × density × specific heat × ΔT), **Aggregate** (16 readings → one 15-minute value, 97 windows → one p95), **Rank** (explicit rules with scores; 0.55 threshold). In the live demo, clicking a step in the Lean context pipeline opens the same worked example.
 - **Measure**: “Every token, call and euro is counted per agent.”
@@ -23,17 +23,21 @@ Live demo. Read the request: *Can Loop A take a new 120 kW AI rack on Thursday?*
 
 Start. Pause after the raw total: “≈760k tokens if we sent it all to a model.” Resume through the six stages; the gauge fills with the **measured** p95 (869 kW) and turns red: 13 kW short. “That number was computed from CDU flow and temperature — no model involved.” Point at **99.6 % context reduction**.
 
-## 5:30–9:00 · Orchestrate (MCP blue, A2A violet)
+## 5:30–9:00 · Orchestrate (people amber, A2A violet, MCP blue)
+
+- Top row of the canvas: three **people**. The Program Owner assigns the goal; later the Cluster Ops Lead and the Facility Manager coordinate and approve (amber). The dotted line separates the open layer (A2A) from what is inside each agent (MCP).
 
 - Discovery: agents ask each system “what can you do?” (`tools/list`).
 - Deployment: three MCP calls — spec, loop, busway. Space and power OK. It **delegates** cooling (violet).
 - Cooling: `getLoopHeatLoad`, then `calculateCoolingHeadroom` — “the arithmetic runs in a tool, not in the model.” Result: short. Two A2A messages: objection to the orchestrator, request to Workload.
 - Workload: jobs, rack power, idle capacity → proposes moving `ft-sweep-17`. Critical jobs untouched.
+- Before the job moves, Workload asks the **Cluster Ops Lead** for approval; the Lead checks with the **Facility Manager**, then approves.
 - Cooling **re-checks with the same tool**: +25.6 kW. The gauge turns green.
+- **Loop engineering** panel (below the canvas): “Iteration 1 failed the acceptance test by 13.1 kW, so the loop corrected; iteration 2 passed, so it stopped — 2 of 3 budgeted iterations, with a hand-over to the Facility Manager if it had not converged.” Working definition, to be aligned with R&D; next step: graph engineering.
 
 ## 9:00–10:00 · Decision
 
-Recommendation panel: conditional approval, the disagreement and its resolution, burn-in 01:00–07:00 for lower carbon.
+Recommendation panel: conditional approval, **decided by people** (Cluster Ops Lead, Facility Manager, Program Owner sign-off — 50 min of human time), the disagreement and its resolution, burn-in 01:00–07:00 for lower carbon.
 
 ## 10:00–11:30 · Measure
 

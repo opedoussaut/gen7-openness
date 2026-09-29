@@ -5,8 +5,10 @@ import { esc } from './format.js';
 export const GLOSSARY = [
   { term: 'p95', match: /\bp95\b/, def: 'The “normal peak”: 95 % of the measurements are at or below this value. It ignores rare spikes but captures the busy periods — a common basis for capacity planning.' },
   { term: 'percentile', match: /\bpercentiles?\b/i, def: 'A value below which a given share of measurements fall. The 95th percentile (p95) is the level 95 % of measurements stay under.' },
-  { term: 'MCP', match: /\bMCP\b/, def: 'Model Context Protocol: a standard way for an AI agent to discover and use tools and data in other systems — like a universal socket.' },
-  { term: 'A2A', match: /\bA2A\b/, def: 'Agent-to-Agent protocol: a standard way for specialised AI agents to send each other tasks and results.' },
+  { term: 'MCP', match: /\bMCP\b/, def: 'Model Context Protocol: how an agent reaches the tools and data of its own systems — like a universal socket. In GEN7 it sits inside each agent, not at the open interface.' },
+  { term: 'A2A', match: /\bA2A\b/, def: 'Agent-to-Agent protocol: the open layer where people and specialised agents exchange goals, tasks and verified results.' },
+  { term: 'loop engineering', match: /\bloop engineering\b/i, def: 'Designing a long-running agent job as an explicit loop: a goal, an acceptance test the agents cannot talk their way past, a correction step, a budget and a hand-over to a person.' },
+  { term: 'hybrid team', match: /\bhybrid team\b/i, def: 'A team of real people and virtual agents working together: agents prepare and verify evidence, people coordinate, approve and decide.' },
   { term: 'token', match: /\btokens?\b/i, def: 'The unit AI providers count and bill: about ¾ of a word. Reading and writing text both consume tokens.' },
   { term: 'cached', match: /\bcached\b/i, def: 'Text the model has already seen (its standing instructions) re-read at a large discount — about 90 % cheaper here.' },
   { term: 'model call', match: /\bmodel calls?\b/i, def: 'One request sent to an AI model: it reads some text and writes an answer.' },

@@ -7,9 +7,9 @@ export const RUN_STATES = Object.freeze(['IDLE', 'INGESTING', 'GROOMING', 'ORCHE
 
 /** The conceptual spine shown across the experience. */
 export const PILLARS = Object.freeze([
-  { id: 'open', word: 'OPEN', line: 'Standard access to tools (MCP) and to other agents (A2A).' },
+  { id: 'open', word: 'OPEN', line: 'Open at the agent layer: people and agents work with governed domain agents (A2A). Tools stay inside each agent (MCP).' },
   { id: 'lean', word: 'LEAN', line: 'Deterministic grooming before any AI reasoning.' },
-  { id: 'orchestrate', word: 'ORCHESTRATE', line: 'Specialised agents, bounded structured messages.' },
+  { id: 'orchestrate', word: 'ORCHESTRATE', line: 'Hybrid teams: several people and specialised agents, in an engineered loop.' },
   { id: 'measure', word: 'MEASURE', line: 'Every token, call and euro accounted for, then compared with value.' }
 ]);
 

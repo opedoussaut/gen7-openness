@@ -3,8 +3,8 @@ import { icon } from './icons.js';
 import { esc, $, int, eur, bytes, ms, pct, clock } from './format.js';
 import { inspectEvent } from './demo.js';
 
-const KIND = { incident: ['var(--bad)', 'Incident'], ingest: ['#8aa0b2', 'Data'], groom: ['var(--lean)', 'Grooming'], discover: ['var(--mcp-2)', 'Discovery'], model: ['var(--model)', 'Model'], mcp: ['var(--mcp)', 'MCP'], a2a: ['var(--a2a)', 'A2A'], decision: ['var(--ok)', 'Decision'] };
-const FILTERS = [['all', 'All'], ['mcp', 'MCP'], ['a2a', 'A2A'], ['model', 'Model'], ['data', 'Data']];
+const KIND = { incident: ['var(--bad)', 'Incident'], ingest: ['#8aa0b2', 'Data'], groom: ['var(--lean)', 'Grooming'], discover: ['var(--mcp-2)', 'Discovery'], model: ['var(--model)', 'Model'], mcp: ['var(--mcp)', 'MCP'], a2a: ['var(--a2a)', 'A2A'], human: ['var(--human)', 'People'], decision: ['var(--ok)', 'Decision'] };
+const FILTERS = [['all', 'All'], ['mcp', 'MCP'], ['a2a', 'A2A'], ['human', 'People'], ['model', 'Model'], ['data', 'Data']];
 const match = (f, k) => f === 'all' || f === k || (f === 'data' && ['ingest', 'groom', 'discover', 'incident'].includes(k)) || (f === 'model' && k === 'decision');
 
 export function mountTechnical(el, app) {

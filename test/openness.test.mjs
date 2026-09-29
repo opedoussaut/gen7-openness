@@ -92,3 +92,24 @@ test('grooming explanations are derived from the run and agree with the pipeline
   assert.ok(Math.abs(w.perCdu.reduce((a, p) => a + p.meanKw, 0) - w.heatKw) <= 0.11, 'window heat = sum of CDU means');
   assert.equal(ex.rank.table.reduce((a, t) => a + t.kept, 0), ex.counts.rank);
 });
+
+test('GEN7: people work with agents at the open layer and take the decision', async () => {
+  const { run, metrics } = await runOnce();
+  assert.equal(metrics.totals.humansInvolved, sc.humans.length);
+  assert.ok(run.humanActions.some(h => h.type === 'coordinate' && sc.humans.some(x => x.id === h.to)), 'people coordinate with people');
+  const approvals = run.humanActions.filter(h => h.type === 'approve' || h.type === 'sign-off');
+  assert.ok(approvals.length >= 2, 'people approve');
+  const decision = run.events.findIndex(e => e.kind === 'decision'), lastHuman = run.events.findLastIndex(e => e.kind === 'human');
+  assert.ok(lastHuman < decision && run.events[lastHuman].title, 'sign-off precedes the decision');
+  // People never call tools: MCP stays inside the agents.
+  assert.ok(run.mcpCalls.every(c => sc.agents.some(a => a.id === c.agent)));
+});
+
+test('GEN7: the loop stops when the deterministic acceptance test passes', async () => {
+  const { run } = await runOnce();
+  const checks = run.mcpCalls.filter(c => c.tool === sc.loop.verifyTool).map(c => c.data);
+  assert.ok(checks.length <= sc.loop.maxIterations);
+  assert.equal(checks.at(-1).criterionMet, true);
+  assert.ok(checks.slice(0, -1).every(c => !c.criterionMet), 'no iteration after acceptance');
+  assert.deepEqual(checks.map(c => c.headroomKw), [-13.1, 25.6]);
+});

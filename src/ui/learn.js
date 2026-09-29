@@ -1,4 +1,4 @@
-// LEARN — MCP + A2A for everyone, then the complete architecture.
+// LEARN — openness at the agent layer (A2A, with MCP inside each agent), hybrid teams, then the complete architecture.
 import { icon } from './icons.js';
 import { explainerMarkup } from './grooming.js';
 import { explainGrooming } from '../scenarios/ai-factory/explain.js';
@@ -8,17 +8,22 @@ import { PILLARS } from '../domain/models.js';
 
 const PILLAR_COLOR = { open: 'var(--mcp)', lean: 'var(--lean)', orchestrate: 'var(--a2a)', measure: 'var(--ok)' };
 
-function integrationSvg(servers, agents) {
-  const W = 640, ax = [140, 320, 500], sx = servers.map((_, i) => 70 + i * 125);
-  const agentBoxes = agents.map((a, i) => `<g class="agt"><rect x="${ax[i] - 68}" y="16" width="136" height="44" rx="12"/><text x="${ax[i]}" y="43" text-anchor="middle">${esc(a.name)}</text></g>`).join('');
-  const sysBoxes = servers.map((s, i) => `<g class="sys"><rect x="${sx[i] - 56}" y="236" width="112" height="44" rx="12"/><text x="${sx[i]}" y="263" text-anchor="middle">${esc(s.short)}</text></g>`).join('');
-  const custom = ax.flatMap(a => sx.map(s => `<path d="M${a} 60 C${a} 150 ${s} 146 ${s} 236"/>`)).join('');
-  const standard = ax.map(a => `<path d="M${a} 60 V138"/>`).join('') + sx.map(s => `<path d="M${s} 162 V236"/>`).join('');
-  return `<svg class="integration-svg" id="integration-svg" data-mode="without" viewBox="0 0 ${W} 296" role="img" aria-label="Agents connected to industrial systems, with and without MCP">
-    <g class="custom">${custom}</g>
-    <g class="standard">${standard}</g>
-    <g class="mcp-bus"><rect x="30" y="138" width="580" height="24" rx="12"/><text x="320" y="154" text-anchor="middle">MCP · ONE STANDARD INTERFACE</text></g>
-    ${agentBoxes}${sysBoxes}
+/** Where to open the system: at the tool level (every caller drives raw tools) or at the agent level (callers talk to governed domain agents). */
+function opennessSvg(servers, agents) {
+  const W = 640, cx = 320, sx = servers.map((_, i) => W / servers.length * (i + 0.5)), ax = agents.map((_, i) => W / agents.length * (i + 0.5));
+  const SY = 238, AY = 118;
+  const sysBoxes = servers.map((s, i) => `<g class="sys"><rect x="${sx[i] - 56}" y="${SY}" width="112" height="44" rx="12"/><text x="${sx[i]}" y="${SY + 20}" text-anchor="middle">${esc(s.short)}</text><text class="sub" x="${sx[i]}" y="${SY + 35}" text-anchor="middle">${s.tools.length} tool${s.tools.length > 1 ? 's' : ''}</text></g>`).join('');
+  const toolLines = servers.flatMap((s, i) => s.tools.map((_, k) => { const x = sx[i] + (k - (s.tools.length - 1) / 2) * 18; return `<path d="M${cx} 56 C${cx} 150 ${x} 150 ${x} ${SY}"/>`; })).join('');
+  const agentBoxes = agents.map((a, i) => `<g class="agt"><rect x="${ax[i] - 70}" y="${AY}" width="140" height="40" rx="12"/><text x="${ax[i]}" y="${AY + 25}" text-anchor="middle">${esc(a.name.replace(' Agent', ''))}</text></g>`).join('');
+  const a2aLines = ax.map(x => `<path d="M${cx} 56 C${cx} 90 ${x} 86 ${x} ${AY}"/>`).join('');
+  const mcpLines = agents.flatMap((a, i) => (a.servers ?? []).map(sid => { const j = servers.findIndex(s => s.id === sid); return `<path d="M${ax[i]} ${AY + 40} C${ax[i]} ${AY + 80} ${sx[j]} ${SY - 40} ${sx[j]} ${SY}"/>`; })).join('');
+  return `<svg class="openness-svg" id="openness-svg" data-mode="tool" viewBox="0 0 ${W} 296" role="img" aria-label="Openness at the tool level versus openness at the agent level">
+    <g class="lvl-agent"><rect class="band a2a" x="0" y="64" width="${W}" height="104" rx="12"/><text class="band-t a2a" x="12" y="80">OPEN INTERFACE · A2A</text>
+      <rect class="band mcp" x="0" y="172" width="${W}" height="120" rx="12"/><text class="band-t mcp" x="12" y="188">BEHIND THE AGENTS · MCP</text>
+      <g class="a2a-l">${a2aLines}</g><g class="mcp-l">${mcpLines}</g>${agentBoxes}</g>
+    <g class="lvl-tool"><g class="tool-l">${toolLines}</g><text class="warn-t" x="${cx}" y="${AY + 26}" text-anchor="middle">the caller must learn every tool, choose the order, read every raw result</text></g>
+    ${sysBoxes}
+    <g class="caller"><rect x="${cx - 110}" y="12" width="220" height="44" rx="22"/><text x="${cx}" y="39" text-anchor="middle">Any AI client · or a person</text></g>
   </svg>`;
 }
 
@@ -31,15 +36,21 @@ export function mountLearn(el, app) {
   const ref = app.reference.run, refM = computeMetrics(ref, scenario);
   const gx = explainGrooming(app.reference.dataset);
   const sample = ref.a2aMessages.find(m => m.from === 'cooling' && m.to === 'workload') ?? ref.a2aMessages[0];
-  const diagramAgents = specialists.slice(0, 3);
-  const nA = diagramAgents.length, nS = scenario.servers.length;
-  const toolExamples = scenario.servers.map(s => ({ s, t: s.tools[0] }));
+  const nS = scenario.servers.length;
+  // Tool-level vs agent-level openness, measured on the reference run.
+  const open = {
+    tools: scenario.servers.reduce((n, s) => n + s.tools.length, 0),
+    calls: ref.mcpCalls.length,
+    toolTokens: Math.round((ref.discoveries.reduce((n, d) => n + JSON.stringify(d.response).length, 0) + ref.mcpCalls.reduce((n, c) => n + c.payloadBytes, 0)) / 4),
+    agents: specialists.length,
+    answerTokens: ref.a2aMessages.filter(m => m.to === 'orchestrator').reduce((n, m) => n + m.tokens, 0)
+  };
   const arch = [
     { k: 'DATA', ic: 'database', c: '#7e95a8', p: 'Heterogeneous facility data: CDU telemetry, PDUs, GPUs, scheduler, DCIM, grid.', page: 'demo' },
     { k: 'GROOM', ic: 'funnel', c: 'var(--lean)', p: 'Deterministic filter, normalise, deduplicate, correlate, aggregate, rank.', page: 'demo' },
-    { k: 'SPECIALISED AGENTS', ic: 'plug', c: 'var(--mcp)', p: 'Narrow responsibilities. Each reaches its systems through MCP.', page: 'demo' },
-    { k: 'A2A ORCHESTRATION', ic: 'team', c: 'var(--a2a)', p: 'Bounded, structured messages between specialists.', page: 'demo' },
-    { k: 'ACTION / DECISION', ic: 'target', c: 'var(--ok)', p: 'An evidence-based recommendation, disagreements resolved.', page: 'demo' },
+    { k: 'SPECIALISED AGENTS', ic: 'plug', c: 'var(--mcp)', p: 'Governed domain agents. Each reaches its own systems through MCP, behind the agent.', page: 'demo' },
+    { k: 'HYBRID TEAM · LOOP', ic: 'team', c: 'var(--a2a)', p: 'People and agents at the open A2A layer, in an engineered loop that runs until its acceptance test passes.', page: 'demo' },
+    { k: 'ACTION / DECISION', ic: 'target', c: 'var(--ok)', p: 'People approve and sign off, on evidence prepared and verified by agents.', page: 'demo' },
     { k: 'TELEMETRY', ic: 'chart', c: 'var(--model)', p: 'Every token, call, millisecond and euro recorded.', page: 'technical' },
     { k: 'VALUE vs COST', ic: 'coins', c: '#0a5f9a', p: 'AI execution cost compared with the estimated industrial value.', page: 'economics' }
   ];
@@ -49,24 +60,23 @@ export function mountLearn(el, app) {
   <div class="hero">
     <span class="eyebrow"><i class="pip"></i>GEN7 Openness · industrial AI, made observable</span>
     <h1 class="display">Open. Lean. Orchestrate. <span>Measure.</span></h1>
-    <p class="lede">See AI agents discover industrial tools, work together, spend tokens — and whether it was worth it. Read the ideas here in a few minutes, then watch them run on a simulated AI-factory decision.</p>
+    <p class="lede">See people and AI agents work as one team: agents open at the agent layer, a lean evidence pack, an engineered loop, every euro measured — and whether it was worth it. Read the ideas here in a few minutes, then watch them run on a simulated AI-factory decision.</p>
     <div class="pillars">${PILLARS.map((p, i) => `<div class="pillar" style="--c:${PILLAR_COLOR[p.id]}"><i>0${i + 1}</i><b>${p.word}</b><p>${esc(p.line)}</p></div>`).join('')}</div>
   </div>
 
-  <section class="learn-section" aria-labelledby="mcp-title">
+  <section class="learn-section" aria-labelledby="open-title">
     <div class="learn-copy">
-      <span class="tag mcp">${icon('plug', 14)} MCP · Model Context Protocol</span>
-      <h2 class="h2" id="mcp-title">MCP gives an AI agent a standard way to <span>discover and use tools and information.</span></h2>
-      <p>Think of a universal socket. Each industrial system describes what it can do — its tools, their inputs, their outputs — in the same way. An agent asks “what can you do?”, then calls the tool it needs.</p>
-      <p>Without MCP, every agent-to-system connection tends to be custom integration work. With MCP, a system is connected once and every agent can use it.</p>
-      <p class="fine">In the live demo, ${nS} systems expose ${scenario.servers.reduce((n, s) => n + s.tools.length, 0)} tools. Agents discover them with <span class="mono">tools/list</span> and call them with <span class="mono">tools/call</span>.</p>
+      <span class="tag a2a">${icon('team', 14)} OPEN · at the agent layer</span>
+      <h2 class="h2" id="open-title">Open the system where the knowledge is: <span>at the agent, not at the tool.</span></h2>
+      <p>Opening every raw tool to any AI sounds open, but it pushes the domain work onto the caller. A generic assistant must learn each tool, guess the order, read large raw results and retry — the recipe for brute-force attempts.</p>
+      <p>GEN7 opens one level higher. People and other agents talk to <b>governed domain agents</b> through A2A: they state a goal and get a bounded, verified answer. Each agent keeps its own tools (MCP), rules and units behind it.</p>
+      <p class="fine">MCP stays essential — it is how each agent reaches its systems. It is plumbing inside the agent, not the open interface. Figures below come from the reference run.</p>
     </div>
     <div class="visual">
-      <div class="visual-top"><span class="eyebrow">${nA} agents · ${nS} systems</span>
-        <div class="seg" role="group" aria-label="Integration model"><button type="button" data-mode="without" aria-pressed="true">Without MCP</button><button type="button" data-mode="with" aria-pressed="false">With MCP</button></div></div>
-      ${integrationSvg(scenario.servers, diagramAgents)}
-      <div class="integration-count"><span><b id="int-count">${nA * nS}</b><span id="int-label">custom integrations (${nA} × ${nS})</span></span></div>
-      <div class="tool-list">${toolExamples.map(({ s, t }) => `<div class="tool-chip"><span class="ic">${icon(s.icon, 16)}</span><b>${esc(s.name)}</b><code>${esc(t.name)}</code></div>`).join('')}</div>
+      <div class="visual-top"><span class="eyebrow">Same ${nS} systems · two ways to open them</span>
+        <div class="seg" role="group" aria-label="Openness level"><button type="button" data-mode="tool" aria-pressed="true">Open at the tool</button><button type="button" data-mode="agent" aria-pressed="false">Open at the agent</button></div></div>
+      ${opennessSvg(scenario.servers, specialists)}
+      <div class="open-compare" id="open-compare"></div>
     </div>
   </section>
 
@@ -78,15 +88,16 @@ export function mountLearn(el, app) {
     </div>
     <div class="learn-copy">
       <span class="tag a2a">${icon('team', 14)} A2A · Agent-to-Agent</span>
-      <h2 class="h2" id="a2a-title">A2A lets specialised AI agents <span>work together.</span></h2>
+      <h2 class="h2" id="a2a-title">A2A lets people and specialised agents <span>work as one hybrid team.</span></h2>
       <p>Instead of one all-knowing assistant, several specialists each own a narrow responsibility — ${specialists.map(a => esc(a.name.replace(' Agent', '').toLowerCase())).join(', ')} — and an orchestrator coordinates them.</p>
       <p>They exchange short, structured messages: one sentence and the data that supports it. No essays. Each specialist keeps its own tools and expertise.</p>
+      <p>Collaboration between people does not stop. In the demo, a Program Owner, a Cluster Ops Lead and a Facility Manager assign the goal, coordinate with each other, and approve the agents’ proposals — the real team and the virtual team, side by side.</p>
     </div>
   </section>
 
   <div class="duo">
-    <div class="duo-card mcp">${glyphMcp}<div><h3><em>MCP</em> connects an agent<br>to capabilities.</h3><p>Agent ↔ tools and data. “Read this measurement. Run this check.”</p></div></div>
-    <div class="duo-card a2a">${glyphA2a}<div><h3><em>A2A</em> connects agents<br>to each other.</h3><p>Agent ↔ agent. “Can you assess this? Here is what I found.”</p></div></div>
+    <div class="duo-card mcp">${glyphMcp}<div><h3><em>MCP</em> works inside an agent:<br>agent ↔ its own tools.</h3><p>Plumbing, governed by the agent’s owner. “Read this measurement. Run this check.”</p></div></div>
+    <div class="duo-card a2a">${glyphA2a}<div><h3><em>A2A</em> is the open layer:<br>people and agents together.</h3><p>Goal in, verified answer out. “Can you assess this? Here is what I found.”</p></div></div>
   </div>
 
   <section class="learn-section" aria-labelledby="lean-title">
@@ -142,18 +153,21 @@ export function mountLearn(el, app) {
   </section>
 
   <div class="cta-band">
-    <div><div class="cta-spine">OPEN<span>·</span>LEAN<span>·</span>ORCHESTRATE<span>·</span>MEASURE</div><p>A new 120 kW AI rack. One cooling loop. Watch five systems and four specialists decide — and what it cost.</p></div>
+    <div><div class="cta-spine">OPEN<span>·</span>LEAN<span>·</span>ORCHESTRATE<span>·</span>MEASURE</div><p>A new 120 kW AI rack. One cooling loop. Watch three people and four specialist agents decide, in an engineered loop — and what it cost.</p></div>
     <button class="btn" id="learn-cta">Run the live demo ${icon('arrow', 16)}</button>
   </div>`;
 
-  const svg = $('#integration-svg', el);
-  el.querySelectorAll('.seg [data-mode]').forEach(b => b.addEventListener('click', () => {
-    const mode = b.dataset.mode;
+  const svg = $('#openness-svg', el);
+  const setOpen = mode => {
     svg.dataset.mode = mode;
-    el.querySelectorAll('.seg [data-mode]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
-    $('#int-count', el).textContent = mode === 'with' ? nA + nS : nA * nS;
-    $('#int-label', el).textContent = mode === 'with' ? `standard connections (${nA} + ${nS})` : `custom integrations (${nA} × ${nS})`;
-  }));
+    el.querySelectorAll('.seg [data-mode]').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.mode === mode)));
+    const row = (v, l) => `<div><b>${v}</b><span>${l}</span></div>`;
+    $('#open-compare', el).innerHTML = mode === 'tool'
+      ? row(open.tools, 'raw tools the caller must understand') + row(open.calls, 'tool calls it must plan and sequence itself') + row(`≈${int(open.toolTokens)}`, 'tokens of tool definitions and raw results to read') + `<p>Every business rule — units, the +20 % allowance, which job may move — must be rediscovered by the caller, each time.</p>`
+      : row(1, 'goal stated, in business terms') + row(open.agents, 'governed domain agents answer') + row(`≈${int(open.answerTokens)}`, `tokens of bounded answers to read — ${Math.round(open.toolTokens / Math.max(open.answerTokens, 1))}× less`) + `<p>Rules, units and tool sequencing live inside each agent, where the domain owner governs them. People approve at the same layer.</p>`;
+  };
+  el.querySelectorAll('.seg [data-mode]').forEach(b => b.addEventListener('click', () => setOpen(b.dataset.mode)));
+  setOpen('tool');
   el.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => app.go(b.dataset.go)));
   $('#learn-cta', el).addEventListener('click', () => app.go('demo'));
   const host = el.querySelector('#gx-host');

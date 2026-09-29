@@ -44,6 +44,9 @@ export function computeMetrics(run, scenario) {
     a2aTokens: sum(run.a2aMessages, m => m.tokens), mcpBytes: sum(run.mcpCalls, c => c.payloadBytes),
     latencyMs: run.simTimeMs, groomCpuMs
   };
+  t.humanInteractions = run.humanActions?.length ?? 0;
+  t.humanMinutes = sum(run.humanActions ?? [], h => h.minutes);
+  t.humansInvolved = new Set((run.humanActions ?? []).flatMap(h => [h.from, h.to]).filter(id => (scenario.humans ?? []).some(p => p.id === id))).size;
   t.totalTokens = t.cachedTokens + t.inputTokens + t.outputTokens;
   t.modelCost = sum(run.modelCalls, c => modelCost(c, models));
   t.infraCost = sum(infraLines, l => l.cost);

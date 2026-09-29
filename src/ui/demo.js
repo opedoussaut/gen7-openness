@@ -9,7 +9,7 @@ const STATES = [
   { id: 'INGESTING', label: 'Ingest', c: '#7e95a8' }, { id: 'GROOMING', label: 'Groom', c: 'var(--lean)' }, { id: 'ORCHESTRATING', label: 'Orchestrate', c: 'var(--a2a)' },
   { id: 'ANALYZING', label: 'Analyze', c: 'var(--mcp)' }, { id: 'DECIDING', label: 'Decide', c: 'var(--model)' }, { id: 'COMPLETED', label: 'Measure', c: 'var(--ok)' }
 ];
-const KIND_TAG = { mcp: ['mcp', 'MCP'], a2a: ['a2a', 'A2A'], model: ['model', 'MODEL'], groom: ['lean', 'LEAN'], ingest: ['neutral', 'DATA'], discover: ['mcp', 'MCP'], incident: ['bad', 'INCIDENT'], decision: ['ok', 'DECISION'] };
+const KIND_TAG = { human: ['human', 'PEOPLE'], mcp: ['mcp', 'MCP'], a2a: ['a2a', 'A2A'], model: ['model', 'MODEL'], groom: ['lean', 'LEAN'], ingest: ['neutral', 'DATA'], discover: ['mcp', 'MCP'], incident: ['bad', 'INCIDENT'], decision: ['ok', 'DECISION'] };
 
 // ---------- Canvas geometry (viewBox 800 × 450) ----------
 const AG_Y = 196, AG_H = 70, AG_W = 164, SV_Y = 382, SV_H = 54;
@@ -37,14 +37,36 @@ const SV_W = 138;
 
 function nodeIcon(name, x, y, size = 18) { return `<g transform="translate(${x} ${y})">${icon(name, size, 1.7)}</g>`; }
 
+// People row (global coordinates; agents and tools are drawn 86 px lower).
+const OY = 100, HUMAN_X = { owner: 400, clusterops: 140, facility: 660 }, HU_Y = 26, HU_W = 164, HU_H = 50;
+const humanEdges = [['owner', 'orchestrator'], ['clusterops', 'workload'], ['facility', 'orchestrator'], ['clusterops', 'facility']];
+const hid = (a, b) => `e-h-${[a, b].sort().join('--')}`;
+function humanPath(a, b) {
+  const x = HUMAN_X[a], bottom = HU_Y + HU_H;
+  if (b === 'orchestrator') return a === 'owner' ? `M${x} ${bottom} L${x} ${OY + 14}` : `M${x} ${bottom} C${x} ${OY + 30} ${x - 60} ${OY + 42} 540 ${OY + 42}`;
+  if (b === 'workload') return `M${x} ${bottom} C${x} ${OY + 110} ${AGENT_X.workload - 40} ${OY + 130} ${AGENT_X.workload} ${AG_Y + OY}`;
+  // person ↔ person: an arc under the people row, so it does not cross the Program Owner
+  return `M${x + 30} ${bottom} C${x + 120} ${bottom + 26} ${HUMAN_X[b] - 120} ${bottom + 26} ${HUMAN_X[b] - 30} ${bottom}`;
+}
+function humansSvg(sc) {
+  if (!sc.humans?.length) return '';
+  const node = h => { const x = HUMAN_X[h.id] - HU_W / 2; return `<g class="node human" id="n-${h.id}"><rect class="box" x="${x}" y="${HU_Y}" width="${HU_W}" height="${HU_H}" rx="25"/><circle class="ic-bg" cx="${x + 25}" cy="${HU_Y + 25}" r="16"/><g class="ic">${nodeIcon('person', x + 16, HU_Y + 16)}</g><text class="name" x="${x + 48}" y="${HU_Y + 22}" style="font-size:12px">${esc(h.name)}</text><text class="role" x="${x + 48}" y="${HU_Y + 37}">${esc(h.title)}</text></g>`; };
+  return `<rect class="band-human" x="0" y="0" width="800" height="${HU_Y + HU_H + 12}" rx="14"/><text class="band-label human" x="14" y="17">PEOPLE · ASSIGN · APPROVE · DECIDE</text>
+    <g id="h-edges">${humanEdges.map(([a, b]) => `<path class="edge human" id="${hid(a, b)}" d="${humanPath(a, b)}"/>`).join('')}</g>
+    ${sc.humans.map(node).join('')}`;
+}
+
 function canvasSvg(sc) {
   const agents = sc.agents.filter(a => a.id !== 'orchestrator');
   const orch = sc.agents.find(a => a.id === 'orchestrator');
   const agentNode = a => { const x = AGENT_X[a.id] - AG_W / 2; return `<g class="node agent" id="n-${a.id}" data-agent="${a.id}"><rect class="box" x="${x}" y="${AG_Y}" width="${AG_W}" height="${AG_H}" rx="14"/><rect class="ic-bg" x="${x + 12}" y="${AG_Y + 13}" width="30" height="30" rx="9"/><g class="ic">${nodeIcon(a.icon, x + 18, AG_Y + 19)}</g><text class="name" x="${x + 52}" y="${AG_Y + 27}">${esc(a.name.replace(' Agent', ''))}</text><text class="role" x="${x + 52}" y="${AG_Y + 42}">${esc(a.tagline)}</text><text class="meta" x="${x + 12}" y="${AG_Y + 60}" id="m-${a.id}">idle</text><circle class="think" cx="${x + AG_W - 13}" cy="${AG_Y + 13}" r="4"/></g>`; };
   const serverNode = s => { const x = SERVER_X[s.id] - SV_W / 2; return `<g class="node server" id="n-${s.id}"><rect class="box" x="${x}" y="${SV_Y}" width="${SV_W}" height="${SV_H}" rx="12"/><rect class="ic-bg" x="${x + 10}" y="${SV_Y + 12}" width="28" height="28" rx="8"/><g class="ic">${nodeIcon(s.icon, x + 15, SV_Y + 17)}</g><text class="name" x="${x + 46}" y="${SV_Y + 24}" style="font-size:12px">${esc(s.short)}</text><text class="role" x="${x + 46}" y="${SV_Y + 38}">${esc(s.system)}</text><text class="meta" x="${x + 46}" y="${SV_Y + 50}" id="m-${s.id}"></text></g>`; };
-  return `<svg class="orch-svg" viewBox="0 0 800 450" role="img" aria-label="Agents, MCP tool connections and A2A messages">
-    <rect class="band-a2a" x="0" y="84" width="800" height="104" rx="14"/><text class="band-label a2a" x="14" y="101">A2A · AGENT ↔ AGENT</text>
-    <rect class="band-mcp" x="0" y="274" width="800" height="100" rx="14"/><text class="band-label mcp" x="14" y="291">MCP · AGENT ↔ TOOLS &amp; DATA</text>
+  return `<svg class="orch-svg" viewBox="0 0 800 ${450 + OY}" role="img" aria-label="People, agents, tools; A2A messages at the agent layer and MCP calls inside each agent">
+    ${humansSvg(sc)}
+    <g transform="translate(0 ${OY})">
+    <rect class="band-a2a" x="0" y="84" width="800" height="104" rx="14"/><text class="band-label a2a" x="14" y="101">OPEN LAYER · AGENT ↔ AGENT (A2A)</text>
+    <line class="open-boundary" x1="0" x2="800" y1="188" y2="188"/>
+    <rect class="band-mcp" x="0" y="274" width="800" height="100" rx="14"/><text class="band-label mcp" x="14" y="291">INSIDE EACH AGENT · ITS OWN TOOLS (MCP)</text>
     <g id="edges">
       ${agents.map(a => `<path class="edge a2a" id="e-orch--${a.id}" d="${spokePath(a.id)}"/>`).join('')}
       ${PAIRS.map(([a, b]) => `<path class="edge a2a idle-arc" id="e-${pairId(a, b)}" d="${arcPath(a, b)}"/>`).join('')}
@@ -55,6 +77,8 @@ function canvasSvg(sc) {
     ${agents.map(agentNode).join('')}
     ${sc.servers.map(serverNode).join('')}
     <g id="pulses"></g>
+    </g>
+    <g id="h-pulses"></g>
   </svg>`;
 }
 
@@ -118,7 +142,7 @@ export function mountDemo(el, app) {
     <section class="panel canvas-panel" aria-labelledby="orch-title">
       <div class="panel-title"><span class="eyebrow" id="orch-title">${icon('orbit', 14)} Orchestration</span><span class="small muted" id="sim-clock"></span></div>
       <div class="canvas-wrap">${canvasSvg(sc)}</div>
-      <div class="legend"><span><i></i>MCP · agent ↔ tool / data</span><span><i class="a2a"></i>A2A · agent ↔ agent</span><span><i class="model"></i>Model reasoning</span></div>
+      <div class="legend"><span><i class="human"></i>People ↔ agents / people</span><span><i class="a2a"></i>A2A · the open layer, agent ↔ agent</span><span><i></i>MCP · inside an agent, agent ↔ its tools</span><span><i class="model"></i>Model reasoning</span></div>
       <div class="now-card" id="now" aria-live="polite"></div>
     </section>
     <section class="panel" aria-labelledby="tele-title">
@@ -126,6 +150,7 @@ export function mountDemo(el, app) {
       <div id="telemetry"></div>
     </section>
   </div>
+  <div id="loop"></div>
   <div id="recommendation"></div>
   <div id="run-error"></div>
   <section class="panel log" aria-labelledby="log-title"><div class="panel-title"><span class="eyebrow" id="log-title">${icon('message', 14)} Exchange log</span><button class="btn sm ghost" id="to-technical">Full trace in Technical view ${icon('arrow', 14)}</button></div><div class="log-list" id="log"></div></section>`;
@@ -152,6 +177,7 @@ export function mountDemo(el, app) {
     renderCanvas(run, metrics);
     renderNow(run, metrics);
     renderTelemetry(run, metrics);
+    renderLoop(run);
     renderRecommendation(run);
     renderLog(run);
     $('#run-error', el).innerHTML = run.status === 'error' ? `<div class="error-box">${esc(run.error)} — reset and run again.</div>` : '';
@@ -233,8 +259,18 @@ export function mountDemo(el, app) {
     } else if (a?.kind === 'discover') {
       el.querySelectorAll(`.edge.mcp[id$="--${ev.ref.server}"]`).forEach(e => e.classList.add('active'));
     }
-    if (key !== lastActiveKey) { $('#pulses', el).innerHTML = pulse; lastActiveKey = key; }
-    if (!a) $('#pulses', el).innerHTML = '';
+    // People
+    for (const [id, h] of Object.entries(run.humans ?? {})) { const n = $(`#n-${id}`, el); if (!n) continue; n.classList.toggle('active', h.status === 'active' && a?.kind === 'human'); n.classList.toggle('done', h.status === 'done' || (h.status === 'active' && a?.kind !== 'human')); }
+    el.querySelectorAll('#h-edges .edge').forEach(p => p.classList.remove('active', 'used'));
+    const hEdge = x => { const pair = [x.from, x.to]; const k = humanEdges.find(([p, q]) => pair.includes(p) && pair.includes(q)); return k ? hid(...k) : null; };
+    for (const x of run.humanActions ?? []) { const id = hEdge(x); if (id) $(`#${id}`, el)?.classList.add('used'); }
+    let hpulse = '';
+    if (a?.kind === 'human') {
+      const x = run.humanActions.at(-1), id = hEdge(x);
+      if (id) { $(`#${id}`, el)?.classList.add('active'); const k = humanEdges.find(([p, q]) => hid(p, q) === id); hpulse = dot(id, '#c07a1e', k[0] === x.from ? '0;1' : '1;0', 1.4); }
+    }
+    if (key !== lastActiveKey) { $('#pulses', el).innerHTML = pulse; $('#h-pulses', el).innerHTML = hpulse; lastActiveKey = key; }
+    if (!a) { $('#pulses', el).innerHTML = ''; $('#h-pulses', el).innerHTML = ''; }
     const dimAll = run.status === 'idle';
     el.querySelectorAll('.orch-svg .node').forEach(n => n.classList.toggle('dim', dimAll));
   }
@@ -259,6 +295,10 @@ export function mountDemo(el, app) {
     } else if (ev.kind === 'groom') {
       const s = run.grooming.stages.find(x => x.id === ev.ref.stage);
       body = head() + `<div class="now-grid"><div class="full"><small>Operation</small><span>${esc(s.operation)}</span></div><div><small>Records</small><span>${int(s.recordsIn)} → ${int(s.recordsOut)}</span></div><div><small>Size</small><span>${bytes(s.bytesIn)} → ${bytes(s.bytesOut)}</span></div><div><small>Kept</small><span>${pct(s.recordsOut / s.recordsIn)}</span></div><div><small>CPU (measured)</small><span>${s.cpuMs.toFixed(1)} ms</span></div></div>`;
+    } else if (ev.kind === 'human') {
+      const x = run.humanActions.find(h => h.id === ev.ref.human);
+      const TYPE = { assign: 'assigns', 'approval-request': 'asks for approval', coordinate: 'coordinates', approve: 'approves', 'sign-off': 'signs off' };
+      body = head(`<span class="tag human">${esc(TYPE[x.type] ?? x.type)}</span>`) + `<p class="now-message">“${esc(x.text)}”</p><div class="now-grid"><div><small>Between</small><span>${esc(kindOf(sc, x.from))} → ${esc(kindOf(sc, x.to))}</span></div><div><small>Human time</small><span>${x.minutes ? `${x.minutes} min` : 'request'}</span></div><div class="wide"><small>Why a person</small><span>${x.type === 'coordinate' ? 'People keep coordinating with people.' : x.type === 'approval-request' ? 'Agents recommend; accountable people approve.' : 'Accountability stays with people.'}</span></div></div>`;
     } else if (ev.kind === 'decision') {
       body = head() + `<p class="now-message">${esc(run.recommendation?.decision ?? '')}</p><div class="now-grid"><div><small>Simulated time</small><span>${ms(run.simTimeMs)}</span></div><div><small>AI execution cost</small><span>${eur(metrics.totals.totalCost, { precise: true })}</span></div><div class="wide"><small>Next</small><span><button class="btn sm" data-go="economics">Was it worth it? ${icon('arrow', 13)}</button></span></div></div>`;
     } else {
@@ -282,10 +322,53 @@ export function mountDemo(el, app) {
         <div class="kpi a2a"><small>A2A messages</small><b>${t.a2aMessages}</b></div>
         <div class="kpi"><small>Simulated latency</small><b>${ms(t.latencyMs)}</b></div>
         <div class="kpi"><small>Energy (indicative)</small><b>${t.energyWh.toFixed(2)} Wh</b></div>
+        <div class="kpi human"><small>People involved</small><b>${t.humansInvolved}</b></div>
+        <div class="kpi human"><small>Human time</small><b>${t.humanMinutes} min</b></div>
       </div>
       <div class="agent-meter">${metrics.agents.map(a => `<div class="am-row"><b>${esc(a.name)}</b><span>${eur(a.modelCost, { precise: true })}</span><div class="stack"><i class="c" style="width:${a.cachedTokens / maxTok * 100}%"></i><i class="in" style="width:${a.inputTokens / maxTok * 100}%"></i><i class="out" style="width:${a.outputTokens / maxTok * 100}%"></i></div><em>${int(a.inputTokens + a.cachedTokens)} in · ${int(a.outputTokens)} out · ${a.mcpCalls} MCP · ${a.a2aSent} A2A sent</em></div>`).join('')}</div>
       <div class="stack-legend"><span><i style="background:#c9d6e0"></i>cached</span><span><i style="background:var(--mcp-2)"></i>input</span><span><i style="background:var(--a2a-2)"></i>output</span></div>
       <p class="telemetry-foot">Every figure is derived from one run model. Simulated adapters estimate tokens from the actual context (≈4 bytes/token); real adapters would report provider usage.</p>`;
+  }
+
+  function renderLoop(run) {
+    const box = $('#loop', el), L = sc.loop;
+    if (!L) { box.innerHTML = ''; return; }
+    // Split the run into loop iterations: each iteration ends when the agent evaluating the verification tool has reasoned on its result.
+    const iters = [];
+    let cur = null, pendingVerify = null, started = false;
+    for (const e of run.events) {
+      if (e.kind === 'model' || e.kind === 'mcp' || e.kind === 'a2a' || e.kind === 'human') {
+        if (e.kind === 'model') started = true;
+        if (!cur) { if (!started) continue; cur = { calls: [], humans: [], verify: null, closed: false }; iters.push(cur); }
+      }
+      if (!cur) continue;
+      if (e.kind === 'model') { const c = run.modelCalls.find(x => x.id === e.ref.modelCall); cur.calls.push(c); if (pendingVerify && c.agent === pendingVerify.agent) { cur.closed = true; pendingVerify = null; cur = null; } }
+      else if (e.kind === 'mcp') { const c = run.mcpCalls.find(x => x.id === e.ref.mcpCall); if (c.tool === L.verifyTool) { cur.verify = c; pendingVerify = c; } }
+      else if (e.kind === 'human') cur.humans.push(run.humanActions.find(h => h.id === e.ref.human));
+    }
+    // Only keep iterations that reached (or are working towards) a verification; a trailing segment after acceptance is the decision, not the loop.
+    const loopIters = iters.filter((it, i) => it.verify || (i === iters.length - 1 && !iters.some(x => x.verify?.data?.criterionMet)));
+    const accepted = loopIters.find(it => it.verify?.data?.criterionMet && it.closed);
+    const phase = (on, done, lbl, txt) => `<li class="${done ? 'done' : on ? 'on' : ''}"><b>${lbl}</b><span>${txt}</span></li>`;
+    const cards = [];
+    for (let i = 0; i < L.maxIterations; i++) {
+      const it = loopIters[i];
+      if (!it) { cards.push(`<div class="loop-iter idle"><div class="li-head"><span class="li-n">${i + 1}</span><b>Iteration ${i + 1}</b></div><p class="small muted">${accepted ? 'Not needed — the acceptance test already passed.' : run.status === 'idle' ? 'Waiting for the run.' : 'Budgeted, not started.'}</p></div>`); continue; }
+      const v = it.verify?.data, cost = it.calls.reduce((a, c) => a + metricsCost(c, sc), 0), tok = it.calls.reduce((a, c) => a + c.cachedTokens + c.inputTokens + c.outputTokens, 0);
+      const approvals = it.humans.filter(h => h.type === 'approve');
+      const act = i === 0 ? `Measure p95 loop heat${v ? ` · ${v.p95HeatKw} kW` : ''}` : `${v?.releasedKw ? `Release ${v.releasedKw} kW` : 'Apply the correction'}${approvals.length ? ` · approved by ${approvals.map(h => kindOf(sc, h.from)).join(', ')}` : ''}`;
+      const verdict = !v ? '' : v.criterionMet ? `Met → stop` : `Short by ${Math.abs(v.headroomKw)} kW → correct`;
+      cards.push(`<div class="loop-iter ${v ? (v.criterionMet ? 'ok' : 'bad') : 'on'}"><div class="li-head"><span class="li-n">${i + 1}</span><b>Iteration ${i + 1}</b>${v ? `<span class="tag ${v.criterionMet ? 'ok' : 'bad'}">${verdict}</span>` : '<span class="tag neutral">running</span>'}</div>
+        <ol class="li-phases">${phase(true, true, 'Plan', i === 0 ? 'Split the goal across the specialist agents' : 'Find load that can be released')}${phase(true, !!v, 'Act', esc(act))}${phase(!!it.verify, !!v, 'Verify', v ? `<span class="mono">${esc(v.formula)} = ${v.headroomKw > 0 ? '+' : ''}${v.headroomKw} kW</span>` : `${esc(L.verifyTool)}`)}${phase(!!v, it.closed, 'Decide', v ? (v.criterionMet ? 'Acceptance test passed' : 'Loop again with a correction') : '…')}</ol>
+        <div class="li-foot"><span>${it.calls.length} model call${it.calls.length === 1 ? '' : 's'} · ${int(tok)} tok</span><b>${eur(cost, { precise: true })}</b></div></div>`);
+    }
+    const status = accepted ? `<span class="tag ok">${icon('check', 12)} goal reached in ${loopIters.indexOf(accepted) + 1} of ${L.maxIterations} iterations</span>` : run.status === 'idle' ? '<span class="tag neutral">not started</span>' : `<span class="tag a2a">iteration ${Math.max(1, loopIters.length)} of ${L.maxIterations}</span>`;
+    box.innerHTML = `<section class="panel loop-panel" aria-labelledby="loop-title">
+      <div class="panel-title"><span class="eyebrow" id="loop-title">${icon('loop', 14)} Loop engineering · a long-running agent job, made explicit</span>${status}</div>
+      <div class="loop-spec"><div><small>Goal</small><span>${esc(L.goal)}</span></div><div><small>Acceptance test</small><span>${esc(L.acceptance)}</span></div><div><small>Verifier</small><span class="mono">${esc(L.verifyTool)}</span> <span class="muted small">deterministic MCP tool</span></div><div><small>Budget &amp; stop rule</small><span>${esc(L.stopRule)}</span></div></div>
+      <div class="loop-iters">${cards.join('')}</div>
+      <p class="loop-note">The loop is engineered, not improvised: a goal, a test the agents cannot talk their way past, a correction step, a budget and a hand-over to a person. <span class="muted">Working definition — to be aligned with R&amp;D. Next step: graph engineering (several loops composed into a graph).</span></p>
+    </section>`;
   }
 
   function renderRecommendation(run) {
@@ -300,6 +383,7 @@ export function mountDemo(el, app) {
         ${r.items.map(it => `<div class="rec-item"><small>${esc(it.label)}</small><p>${esc(it.text)}</p></div>`).join('')}
         <div class="rec-item"><small>Actions</small><ol>${r.actions.map(x => `<li>${esc(x)}</li>`).join('')}</ol></div>
       </div>
+      ${peopleBlock(sc, run)}
       ${d ? `<div class="disagree"><span class="ic">${icon('alert', 16)}</span><div><b>Disagreement detected · ${esc(d.topic)}</b><div class="pos">${d.positions.map(p => `<span class="chip"><b>${esc(label(sc, p.agent))}</b> ${esc(p.position)}</span>`).join('')}</div><p><b>Resolution:</b> ${esc(d.resolution)}</p></div></div>` : ''}
       <div class="spine"><div class="spine-words"><span style="--c:var(--mcp)">OPEN.</span><span style="--c:var(--lean)">LEAN.</span><span style="--c:var(--a2a)">ORCHESTRATE.</span><span style="--c:var(--ok)">MEASURE.</span></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-go="technical">Inspect the trace</button><button class="btn primary" data-go="economics">Was it worth it? ${icon('arrow', 15)}</button></div></div>
     </section>`;
@@ -318,7 +402,14 @@ export function mountDemo(el, app) {
 }
 
 const metricsCost = (c, sc) => modelCost(c, sc.models);
-const label = (sc, id) => sc.agents.find(a => a.id === id)?.name ?? id;
+const kindOf = (sc, id) => sc.humans?.find(h => h.id === id)?.name ?? label(sc, id);
+function peopleBlock(sc, run) {
+  const acts = (run.humanActions ?? []).filter(h => ['approve', 'sign-off'].includes(h.type));
+  if (!acts.length) return '';
+  const coord = (run.humanActions ?? []).filter(h => h.type === 'coordinate').length;
+  return `<div class="people-block"><span class="ic">${icon('person', 16)}</span><div><b>Decided by people · agents prepared the evidence</b><div class="pos">${acts.map(h => `<span class="chip"><b>${esc(kindOf(sc, h.from))}</b> ${esc(h.text)}</span>`).join('')}</div><p>${coord} person-to-person exchange${coord === 1 ? '' : 's'} · ${(run.humanActions ?? []).reduce((a, h) => a + h.minutes, 0)} min of human time in total.</p></div></div>`;
+}
+const label = (sc, id) => sc.agents.find(a => a.id === id)?.name ?? sc.humans?.find(h => h.id === id)?.name ?? id;
 function dot(pathId, color, keyPoints, dur) {
   const kt = keyPoints.split(';').length === 3 ? '0;0.5;1' : '0;1';
   return `<circle r="4.5" class="pulse" fill="${color}" style="color:${color}"><animateMotion dur="${dur}s" repeatCount="indefinite" keyPoints="${keyPoints}" keyTimes="${kt}" calcMode="linear"><mpath href="#${pathId}"/></animateMotion></circle>`;
@@ -356,6 +447,7 @@ export function inspectEvent(app, run, evId) {
     const d = run.discoveries.find(x => x.server === ev.ref.server);
     return app.inspect('MCP · tools/list', d.name, `${time}<h4>Request</h4>${app.json(d.request)}<h4>Response</h4>${app.json(d.response)}`);
   }
+  if (ev.kind === 'human') { const x = run.humanActions.find(h => h.id === ev.ref.human); return app.inspect('People in the loop', ev.title, `${time}<p>“${esc(x.text)}”</p>${app.json(x)}`); }
   if (ev.kind === 'decision') return app.inspect('Decision', 'Recommendation', `${time}${app.json(run.recommendation)}`);
   return app.inspect('Event', ev.title, `${time}${app.json(ev)}`);
 }

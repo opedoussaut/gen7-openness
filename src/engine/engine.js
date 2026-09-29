@@ -9,7 +9,7 @@ import { createA2AClient, inProcessA2ATransport } from '../adapters/a2a.js';
 import { createScriptedModel } from '../adapters/model.js';
 
 /** Playback dwell per step kind at 1× (milliseconds of presentation time, not simulated time). */
-const DWELL = { incident: 2600, ingest: 420, 'raw-summary': 2400, groom: 1250, discover: 260, model: 1500, a2a: 1350, mcp: 1150, decision: 1600 };
+const DWELL = { incident: 2600, ingest: 420, 'raw-summary': 2400, groom: 1250, discover: 260, model: 1500, a2a: 1350, mcp: 1150, decision: 1600, human: 2200 };
 
 export function createRun(scenario, steps) {
   return {
@@ -24,7 +24,8 @@ export function createRun(scenario, steps) {
     sources: scenario.sources.map(s => ({ ...s, records: 0, bytes: 0, tokens: 0, loaded: false })),
     raw: { records: 0, bytes: 0, tokens: 0, generationMs: 0 },
     grooming: { stages: [], evidence: null, evidenceList: [], links: null, done: false },
-    discoveries: [], mcpCalls: [], a2aMessages: [], modelCalls: [],
+    discoveries: [], mcpCalls: [], a2aMessages: [], modelCalls: [], humanActions: [],
+    humans: Object.fromEntries((scenario.humans ?? []).map(h => [h.id, { status: 'idle' }])),
     agents: Object.fromEntries(scenario.agents.map(a => [a.id, { status: 'idle', outputs: [], inbox: { evidence: [], messages: [] }, outbox: [] }])),
     recommendation: null,
     active: null
@@ -135,6 +136,7 @@ export class DemoEngine {
       if (step.kind === 'decision') {
         this.run.status = 'completed'; this.run.completedAt = new Date().toISOString(); this.run.story = 10; this.run.active = null;
         for (const a of Object.values(this.run.agents)) a.status = 'done';
+        for (const h of Object.values(this.run.humans)) h.status = 'done';
       }
       this.emit();
       if (paced && step.kind !== 'decision') await this.dwell(DWELL[step.kind] ?? 1000, token);
@@ -228,6 +230,19 @@ export class DemoEngine {
         run.agents[step.agent].inbox.evidence.push({ callId: record.id, tool: step.tool, server: step.server, data: call.data });
         return { lane: step.agent, durationMs: call.latencyMs, event: { kind: 'mcp', title: `${label(sc, step.agent)} → ${server.name} · ${step.tool}`, detail: call.summary, ref: { mcpCall: record.id } } };
       }
+      case 'human': {
+        // People in the loop: assign, request approval, coordinate, approve, sign off.
+        // Human time is recorded separately; it does not enter the machine timeline.
+        const text = typeof step.text === 'function' ? step.text(run) : step.text;
+        const action = { id: uid('hum'), from: step.from, to: step.to, type: step.type, text, minutes: step.minutes ?? 0 };
+        run.humanActions.push(action);
+        for (const h of Object.values(run.humans)) if (h.status === 'active') h.status = 'done';
+        for (const id of [step.from, step.to]) if (run.humans[id]) run.humans[id].status = 'active';
+        const agentSide = [step.from, step.to].filter(id => run.agents[id]);
+        this.setAgentStatus(agentSide);
+        if (run.agents[step.to]) run.agents[step.to].inbox.messages.push({ id: action.id, from: step.from, intent: step.type, text, data: { type: step.type } });
+        return { lane: `human:${step.from}`, durationMs: 0, event: { kind: 'human', title: `${label(sc, step.from)} → ${label(sc, step.to)}`, detail: text, ref: { human: action.id } } };
+      }
       case 'decision': {
         run.recommendation = run.agents.orchestrator.outputs.at(-1)?.output ?? null;
         return { lane: 'orchestrator', durationMs: 0, event: { kind: 'decision', title: 'Recommendation generated', detail: run.recommendation?.decision ?? '' } };
@@ -237,6 +252,6 @@ export class DemoEngine {
   }
 }
 
-const label = (sc, id) => sc.agents.find(a => a.id === id)?.name ?? id;
+const label = (sc, id) => sc.agents.find(a => a.id === id)?.name ?? sc.humans?.find(h => h.id === id)?.name ?? id;
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 export { RUN_STATES };

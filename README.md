@@ -4,8 +4,8 @@ An executive-quality, engineer-inspectable demonstrator of four ideas:
 
 **OPEN → LEAN → ORCHESTRATE → MEASURE**
 
-1. **MCP** — agents discover and use tools and data through one standard interface.
-2. **A2A** — specialised agents collaborate through bounded, structured messages.
+1. **Open at the agent layer** — people and other agents work with governed domain agents through **A2A** (goal in, verified answer out). **MCP** stays inside each agent, as the way it reaches its own systems — not the open interface (opening raw tools pushes callers into brute-force attempts).
+2. **Hybrid teams in an engineered loop** — several people (Program Owner, Cluster Ops Lead, Facility Manager) coordinate, approve and sign off alongside specialised agents; the long-running job is an explicit loop with a goal, a deterministic acceptance test, a correction step, a budget and a stop rule (*loop engineering*; graph engineering is the next step).
 3. **Lean AI** — deterministic grooming of plant data *before* any AI reasoning.
 4. **AI economics** — the recorded execution cost of a run, compared with the estimated value it enabled, and a three-step explanation of the brute-force vs lean saving.
 5. **At scale** — a projection of per-decision savings across sites and volumes, and why telemetry matters.

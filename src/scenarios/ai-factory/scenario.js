@@ -46,14 +46,16 @@ export const STORY = [
   'Sending all of it to AI would be wasteful.',
   'We deterministically groom the data.',
   'Specialised agents receive only useful context.',
-  'Agents access systems through MCP.',
-  'Agents collaborate through A2A.',
+  'Inside each agent, its own systems are reached through MCP.',
+  'People and agents collaborate at the agent layer (A2A).',
   'The system reaches an evidence-based recommendation.',
   'Telemetry tells us exactly what AI consumed.',
   'We compare AI cost with generated value.'
 ].map((line, i) => ({ n: i + 1, line }));
 
 const toolData = (run, tool) => run.mcpCalls.filter(c => c.tool === tool).at(-1)?.data;
+const proposal = run => run.agents.workload.outputs.at(-1)?.output.proposal ?? { job: 'the job', toRack: 'Loop B' };
+const burnIn = run => run.agents.sustainability.outputs.at(-1)?.output.window ?? '01:00–07:00';
 const released = run => run.a2aMessages.filter(m => m.from === 'workload').at(-1)?.data.releasedKw ?? 0;
 
 export function buildScript() {
@@ -62,10 +64,11 @@ export function buildScript() {
   const add = (step, same = false) => { if (!same) beat++; steps.push({ beat, ...step }); };
   const I = INCIDENT;
   add({ kind: 'incident', state: 'INGESTING', story: 1, narration: `Request ${I.id}: install ${I.rack} (${I.model}, ${I.itKw} kW) on Loop A, ${I.plannedForLabel}.` });
+  add({ kind: 'human', from: 'owner', to: 'orchestrator', type: 'assign', minutes: 5, state: 'INGESTING', story: 1, text: () => `Can we bring ${I.rack} online on Loop ${I.loop} on ${I.plannedForLabel}? Recommend, with evidence.`, narration: 'A person starts it: the Program Owner hands the question to the orchestrator.' });
   SOURCE_META.forEach((s, i) => add({ kind: 'ingest', source: s.id, state: 'INGESTING', story: 2, narration: `Extracting ${s.label.toLowerCase()} from ${s.system}.` }, i > 0));
   add({ kind: 'raw-summary', state: 'INGESTING', story: 3, narration: 'Sending all of this to a model would cost the most and bury the signal.' });
   STAGES.forEach(st => add({ kind: 'groom', stage: st.id, state: 'GROOMING', story: 4, narration: `${st.label}: ${st.operation}` }));
-  SERVERS.forEach((s, i) => add({ kind: 'discover', server: s.id, state: 'ORCHESTRATING', story: 5, narration: 'Agents discover the tools each system exposes through MCP (tools/list).' }, i > 0));
+  SERVERS.forEach((s, i) => add({ kind: 'discover', server: s.id, state: 'ORCHESTRATING', story: 5, narration: 'Inside each agent: its own tools are discovered through MCP — private to the agent, not the open interface.' }, i > 0));
   add({ kind: 'model', agent: 'orchestrator', purpose: 'plan', state: 'ORCHESTRATING', story: 5, narration: 'The orchestrator decides which specialists this decision needs.' });
   add({ kind: 'a2a', from: 'orchestrator', to: 'deployment', state: 'ORCHESTRATING', story: 7, narration: 'A2A: a bounded task to the Rack Deployment Agent.' });
   add({ kind: 'a2a', from: 'orchestrator', to: 'sustainability', state: 'ORCHESTRATING', story: 7, narration: 'A2A, in parallel: a bounded task to the Sustainability Agent.' }, true);
@@ -79,7 +82,7 @@ export function buildScript() {
   add({ kind: 'a2a', from: 'deployment', to: 'orchestrator', state: 'ANALYZING', story: 7, narration: 'A2A: space and power confirmed to the orchestrator.' }, true);
   add({ kind: 'a2a', from: 'sustainability', to: 'orchestrator', state: 'ANALYZING', story: 7, narration: 'A2A: burn-in window reported.' }, true);
   add({ kind: 'mcp', agent: 'cooling', server: 'bms', tool: 'getLoopHeatLoad', args: () => ({ loopId: I.loop }), state: 'ANALYZING', story: 6, narration: 'MCP: measured Loop A heat — p95 over 24 h, from CDU flow × ΔT.' });
-  add({ kind: 'mcp', agent: 'cooling', server: 'bms', tool: 'calculateCoolingHeadroom', args: () => ({ loopId: I.loop, itKw: I.itKw, allowancePct: I.allowancePct, releasedKw: 0 }), state: 'ANALYZING', story: 6, narration: 'MCP: the arithmetic runs in a deterministic tool, not in the model.' });
+  add({ kind: 'mcp', agent: 'cooling', server: 'bms', tool: 'calculateCoolingHeadroom', args: () => ({ loopId: I.loop, itKw: I.itKw, allowancePct: I.allowancePct, releasedKw: 0 }), state: 'ANALYZING', story: 6, narration: 'Loop, iteration 1 — the arithmetic runs in a deterministic tool, not in the model.' });
   add({ kind: 'model', agent: 'cooling', purpose: 'assess', state: 'ANALYZING', story: 5, narration: 'Cooling: as-is, the loop is short of the planning target.' });
   add({ kind: 'a2a', from: 'cooling', to: 'orchestrator', state: 'ANALYZING', story: 7, narration: 'A2A: Cooling objects — not as-is.' });
   add({ kind: 'a2a', from: 'cooling', to: 'workload', state: 'ANALYZING', story: 7, narration: 'A2A: Cooling asks the Workload Agent to release load on Loop A.' }, true);
@@ -87,18 +90,40 @@ export function buildScript() {
   add({ kind: 'mcp', agent: 'workload', server: 'power', tool: 'getRackPower', args: () => ({ loopId: I.loop }), state: 'ANALYZING', story: 6, narration: 'MCP: measured p95 power of every rack on Loop A.' }, true);
   add({ kind: 'mcp', agent: 'workload', server: 'scheduler', tool: 'findFreeCapacity', args: () => ({ loopId: 'B' }), state: 'ANALYZING', story: 6, narration: 'MCP: idle racks on Loop B.' }, true);
   add({ kind: 'model', agent: 'workload', purpose: 'assess', state: 'ANALYZING', story: 5, narration: 'Workload: the smallest safe change — one low-priority, checkpointable job.' });
-  add({ kind: 'a2a', from: 'workload', to: 'cooling', state: 'ANALYZING', story: 7, narration: 'A2A: Workload proposes a migration to Cooling.' });
-  add({ kind: 'mcp', agent: 'cooling', server: 'bms', tool: 'calculateCoolingHeadroom', args: run => ({ loopId: I.loop, itKw: I.itKw, allowancePct: I.allowancePct, releasedKw: released(run) }), state: 'ANALYZING', story: 6, narration: 'MCP: Cooling re-runs the same deterministic check with the released load.' });
+  add({ kind: 'human', from: 'workload', to: 'clusterops', type: 'approval-request', minutes: 0, state: 'ANALYZING', story: 7, text: run => `Approve checkpointing ${proposal(run).job} and resuming it on ${proposal(run).toRack} before ${I.plannedForLabel}?`, narration: 'Agent → person: moving a job needs the Cluster Ops Lead’s approval.' });
+  add({ kind: 'human', from: 'clusterops', to: 'facility', type: 'coordinate', minutes: 10, state: 'ANALYZING', story: 7, text: run => `I can move ${proposal(run).job} tonight after its next checkpoint. Does the ${burnIn(run)} burn-in window work for Hall 2?`, narration: 'Person ↔ person: the Cluster Ops Lead and the Facility Manager agree on timing.' });
+  add({ kind: 'human', from: 'facility', to: 'clusterops', type: 'coordinate', minutes: 5, state: 'ANALYZING', story: 7, text: () => 'Yes — the Hall 2 crew is on site from 00:30. Go ahead.', narration: 'Person ↔ person: timing agreed.' });
+  add({ kind: 'human', from: 'clusterops', to: 'workload', type: 'approve', minutes: 5, state: 'ANALYZING', story: 7, text: run => `Approved: move ${proposal(run).job} to ${proposal(run).toRack}.`, narration: 'Person → agent: approved. The loop can continue.' });
+  add({ kind: 'a2a', from: 'workload', to: 'cooling', state: 'ANALYZING', story: 7, narration: 'A2A: Workload proposes the approved migration to Cooling.' });
+  add({ kind: 'mcp', agent: 'cooling', server: 'bms', tool: 'calculateCoolingHeadroom', args: run => ({ loopId: I.loop, itKw: I.itKw, allowancePct: I.allowancePct, releasedKw: released(run) }), state: 'ANALYZING', story: 6, narration: 'Loop, iteration 2 — Cooling re-runs the same deterministic check with the released load.' });
   add({ kind: 'model', agent: 'cooling', purpose: 'recheck', state: 'ANALYZING', story: 5, narration: 'Cooling verifies the proposal before agreeing.' });
   add({ kind: 'a2a', from: 'cooling', to: 'orchestrator', state: 'ANALYZING', story: 7, narration: 'A2A: Cooling confirms — target met after the change.' });
   add({ kind: 'model', agent: 'orchestrator', purpose: 'consolidate', state: 'DECIDING', story: 8, narration: 'The orchestrator consolidates evidence and resolves the disagreement.' });
-  add({ kind: 'decision', state: 'COMPLETED', story: 8, narration: 'Evidence-based recommendation ready.' });
+  add({ kind: 'human', from: 'orchestrator', to: 'facility', type: 'approval-request', minutes: 0, state: 'DECIDING', story: 8, text: run => `Recommendation: ${run.agents.orchestrator.outputs.at(-1)?.output.decision ?? ''}. Approve the installation?`, narration: 'Agents recommend. People decide: approval requested from the Facility Manager.' });
+  add({ kind: 'human', from: 'facility', to: 'orchestrator', type: 'approve', minutes: 15, state: 'DECIDING', story: 8, text: run => `Approved — install ${I.rack}; burn-in ${burnIn(run)}.`, narration: 'Person → agent: the Facility Manager approves, with the conditions.' });
+  add({ kind: 'human', from: 'owner', to: 'orchestrator', type: 'sign-off', minutes: 10, state: 'DECIDING', story: 8, text: () => `Signed off. Proceed on ${I.plannedForLabel}.`, narration: 'The Program Owner signs off.' });
+  add({ kind: 'decision', state: 'COMPLETED', story: 8, narration: 'Decision taken by people, on evidence prepared by agents.' });
   return steps;
 }
 
+/** People in the hybrid team. They assign, approve, coordinate and sign off; agents prepare the evidence. */
+export const HUMANS = [
+  { id: 'owner', name: 'Program Owner', title: 'AI capacity program', icon: 'target' },
+  { id: 'clusterops', name: 'Cluster Ops Lead', title: 'GPU workloads', icon: 'cpu' },
+  { id: 'facility', name: 'Facility Manager', title: 'Hall 2 · cooling & power', icon: 'shield' }
+];
+/** The engineered loop around the capacity decision (working definition, to align with R&D's Loop Engineering). */
+export const LOOP = {
+  goal: 'Loop A can take R-17 at 120 kW + 20 % margin on Thursday',
+  acceptance: 'headroom ≥ 0 kW, verified by the same deterministic tool',
+  verifyTool: 'calculateCoolingHeadroom',
+  maxIterations: 3,
+  stopRule: 'stop when accepted; after 3 iterations, escalate to the Facility Manager'
+};
+
 export const scenario = {
   id: 'ai-factory', title: 'AI factory', domain: 'Rack deployment · liquid cooling', status: 'ready', icon: 'rack',
-  incident: INCIDENT, agents: AGENTS, reasoners: REASONERS, servers: SERVERS, sources: SOURCE_META,
+  incident: INCIDENT, agents: AGENTS, humans: HUMANS, loop: LOOP, reasoners: REASONERS, servers: SERVERS, sources: SOURCE_META,
   models: MODELS, infra: INFRA, energy: ENERGY, value: VALUE_ASSUMPTIONS, valueComponents, outcomeLine, naiveRouting: NAIVE_ROUTING,
   story: STORY, stages: STAGES, pipeline: { flatten, runStage },
   generateDataset, buildScript
