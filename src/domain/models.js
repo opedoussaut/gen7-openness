@@ -1,4 +1,4 @@
-// Domain model of the LeanAI demonstrator.
+// Domain model of the GEN7 Openness demonstrator.
 // Plain JSDoc typedefs: the objects are created by the engine and adapters, and read by the UI.
 // Keeping them here documents the contract a real MCP server, A2A endpoint or telemetry provider must satisfy.
 

@@ -20,8 +20,8 @@ export function mountTechnical(el, app) {
   function exportTrace() {
     const v = app.focus();
     const run = v.run;
-    const blob = new Blob([JSON.stringify({ note: 'LeanAI · illustrative run · simulated adapters · illustrative pricing', adapters: app.engine.adapterInfo, assumptions: { models: sc.models, infra: sc.infra, energy: sc.energy, value: sc.value }, run, metrics: v.metrics, bruteForce: v.naive, value: v.value, invariants: v.invariants }, null, 2)], { type: 'application/json' });
-    const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `leanai-${v.run.id}.json` });
+    const blob = new Blob([JSON.stringify({ note: 'GEN7 Openness · illustrative run · simulated adapters · illustrative pricing', adapters: app.engine.adapterInfo, assumptions: { models: sc.models, infra: sc.infra, energy: sc.energy, value: sc.value }, run, metrics: v.metrics, bruteForce: v.naive, value: v.value, invariants: v.invariants }, null, 2)], { type: 'application/json' });
+    const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `gen7-openness-${v.run.id}.json` });
     a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   }
 

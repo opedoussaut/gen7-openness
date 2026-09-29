@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { resolve, extname } from 'node:path';
 import { mcp, a2a, agentCard, rpcError } from './protocol.js';
 const root = fileURLToPath(new URL('.', import.meta.url));
-// Public files: legacy Protocol Lab assets, the LeanAI app, and everything under src/ and styles/.
+// Public files: legacy Protocol Lab assets, the GEN7 Openness app, and everything under src/ and styles/.
 const TOP = { '/': 'index.html', '/index.html': 'index.html', '/lab.html': 'lab.html', '/lab.css': 'lab.css', '/lab.js': 'lab.js', '/protocol.js': 'protocol.js', '/icons.js': 'icons.js', '/favicon.svg': 'favicon.svg' };
 const TYPES = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.svg': 'image/svg+xml' };
 function publicFile(path) {
@@ -18,7 +18,7 @@ export function createAppServer() {
     try {
       const path = new URL(req.url, 'http://localhost').pathname;
       const origin = `http://127.0.0.1:${server.address().port}`;
-      if (req.method === 'GET' && path === '/api/health') return json(200,{mode:'live',name:'leanai',version:'2.0.0'});
+      if (req.method === 'GET' && path === '/api/health') return json(200,{mode:'live',name:'gen7-openness',version:'2.0.0'});
       if (req.method === 'GET' && path === '/.well-known/agent-card.json') return json(200,agentCard(origin));
       if (req.method === 'POST' && ['/api/product-mcp','/api/cooling-mcp','/api/a2a'].includes(path)) {
         let input = '', size = 0;
@@ -43,5 +43,5 @@ export function createAppServer() {
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const port = Number(process.env.PORT || 3000), host = process.env.HOST || '127.0.0.1';
-  createAppServer().listen(port,host,() => console.log(`LeanAI: http://${host}:${port}\nProtocol Lab (live MCP/A2A over HTTP): http://${host}:${port}/lab.html\nNo API key or dependency install needed.`));
+  createAppServer().listen(port,host,() => console.log(`GEN7 Openness: http://${host}:${port}\nProtocol Lab (live MCP/A2A over HTTP): http://${host}:${port}/lab.html\nNo API key or dependency install needed.`));
 }

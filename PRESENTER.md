@@ -1,6 +1,4 @@
-# LeanAI · 14-minute presenter script
-
-*Less noise. Less cost. More value.*
+# GEN7 Openness · 14-minute presenter script
 
 **Jargon help:** every technical term in the application (p95, MCP, A2A, token, CDU, headroom, checkpoint…) has a dotted underline. Hover, focus or tap it to show a plain-language definition. The **? Glossary** button at the top right lists all terms — useful when someone in the audience asks.
 
