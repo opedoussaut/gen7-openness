@@ -1,0 +1,307 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face { font-family: Inter; font-weight: 200; src: url(inter-latin-200-normal.woff2); }
+@font-face { font-family: Inter; font-weight: 300; src: url(inter-latin-300-normal.woff2); }
+@font-face { font-family: Inter; font-weight: 400; src: url(inter-latin-400-normal.woff2); }
+@font-face { font-family: Inter; font-weight: 600; src: url(inter-latin-600-normal.woff2); }
+@font-face { font-family: Inter; font-weight: 700; src: url(inter-latin-700-normal.woff2); }
+@font-face { font-family: Inter; font-weight: 800; src: url(inter-latin-800-normal.woff2); }
+html, body { margin: 0; background: #02070e; }
+canvas { display: block; }
+</style></head>
+<body><canvas id="c" width="1920" height="1080"></canvas>
+<script>
+// GEN7 Openness — cinematic intro. Deterministic: render(t) draws the frame at time t (seconds).
+const W = 1920, H = 1080, cv = document.getElementById('c'), g = cv.getContext('2d');
+const DURATION = 37;
+// ---------- helpers ----------
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, k) => a + (b - a) * k;
+const seg = (t, a, b) => clamp((t - a) / (b - a));
+const eio = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+const eout = k => 1 - Math.pow(1 - k, 3);
+const ein = k => k * k * k;
+const fade = (t, a, b, c, d) => Math.min(eio(seg(t, a, b)), 1 - eio(seg(t, c, d)));
+function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let x = Math.imul(seed ^ seed >>> 15, 1 | seed); x = x + Math.imul(x ^ x >>> 7, 61 | x) ^ x; return ((x ^ x >>> 14) >>> 0) / 4294967296; }; }
+const R = rng(7);
+const COL = { cyan: [61, 192, 255], blue: [61, 155, 224], violet: [150, 122, 238], amber: [236, 168, 74], green: [60, 214, 150], red: [255, 92, 92], white: [235, 245, 255] };
+const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+// glow sprites
+const sprites = {};
+function sprite(name) {
+  if (sprites[name]) return sprites[name];
+  const s = document.createElement('canvas'); s.width = s.height = 64; const x = s.getContext('2d'), c = COL[name];
+  const gr = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+  gr.addColorStop(0, rgba([255, 255, 255], 1)); gr.addColorStop(.12, rgba(c, .95)); gr.addColorStop(.4, rgba(c, .28)); gr.addColorStop(1, rgba(c, 0));
+  x.fillStyle = gr; x.fillRect(0, 0, 64, 64); return (sprites[name] = s);
+}
+function glow(x, y, r, name, a) { if (a <= 0) return; g.globalAlpha = a; const s = sprite(name); g.drawImage(s, x - r, y - r, 2 * r, 2 * r); g.globalAlpha = 1; }
+function text(str, x, y, { size = 48, weight = 600, color = [235, 245, 255], a = 1, align = 'center', track = 0, font = 'Inter' } = {}) {
+  if (a <= 0) return;
+  g.font = `${weight} ${size}px ${font}`; g.textAlign = align; g.textBaseline = 'middle'; g.letterSpacing = `${track}px`;
+  g.fillStyle = rgba(color, a); g.fillText(str, x, y); g.letterSpacing = '0px';
+}
+function line(x1, y1, x2, y2, c, a, w = 1.5, dash = null) {
+  if (a <= 0) return; g.strokeStyle = rgba(c, a); g.lineWidth = w; g.setLineDash(dash ?? []); g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke(); g.setLineDash([]);
+}
+const bez = (p0, p1, p2, p3, k) => { const u = 1 - k; return [u*u*u*p0[0] + 3*u*u*k*p1[0] + 3*u*k*k*p2[0] + k*k*k*p3[0], u*u*u*p0[1] + 3*u*u*k*p1[1] + 3*u*k*k*p2[1] + k*k*k*p3[1]]; };
+
+// ---------- static data ----------
+const stars = Array.from({ length: 260 }, () => ({ x: R() * W, y: R() * H, z: .2 + R() * .8, p: R() * 6.28 }));
+const SOURCES = ['Cooling sensors', 'Power meters', 'GPU telemetry', 'Job scheduler', 'Equipment inventory', 'Maintenance log', 'Grid carbon'];
+const SRC = SOURCES.map((n, i) => ({ n, x: 250, y: 250 + i * 97 }));
+const CENTER = [1010, 560];
+const N = 2600, EVIDENCE = 60;
+const COUNTS = [11825, 4061, 4061, 3787, 3721, 235, 60];
+const STAGES = ['FILTER', 'NORMALIZE', 'DEDUPLICATE', 'CORRELATE', 'AGGREGATE', 'RANK'];
+const T_STAGE0 = 11.2, T_STAGE_STEP = .85; // stage k happens at T_STAGE0 + k*step
+const P = Array.from({ length: N }, (_, i) => {
+  const s = i % 7, r = i < EVIDENCE ? -1 : R();
+  // stage after which the particle dies (evidence never dies)
+  let dies = 99; if (r >= 0) for (let k = 1; k < COUNTS.length; k++) if (r >= (COUNTS[k] - EVIDENCE) / (COUNTS[0] - EVIDENCE)) { dies = k - 1; break; }
+  return { s, born: 4.9 + R() * 4.6, spd: .9 + R() * .7, ang: R() * 6.28, rad: 60 + Math.pow(R(), .6) * 230, w: (R() - .5) * 1.4, jy: (R() - .5) * 90, dies, col: ['cyan', 'blue', 'cyan', 'violet', 'blue', 'cyan', 'green'][s], sz: 5 + R() * 7 };
+});
+// network (scene 4)
+const NET = {
+  humans: [['Cluster Ops Lead', 660, 300], ['Program Owner', 960, 300], ['Facility Manager', 1260, 300]],
+  orch: ['Coordinator', 'AURA', 960, 450],
+  agents: [['Installation', 'LEO', 585, 610], ['Workload', 'AURA', 845, 610], ['Cooling', 'LEO', 1075, 610], ['Sustainability', 'AURA', 1335, 610]],
+  systems: [['DCIM', 560, 850], ['Power', 760, 850], ['Scheduler', 960, 850], ['Cooling', 1160, 850], ['Carbon', 1360, 850]]
+};
+const NODES = [
+  ...NET.humans.map(([n, x, y]) => ({ x, y, c: 'amber', n, sub: '' })),
+  { x: NET.orch[2], y: NET.orch[3], c: 'white', n: NET.orch[0], sub: NET.orch[1] },
+  ...NET.agents.map(([n, s, x, y]) => ({ x, y, c: 'violet', n, sub: s })),
+  ...NET.systems.map(([n, x, y]) => ({ x, y, c: 'blue', n, sub: '' }))
+];
+const EV_TARGET = Array.from({ length: EVIDENCE }, (_, i) => NODES[i % NODES.length]);
+// final evidence cluster (end of scene 3): a Fibonacci disc
+const EV_CLUSTER = Array.from({ length: EVIDENCE }, (_, i) => { const a = i * 2.39996, r = 9 * Math.sqrt(i + .5); return [CENTER[0] + r * Math.cos(a), CENTER[1] + r * Math.sin(a)]; });
+
+// ---------- layers ----------
+function background(t) {
+  g.globalCompositeOperation = 'source-over';
+  g.fillStyle = '#02070e'; g.fillRect(0, 0, W, H);
+  const rg = g.createRadialGradient(W / 2, H * .55, 50, W / 2, H * .55, 1100);
+  rg.addColorStop(0, 'rgba(18,60,100,.55)'); rg.addColorStop(.5, 'rgba(8,28,52,.35)'); rg.addColorStop(1, 'rgba(2,7,14,0)');
+  g.fillStyle = rg; g.fillRect(0, 0, W, H);
+  // perspective grid floor
+  const on = eio(seg(t, .2, 2.4)) * (1 - .6 * eio(seg(t, 30.8, 32.5)));
+  const hz = 640, vx = W / 2 + Math.sin(t * .12) * 60;
+  g.globalCompositeOperation = 'lighter';
+  for (let i = -24; i <= 24; i++) { const bx = W / 2 + i * 140; line(vx, hz, bx + (bx - vx) * 1.8, H + 40, COL.cyan, .07 * on, 1); }
+  const drift = (t * .35) % 1;
+  for (let k = 0; k < 16; k++) { const z = (k + 1 - drift) / 16; const y = hz + Math.pow(z, 2.6) * (H - hz + 60); line(0, y, W, y, COL.cyan, .10 * on * z, 1); }
+  // horizon glow
+  const hg = g.createLinearGradient(0, hz - 40, 0, hz + 30); hg.addColorStop(0, 'rgba(61,192,255,0)'); hg.addColorStop(.6, `rgba(61,192,255,${.10 * on})`); hg.addColorStop(1, 'rgba(61,192,255,0)');
+  g.fillStyle = hg; g.fillRect(0, hz - 40, W, 70);
+  // dust
+  for (const s of stars) { const a = (.25 + .35 * Math.sin(t * 1.3 * s.z + s.p)) * s.z * clamp(t / 1.5); const x = (s.x - t * 8 * s.z + W) % W; glow(x, s.y, 3 + 5 * s.z, 'cyan', a * .5); }
+  g.globalCompositeOperation = 'source-over';
+}
+function vignette() {
+  const v = g.createRadialGradient(W / 2, H / 2, 500, W / 2, H / 2, 1250); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,.7)');
+  g.fillStyle = v; g.fillRect(0, 0, W, H);
+}
+function headline(t, a, b, c, d, l1, l2, y = 150) {
+  const k = fade(t, a, b, c, d), rise = (1 - eout(seg(t, a, b))) * 18;
+  text(l1, W / 2, y + rise, { size: 58, weight: 700, a: k, track: -1 });
+  if (l2) text(l2, W / 2, y + 72 + rise, { size: 34, weight: 300, color: [170, 212, 240], a: k * .95 });
+}
+function counter(t, value, label, a, col = COL.cyan) {
+  if (a <= 0) return;
+  text(value, 1700, 110, { size: 56, weight: 200, color: col, a, align: 'right', track: 1 });
+  text(label, 1700, 160, { size: 18, weight: 600, color: [140, 180, 210], a: a * .9, align: 'right', track: 4 });
+}
+
+// Scene 1 — the rack arrives
+function scene1(t) {
+  const a = fade(t, .8, 2.2, 8.5, 10.4); if (a <= 0) return;
+  const k = eout(seg(t, .8, 3.2)), mv = eio(seg(t, 4.2, 7.5));
+  const cx = lerp(W / 2, 1640, mv), cy = lerp(560, 600, mv), sc = lerp(1, .55, mv) * lerp(.85, 1, k);
+  const w = 170 * sc, h = 380 * sc;
+  g.globalCompositeOperation = 'lighter';
+  const draw = (x1, y1, x2, y2) => { line(x1, y1, x2, y2, COL.cyan, .85 * a, 2.2); line(x1, y1, x2, y2, COL.cyan, .15 * a, 9); };
+  const x0 = cx - w / 2, y0 = cy - h / 2, dx = 34 * sc, dy = -22 * sc; // 3D box
+  const reveal = seg(t, .8, 2.6);
+  draw(x0, y0, x0 + w * reveal, y0); draw(x0, y0 + h, x0 + w * reveal, y0 + h); draw(x0, y0, x0, y0 + h * reveal); draw(x0 + w, y0, x0 + w, y0 + h * reveal);
+  draw(x0 + w, y0, x0 + w + dx * reveal, y0 + dy * reveal); draw(x0, y0, x0 + dx * reveal, y0 + dy * reveal); draw(x0 + dx, y0 + dy, x0 + w + dx, y0 + dy);
+  draw(x0 + w + dx, y0 + dy, x0 + w + dx, y0 + h + dy); draw(x0 + w, y0 + h, x0 + w + dx, y0 + h + dy);
+  for (let i = 1; i < 12; i++) { const yy = y0 + h * i / 12; line(x0 + 10 * sc, yy, x0 + w - 10 * sc, yy, COL.cyan, .28 * a * seg(t, 1.6 + i * .08, 2.2 + i * .08), 1.2); glow(x0 + w - 22 * sc, yy - h / 24, 7 * sc, (i * 7 + Math.floor(t * 3)) % 5 ? 'green' : 'cyan', a * (.5 + .5 * Math.sin(t * 5 + i))); }
+  // heat shimmer rising
+  for (let i = 0; i < 26; i++) { const ph = (t * .45 + i / 26) % 1; glow(x0 + w * ((i * 37) % 26) / 26, y0 - ph * 160 * sc, 16 * sc * (1 - ph), 'amber', a * .35 * (1 - ph) * seg(t, 2, 3)); }
+  g.globalCompositeOperation = 'source-over';
+  text('120 kW', cx + (w + dx) / 2, y0 + h + 44 * sc, { size: 30 * sc + 6, weight: 300, color: COL.amber, a: a * seg(t, 2.4, 3.2), track: 2 });
+  text('72 GPUs · 1 rack', cx + (w + dx) / 2, y0 + h + 82 * sc, { size: 16 * sc + 6, weight: 600, color: [150, 190, 220], a: a * seg(t, 2.6, 3.4), track: 3 });
+}
+
+// Scenes 2 & 3 — the data flood, then lean grooming
+function particles(t) {
+  if (t < 4.8 || t > 22.5) return;
+  g.globalCompositeOperation = 'lighter';
+  const pull = eio(seg(t, 10.2, 11.4)), converge = eio(seg(t, 15.4, 16.6));
+  for (let i = 0; i < N; i++) {
+    const p = P[i]; if (t < p.born) continue;
+    const src = SRC[p.s];
+    // flight from source to the swirl
+    const fk = clamp((t - p.born) / (1.9 / p.spd));
+    const ang = p.ang + (t - p.born) * p.w * (1 + 2 * pull);
+    const rad = p.rad * lerp(1, .32, pull);
+    const swirl = [CENTER[0] + Math.cos(ang) * rad * 1.25, CENTER[1] + Math.sin(ang) * rad * .72];
+    let [x, y] = fk < 1 ? bez([src.x, src.y], [src.x + 380, src.y + p.jy], [CENTER[0] - 300, CENTER[1] + p.jy], swirl, eio(fk)) : swirl;
+    // death at its stage
+    let a = .75;
+    if (p.dies < 99) { const td = T_STAGE0 + p.dies * T_STAGE_STEP + (i % 13) * .025; if (t > td) { const dk = seg(t, td, td + .45); a *= 1 - dk; x += (x - CENTER[0]) * dk * .9; y += (y - CENTER[1]) * dk * .9 + dk * 40; if (dk >= 1) continue; } }
+    // evidence converges to the cluster, then flies to the network
+    let r = p.sz, col = p.col;
+    if (i < EVIDENCE) {
+      const cl = EV_CLUSTER[i];
+      x = lerp(x, cl[0], converge); y = lerp(y, cl[1], converge);
+      const fly = eio(seg(t, 17.2 + (i % 12) * .05, 18.6 + (i % 12) * .05));
+      if (fly > 0) { const tg = EV_TARGET[i]; const mid = [(cl[0] + tg.x) / 2 + (i % 2 ? 80 : -80), Math.min(cl[1], tg.y) - 120]; [x, y] = bez(cl, mid, mid, [tg.x, tg.y], fly); col = fly > .6 ? tg.c : 'white'; }
+      r = lerp(p.sz, 11, converge) + 3 * Math.sin(t * 4 + i) * converge; a = lerp(.75, 1, converge) * (1 - seg(t, 18.4, 19.2));
+      if (converge > 0 && fly <= 0) col = 'white';
+    } else if (t > 16.6) continue;
+    glow(x, y, r, col, a);
+  }
+  g.globalCompositeOperation = 'source-over';
+}
+function sources(t) {
+  const a = fade(t, 4.6, 5.6, 10.2, 11.2); if (a <= 0) return;
+  g.globalCompositeOperation = 'lighter';
+  SRC.forEach((s, i) => { const k = a * seg(t, 4.6 + i * .12, 5.3 + i * .12); glow(s.x, s.y, 26 + 4 * Math.sin(t * 3 + i), ['cyan', 'blue', 'cyan', 'violet', 'blue', 'cyan', 'green'][i], k); });
+  g.globalCompositeOperation = 'source-over';
+  SRC.forEach((s, i) => text(s.n, s.x - 42, s.y, { size: 21, weight: 400, color: [170, 205, 232], a: a * seg(t, 4.8 + i * .12, 5.5 + i * .12), align: 'right' }));
+}
+function grooming(t) {
+  const a = fade(t, 10.6, 11.2, 17.0, 17.8); if (a <= 0) return;
+  // rings contracting around the swarm
+  g.globalCompositeOperation = 'lighter';
+  for (let k = 0; k < 6; k++) {
+    const tk = T_STAGE0 + k * T_STAGE_STEP, on = seg(t, tk - .2, tk + .1), pulse = Math.exp(-4 * Math.max(0, t - tk));
+    const r = lerp(330, 110, k / 5) * lerp(1.15, 1, eout(seg(t, tk - .3, tk + .3)));
+    g.strokeStyle = rgba(COL.cyan, (.10 + .55 * pulse) * on * a); g.lineWidth = 1.5 + 5 * pulse;
+    g.beginPath(); g.ellipse(CENTER[0], CENTER[1], r * 1.25, r * .72, 0, 0, 6.283); g.stroke();
+  }
+  g.globalCompositeOperation = 'source-over';
+  // stage chips
+  const y = 930, total = 1320, x0 = W / 2 - total / 2;
+  STAGES.forEach((s, k) => {
+    const tk = T_STAGE0 + k * T_STAGE_STEP, on = seg(t, tk - .15, tk + .2), cx = x0 + total * (k + .5) / 6;
+    text(s, cx, y, { size: 20, weight: 700, color: on > .5 ? [220, 245, 255] : [90, 130, 160], a: a * (.45 + .55 * on), track: 4 });
+    g.globalCompositeOperation = 'lighter'; glow(cx, y + 28, 10, 'cyan', a * on * (.4 + .6 * Math.exp(-3 * Math.max(0, t - tk)))); g.globalCompositeOperation = 'source-over';
+    if (k < 5) text('›', cx + total / 12, y, { size: 26, weight: 300, color: [90, 130, 160], a: a * .6 });
+  });
+  text('ORDINARY, DETERMINISTIC SOFTWARE · NO AI', W / 2, y + 66, { size: 16, weight: 600, color: [120, 170, 200], a: a * .8, track: 5 });
+}
+function dataCounter(t) {
+  // 0 → 11,825 during the flood, then the stage counts
+  let v, lab = 'RAW RECORDS', col = COL.cyan;
+  if (t < 11) v = Math.round(COUNTS[0] * eout(seg(t, 5, 9.6)));
+  else { let k = 0; for (let s = 0; s < 6; s++) if (t > T_STAGE0 + s * T_STAGE_STEP + .2) k = s + 1; v = COUNTS[k]; lab = k ? `AFTER ${STAGES[k - 1]}` : 'RAW RECORDS'; if (k === 6) { lab = 'PIECES OF EVIDENCE'; col = COL.green; } }
+  counter(t, v.toLocaleString('en-US'), lab, fade(t, 5, 5.8, 16.8, 17.5), col);
+}
+
+// Scene 4 — one team: people and agents
+function network(t) {
+  const a = fade(t, 17.6, 18.6, 23.6, 24.6); if (a <= 0) return;
+  const nodeOn = n => a * seg(t, 18.3 + (n.y - 300) / 1400, 19.1 + (n.y - 300) / 1400);
+  const [PO, CL, FM] = [NODES[1], NODES[0], NODES[2]], OR = NODES[3], AG = NODES.slice(4, 8), SY = NODES.slice(8);
+  const edge = (A, B, c, t0, dash, w = 1.6) => { const k = eio(seg(t, t0, t0 + .7)); if (k <= 0) return; line(A.x, A.y, lerp(A.x, B.x, k), lerp(A.y, B.y, k), c, .55 * a, w, dash); return k; };
+  g.globalCompositeOperation = 'lighter';
+  // MCP bus
+  const busK = eio(seg(t, 19.6, 20.3)), by = 735;
+  g.fillStyle = rgba(COL.blue, .10 * a * busK); g.fillRect(W / 2 - 480 * busK, by - 14, 960 * busK, 28);
+  line(W / 2 - 480 * busK, by - 14, W / 2 + 480 * busK, by - 14, COL.blue, .5 * a * busK, 1); line(W / 2 - 480 * busK, by + 14, W / 2 + 480 * busK, by + 14, COL.blue, .5 * a * busK, 1);
+  AG.forEach(n => edge(n, { x: n.x, y: by - 14 }, COL.blue, 19.8, null));
+  SY.forEach(n => edge({ x: n.x, y: by + 14 }, n, COL.blue, 19.9, null));
+  AG.forEach((n, i) => edge(OR, n, COL.violet, 19.2 + i * .05, [7, 6], 2));
+  [PO].forEach(n => edge(n, OR, COL.amber, 19.4, [3, 5], 2));
+  edge(CL, AG[1], COL.amber, 19.5, [3, 5], 2); edge(FM, OR, COL.amber, 19.55, [3, 5], 2); edge(CL, FM, COL.amber, 19.6, [3, 5], 1.6);
+  // pulses
+  const pulse = (A, B, c, t0, per) => { if (t < t0) return; const k = ((t - t0) / per) % 1; glow(lerp(A.x, B.x, k), lerp(A.y, B.y, k), 12, c, a * .95); };
+  AG.forEach((n, i) => pulse(OR, n, 'violet', 20.2 + i * .3, 1.3));
+  AG.forEach((n, i) => pulse(n, { x: n.x, y: by }, 'blue', 20.6 + i * .2, .9));
+  pulse(PO, OR, 'amber', 20.4, 1.6); pulse(CL, AG[1], 'amber', 21.1, 1.8); pulse(FM, OR, 'amber', 21.4, 1.7);
+  // nodes
+  NODES.forEach(n => { const k = nodeOn(n); glow(n.x, n.y, 36 + 3 * Math.sin(t * 2.4 + n.x), n.c, k); glow(n.x, n.y, 90, n.c, k * .22); });
+  g.globalCompositeOperation = 'source-over';
+  NODES.forEach(n => { const k = nodeOn(n); const below = n.c !== 'amber'; text(n.n, n.x, n.y + (below ? 44 : -44), { size: 20, weight: 600, color: [225, 238, 250], a: k }); if (n.sub) text(n.sub, n.x, n.y + (below ? 68 : -68), { size: 15, weight: 700, color: n.sub === 'LEO' ? [120, 170, 255] : [96, 214, 226], a: k, track: 3 }); });
+  text('PEOPLE', 250, 300, { size: 15, weight: 700, color: COL.amber, a: a * seg(t, 18.6, 19.4), track: 5, align: 'left' });
+  text('AI AGENTS · A2A', 250, 610, { size: 15, weight: 700, color: COL.violet, a: a * seg(t, 18.9, 19.7), track: 5, align: 'left' });
+  text('MCP', 250, 735, { size: 15, weight: 700, color: COL.blue, a: a * seg(t, 19.6, 20.3), track: 5, align: 'left' });
+  text('SYSTEMS', 250, 850, { size: 15, weight: 700, color: COL.blue, a: a * seg(t, 19.9, 20.6), track: 5, align: 'left' });
+}
+
+// Scene 5 — computed with physics
+function gauge(t) {
+  const a = fade(t, 24.2, 25.0, 30.4, 31.2); if (a <= 0) return;
+  const X0 = 360, GW = 1200, Y = 600, BH = 64, x = v => X0 + (v - 700) / 350 * GW;
+  const fillM = eio(seg(t, 24.8, 25.9)), fillR = eio(seg(t, 25.9, 26.7)), rel = eio(seg(t, 27.6, 28.6));
+  const measured = 869.1, released = 38.7, target = 144;
+  const mEnd = lerp(700, measured, fillM) - released * rel, rEnd = mEnd + target * fillR;
+  // track
+  g.fillStyle = `rgba(20,50,80,${.55 * a})`; g.fillRect(x(700), Y - BH / 2, GW, BH);
+  // measured load
+  const gm = g.createLinearGradient(x(700), 0, x(mEnd), 0); gm.addColorStop(0, `rgba(30,90,150,${.9 * a})`); gm.addColorStop(1, `rgba(61,155,224,${.95 * a})`);
+  g.fillStyle = gm; g.fillRect(x(700), Y - BH / 2, x(mEnd) - x(700), BH);
+  // released block flying away
+  if (rel > 0 && rel < 1) { const bx = x(measured - released) + rel * 380, by = Y - BH / 2 - rel * 170; g.fillStyle = `rgba(61,155,224,${.8 * a * (1 - rel)})`; g.fillRect(bx, by, x(measured) - x(measured - released), BH); }
+  // new rack
+  const over = rEnd > 1000, col = t > 28.4 ? COL.green : over ? COL.red : COL.amber;
+  g.fillStyle = rgba(col, .85 * a); g.fillRect(x(mEnd), Y - BH / 2, x(rEnd) - x(mEnd), BH);
+  g.globalCompositeOperation = 'lighter'; if (fillR > .9) glow(x(rEnd), Y, 90, t > 28.4 ? 'green' : 'red', a * .7); g.globalCompositeOperation = 'source-over';
+  // capacity line
+  g.fillStyle = rgba(COL.white, .95 * a); g.fillRect(x(1000) - 2, Y - BH / 2 - 26, 4, BH + 52);
+  text('USABLE CAPACITY · 1,000 kW', x(1000), Y - BH / 2 - 46, { size: 16, weight: 700, color: [220, 235, 250], a, track: 3 });
+  text('MEASURED LOAD (p95) 869.1 kW', x(700), Y + BH / 2 + 34, { size: 16, weight: 600, color: COL.blue, a: a * fillM, align: 'left', track: 2 });
+  text('+ NEW RACK 120 kW + 20 % MARGIN', x(mEnd) + 8, Y + BH / 2 + 34, { size: 16, weight: 600, color: col, a: a * fillR, align: 'left', track: 2 });
+  if (rel > 0) text('ONE LOW-PRIORITY JOB MOVES TO ANOTHER LOOP · −38.7 kW', x(measured - released) + 380 * rel + 10, Y - BH / 2 - 170 * rel - 22, { size: 15, weight: 600, color: [170, 210, 240], a: a * Math.min(1, rel * 3) * (1 - seg(t, 29.2, 30)), align: 'left', track: 2 });
+  // verdict
+  const v1 = a * seg(t, 26.5, 27.0) * (1 - seg(t, 27.5, 27.9)), v2 = a * seg(t, 28.4, 28.9);
+  text('−13.1 kW', W / 2, 820, { size: 96, weight: 200, color: COL.red, a: v1, track: 2 }); text('SHORT — NOT AS IT STANDS', W / 2, 890, { size: 18, weight: 700, color: COL.red, a: v1, track: 5 });
+  text('+25.6 kW', W / 2, 820, { size: 96, weight: 200, color: COL.green, a: v2, track: 2 }); text('IT FITS — SAME CALCULATION, CHECKED AGAIN', W / 2, 890, { size: 18, weight: 700, color: COL.green, a: v2, track: 5 });
+  // approvals
+  ['Cluster Ops Lead', 'Facility Manager', 'Program Owner'].forEach((n, i) => { const k = a * seg(t, 29.0 + i * .25, 29.4 + i * .25); g.globalCompositeOperation = 'lighter'; glow(W / 2 - 360 + i * 360, 960, 14, 'amber', k); g.globalCompositeOperation = 'source-over'; text(`✓ ${n}`, W / 2 - 360 + i * 360, 996, { size: 18, weight: 600, color: COL.amber, a: k }); });
+}
+
+// Scene 6 — title
+function finale(t) {
+  if (t < 30.6) return;
+  const flash = Math.exp(-5 * Math.max(0, t - 31.0)) * seg(t, 30.6, 31.0);
+  g.globalCompositeOperation = 'lighter';
+  const rr = eout(seg(t, 30.9, 32.4)) * 1300; g.strokeStyle = rgba(COL.cyan, .5 * (1 - seg(t, 30.9, 32.4))); g.lineWidth = 3; g.beginPath(); g.arc(W / 2, 520, rr, 0, 6.283); g.stroke();
+  glow(W / 2, 520, 240 + 400 * flash, 'cyan', .9 * flash + .18 * seg(t, 31.2, 33));
+  g.globalCompositeOperation = 'source-over';
+  const k1 = eout(seg(t, 31.1, 32.3)), k2 = seg(t, 32.2, 33.1), k3 = seg(t, 33.0, 33.9), k4 = seg(t, 33.8, 34.6);
+  g.font = '800 132px Inter'; g.letterSpacing = '-4px'; const wA = g.measureText('GEN7 ').width; g.font = '200 132px Inter'; const wB = g.measureText('Openness').width; g.letterSpacing = '0px';
+  const sx = W / 2 - (wA + wB) / 2, yT = 500 + (1 - k1) * 26;
+  text('GEN7 ', sx, yT, { size: 132, weight: 800, a: k1, align: 'left', track: -4 });
+  text('Openness', sx + wA, yT, { size: 132, weight: 200, color: [120, 200, 255], a: k1, align: 'left', track: -4 });
+  text('People and AI agents, one team.', W / 2, 620, { size: 38, weight: 300, color: [205, 225, 242], a: k2 });
+  text('Knowledge first  ·  Computed with physics  ·  Every euro measured', W / 2, 682, { size: 26, weight: 400, color: [150, 190, 220], a: k3 });
+  text('OPEN  ·  LEAN  ·  ORCHESTRATE  ·  MEASURE', W / 2, 790, { size: 22, weight: 700, color: [96, 214, 226], a: k4, track: 8 });
+  text('SIMULATED AI-FACTORY SCENARIO · ILLUSTRATIVE DATA', W / 2, 1010, { size: 13, weight: 600, color: [90, 120, 150], a: k4 * .9, track: 4 });
+}
+
+function headlines(t) {
+  headline(t, .9, 1.9, 4.2, 5.0, 'Thursday. A new AI rack arrives.', 'Can the cooling loop take it — safely?');
+  headline(t, 5.2, 6.1, 10.0, 10.8, '11,825 records. Seven systems.', 'One question.');
+  headline(t, 11.0, 11.9, 16.6, 17.3, 'Knowledge first.', '99.6 % of the noise removed — before any AI thinks.');
+  headline(t, 18.0, 18.9, 23.6, 24.4, 'People and AI agents. One team.', 'Open at the agent layer.', 140);
+  headline(t, 24.4, 25.3, 30.2, 30.9, 'Computed with physics.', 'Checked twice. Approved by people.');
+}
+
+window.render = t => {
+  background(t);
+  scene1(t); sources(t); grooming(t); particles(t); network(t); gauge(t); finale(t);
+  vignette();
+  headlines(t); dataCounter(t);
+  // fade in / out
+  const fi = 1 - seg(t, 0, .9), fo = seg(t, DURATION - .6, DURATION);
+  if (fi > 0 || fo > 0) { g.fillStyle = `rgba(0,0,0,${Math.max(fi, fo)})`; g.fillRect(0, 0, W, H); }
+};
+window.DURATION = DURATION;
+window.ready = document.fonts.load('800 20px Inter').then(() => Promise.all([200, 300, 400, 600, 700].map(w => document.fonts.load(`${w} 20px Inter`)))).then(() => true);
+</script></body></html>
