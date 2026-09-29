@@ -112,26 +112,16 @@ export function mountTechnical(el, app) {
     const tools = [...new Set(run.mcpCalls.filter(c => c.agent === a.id).map(c => c.tool))];
     const received = run.a2aMessages.filter(msg => msg.to === a.id).map(msg => short(sc, msg.from));
     const last = calls.at(-1);
-    const outline = last ? summarize(a.id, last.output) : 'Not yet active.';
+    const outline = last ? a.summarize(last.output) : 'Not yet active.';
     return `<section class="panel trace-card"><header><span class="ic">${icon(a.icon, 16)}</span><div><b>${esc(a.name)}</b><small>${esc(sc.models[a.model].label)}</small></div></header>
       <p>${esc(a.role)}</p>
-      <div class="io"><b>Input:</b> ${tools.length ? `MCP ${tools.map(esc).join(', ')}` : a.id === 'orchestrator' ? 'incident brief, specialist findings' : '—'}${received.length ? ` · A2A from ${[...new Set(received)].map(esc).join(', ')}` : ''}<br><b>Output:</b> ${esc(outline)}</div>
+      <div class="io"><b>Input:</b> ${tools.length ? `MCP ${tools.map(esc).join(', ')}` : a.id === 'orchestrator' ? 'deployment request, specialist findings' : '—'}${received.length ? ` · A2A from ${[...new Set(received)].map(esc).join(', ')}` : ''}<br><b>Output:</b> ${esc(outline)}</div>
       <dl><dt>Model calls</dt><dd>${x.modelCalls}</dd><dt>Tokens in</dt><dd>${int(x.cachedTokens + x.inputTokens)}</dd><dt>Tokens out</dt><dd>${int(x.outputTokens)}</dd><dt>Model latency</dt><dd>${ms(x.modelLatencyMs)}</dd><dt>Tool latency</dt><dd>${ms(x.toolLatencyMs)}</dd><dt>Cost</dt><dd>${eur(x.modelCost, { precise: true })}</dd></dl>
       ${last ? `<button class="btn sm" data-model-call="${last.id}">Structured output ${icon('eye', 13)}</button>` : ''}</section>`;
   }
   return { update };
 }
 
-function summarize(id, o) {
-  switch (id) {
-    case 'orchestrator': return o.decision ?? `${o.agentsNeeded?.length ?? 0} specialists selected`;
-    case 'quality': return `${o.affectedSerials.length} affected units, containment, default disposition ${o.defaultDisposition}`;
-    case 'manufacturing': return `root cause: ${o.causes[0].cause}; rework ${o.rework.routing} feasible`;
-    case 'engineering': return o.rework ? `rework ${o.rework.length}, scrap ${o.scrap.length} (${o.rule})` : 'approved repair identified; feasibility requested';
-    case 'sustainability': return `rework avoids ≈${Math.round(o.avoidedKgCO2e)} kgCO₂e`;
-  }
-  return '';
-}
 function fmtCheck(c) {
   const f = v => c.pct ? `${(v * 100).toFixed(4)}%` : c.money ? `€${v.toFixed(6)}` : c.bool ? (v ? 'true' : 'false') : Number.isInteger(v) ? int(v) : v.toFixed(3);
   return `${f(c.lhs)} = ${f(c.rhs)}`;

@@ -1,11 +1,8 @@
 // LIVE DEMO — the centerpiece. Renders engine.run; never keeps its own timers.
 import { icon } from './icons.js';
 import { esc, $, int, compact, eur, bytes, ms, pct, clock, signedMm } from './format.js';
-import { STORY } from '../scenarios/manufacturing/scenario.js';
-import { STAGES as STAGE_LIST } from '../scenarios/manufacturing/pipeline.js';
 import { modelCost } from '../engine/telemetry.js';
 
-const TAGLINE = { orchestrator: 'Plans · coordinates · decides', quality: 'Inspect · contain', manufacturing: 'Process · tool · rework', engineering: 'Rules · disposition', sustainability: 'Footprint trade-offs' };
 const STATES = [
   { id: 'INGESTING', label: 'Ingest', c: '#7e95a8' }, { id: 'GROOMING', label: 'Groom', c: 'var(--lean)' }, { id: 'ORCHESTRATING', label: 'Orchestrate', c: 'var(--a2a)' },
   { id: 'ANALYZING', label: 'Analyze', c: 'var(--mcp)' }, { id: 'DECIDING', label: 'Decide', c: 'var(--model)' }, { id: 'COMPLETED', label: 'Measure', c: 'var(--ok)' }
@@ -14,66 +11,88 @@ const KIND_TAG = { mcp: ['mcp', 'MCP'], a2a: ['a2a', 'A2A'], model: ['model', 'M
 
 // ---------- Canvas geometry (viewBox 800 × 450) ----------
 const AG_Y = 196, AG_H = 70, AG_W = 164, SV_Y = 382, SV_H = 54;
-const AGENT_X = { quality: 108, manufacturing: 302, engineering: 498, sustainability: 692 };
-const SERVER_X = { qms: [108, 150], mes: [302, 150], plm: [442, 104], sim: [554, 104], lca: [692, 150] };
-const SERVER_OWNER = { qms: 'quality', mes: 'manufacturing', plm: 'engineering', sim: 'engineering', lca: 'sustainability' };
+let AGENT_X = {}, SERVER_X = {}, MCP_EDGES = [], PAIRS = [];
 const pairId = (a, b) => [a, b].sort().join('--');
-const PAIRS = [['quality', 'engineering'], ['quality', 'manufacturing'], ['engineering', 'manufacturing'], ['engineering', 'sustainability'], ['quality', 'sustainability'], ['manufacturing', 'sustainability']];
-
+/** Layout derived from the scenario: specialists in slots, servers in slots, edges from the run script. */
+function layout(sc) {
+  const specialists = sc.agents.filter(a => a.id !== 'orchestrator');
+  const slot = (n, i) => 800 / n * (i + 0.5);
+  AGENT_X = Object.fromEntries(specialists.map((a, i) => [a.id, slot(specialists.length, i)]));
+  SERVER_X = Object.fromEntries(sc.servers.map((s, i) => [s.id, slot(sc.servers.length, i)]));
+  const steps = sc.buildScript();
+  MCP_EDGES = [...new Set(steps.filter(x => x.kind === 'mcp').map(x => `${x.agent}--${x.server}`))].map(k => k.split('--'));
+  PAIRS = [...new Set(steps.filter(x => x.kind === 'a2a' && x.from !== 'orchestrator' && x.to !== 'orchestrator').map(x => pairId(x.from, x.to)))].map(k => k.split('--'));
+}
 function arcPath(a, b) {
-  const [p, q] = [a, b].sort();
-  const x1 = AGENT_X[p], x2 = AGENT_X[q], dir = Math.sign(x2 - x1);
-  const s = x1 + dir * 44, e = x2 - dir * 44, h = 26 + Math.abs(x2 - x1) * 0.14;
+  const [p, q] = [a, b].sort((m, n) => AGENT_X[m] - AGENT_X[n]);
+  const x1 = AGENT_X[p], x2 = AGENT_X[q];
+  const s = x1 + 44, e = x2 - 44, h = 26 + Math.abs(x2 - x1) * 0.14;
   return `M${s} ${AG_Y} Q${(s + e) / 2} ${AG_Y - 2 * h} ${e} ${AG_Y}`;
 }
 const spokePath = id => `M400 70 C400 138 ${AGENT_X[id]} 128 ${AGENT_X[id]} ${AG_Y}`;
-const mcpPath = sid => { const ax = AGENT_X[SERVER_OWNER[sid]], [sx] = SERVER_X[sid]; return `M${ax} ${AG_Y + AG_H} C${ax} 326 ${sx} 332 ${sx} ${SV_Y}`; };
+const mcpPath = (a, sid) => { const ax = AGENT_X[a], sx = SERVER_X[sid]; return `M${ax} ${AG_Y + AG_H} C${ax} 326 ${sx} 332 ${sx} ${SV_Y}`; };
+const SV_W = 138;
 
 function nodeIcon(name, x, y, size = 18) { return `<g transform="translate(${x} ${y})">${icon(name, size, 1.7)}</g>`; }
 
 function canvasSvg(sc) {
   const agents = sc.agents.filter(a => a.id !== 'orchestrator');
   const orch = sc.agents.find(a => a.id === 'orchestrator');
-  const agentNode = a => { const x = AGENT_X[a.id] - AG_W / 2; return `<g class="node agent" id="n-${a.id}" data-agent="${a.id}"><rect class="box" x="${x}" y="${AG_Y}" width="${AG_W}" height="${AG_H}" rx="14"/><rect class="ic-bg" x="${x + 12}" y="${AG_Y + 13}" width="30" height="30" rx="9"/><g class="ic">${nodeIcon(a.icon, x + 18, AG_Y + 19)}</g><text class="name" x="${x + 52}" y="${AG_Y + 27}">${esc(a.name.replace(' Agent', ''))}</text><text class="role" x="${x + 52}" y="${AG_Y + 42}">${esc(TAGLINE[a.id])}</text><text class="meta" x="${x + 12}" y="${AG_Y + 60}" id="m-${a.id}">idle</text><circle class="think" cx="${x + AG_W - 13}" cy="${AG_Y + 13}" r="4"/></g>`; };
-  const serverNode = s => { const [cx, w] = SERVER_X[s.id], x = cx - w / 2, narrow = w < 140; return `<g class="node server" id="n-${s.id}"><rect class="box" x="${x}" y="${SV_Y}" width="${w}" height="${SV_H}" rx="12"/><rect class="ic-bg" x="${x + 10}" y="${SV_Y + 12}" width="28" height="28" rx="8"/><g class="ic">${nodeIcon(s.icon, x + 15, SV_Y + 17)}</g><text class="name" x="${x + 46}" y="${SV_Y + 24}" style="font-size:12px">${esc(narrow ? s.id.toUpperCase() : s.short)}</text><text class="role" x="${x + 46}" y="${SV_Y + 39}">${esc(narrow ? s.short : s.system.split('·')[0].trim())}</text><text class="meta" x="${x + (narrow ? 46 : 46)}" y="${SV_Y + 50}" id="m-${s.id}"></text></g>`; };
+  const agentNode = a => { const x = AGENT_X[a.id] - AG_W / 2; return `<g class="node agent" id="n-${a.id}" data-agent="${a.id}"><rect class="box" x="${x}" y="${AG_Y}" width="${AG_W}" height="${AG_H}" rx="14"/><rect class="ic-bg" x="${x + 12}" y="${AG_Y + 13}" width="30" height="30" rx="9"/><g class="ic">${nodeIcon(a.icon, x + 18, AG_Y + 19)}</g><text class="name" x="${x + 52}" y="${AG_Y + 27}">${esc(a.name.replace(' Agent', ''))}</text><text class="role" x="${x + 52}" y="${AG_Y + 42}">${esc(a.tagline)}</text><text class="meta" x="${x + 12}" y="${AG_Y + 60}" id="m-${a.id}">idle</text><circle class="think" cx="${x + AG_W - 13}" cy="${AG_Y + 13}" r="4"/></g>`; };
+  const serverNode = s => { const x = SERVER_X[s.id] - SV_W / 2; return `<g class="node server" id="n-${s.id}"><rect class="box" x="${x}" y="${SV_Y}" width="${SV_W}" height="${SV_H}" rx="12"/><rect class="ic-bg" x="${x + 10}" y="${SV_Y + 12}" width="28" height="28" rx="8"/><g class="ic">${nodeIcon(s.icon, x + 15, SV_Y + 17)}</g><text class="name" x="${x + 46}" y="${SV_Y + 24}" style="font-size:12px">${esc(s.short)}</text><text class="role" x="${x + 46}" y="${SV_Y + 38}">${esc(s.system)}</text><text class="meta" x="${x + 46}" y="${SV_Y + 50}" id="m-${s.id}"></text></g>`; };
   return `<svg class="orch-svg" viewBox="0 0 800 450" role="img" aria-label="Agents, MCP tool connections and A2A messages">
     <rect class="band-a2a" x="0" y="84" width="800" height="104" rx="14"/><text class="band-label a2a" x="14" y="101">A2A · AGENT ↔ AGENT</text>
     <rect class="band-mcp" x="0" y="274" width="800" height="100" rx="14"/><text class="band-label mcp" x="14" y="291">MCP · AGENT ↔ TOOLS &amp; DATA</text>
     <g id="edges">
       ${agents.map(a => `<path class="edge a2a" id="e-orch--${a.id}" d="${spokePath(a.id)}"/>`).join('')}
       ${PAIRS.map(([a, b]) => `<path class="edge a2a idle-arc" id="e-${pairId(a, b)}" d="${arcPath(a, b)}"/>`).join('')}
-      ${sc.servers.map(s => `<path class="edge mcp" id="e-${s.id}" d="${mcpPath(s.id)}"/>`).join('')}
+      ${MCP_EDGES.map(([a, sv]) => `<path class="edge mcp" id="e-${a}--${sv}" d="${mcpPath(a, sv)}"/>`).join('')}
     </g>
-    ${sc.servers.map(s => { const ax = AGENT_X[SERVER_OWNER[s.id]], [sx] = SERVER_X[s.id], mx = (ax + sx) / 2; return `<g class="mcp-pill" id="p-${s.id}"><rect x="${mx - 17}" y="320" width="34" height="15" rx="7.5"/><text x="${mx}" y="330.6" text-anchor="middle">MCP</text></g>`; }).join('')}
-    <g class="node orch" id="n-orchestrator"><rect class="box" x="260" y="14" width="280" height="56" rx="14"/><rect class="ic-bg" x="272" y="27" width="30" height="30" rx="9"/><g class="ic">${nodeIcon(orch.icon, 278, 33)}</g><text class="name" x="312" y="38">${esc(orch.name)}</text><text class="role" x="312" y="53">${esc(TAGLINE.orchestrator)}</text><text class="meta" x="526" y="38" text-anchor="end" id="m-orchestrator"></text><circle class="think" cx="530" cy="22" r="3.5"/></g>
+    ${MCP_EDGES.map(([a, sv]) => { const mx = (AGENT_X[a] + SERVER_X[sv]) / 2; return `<g class="mcp-pill" id="p-${a}--${sv}"><rect x="${mx - 17}" y="320" width="34" height="15" rx="7.5"/><text x="${mx}" y="330.6" text-anchor="middle">MCP</text></g>`; }).join('')}
+    <g class="node orch" id="n-orchestrator"><rect class="box" x="260" y="14" width="280" height="56" rx="14"/><rect class="ic-bg" x="272" y="27" width="30" height="30" rx="9"/><g class="ic">${nodeIcon(orch.icon, 278, 33)}</g><text class="name" x="312" y="38">${esc(orch.name)}</text><text class="role" x="312" y="53">${esc(orch.tagline)}</text><text class="meta" x="526" y="38" text-anchor="end" id="m-orchestrator"></text><circle class="think" cx="530" cy="22" r="3.5"/></g>
     ${agents.map(agentNode).join('')}
     ${sc.servers.map(serverNode).join('')}
     <g id="pulses"></g>
   </svg>`;
 }
 
-function gaugeMarkup(inc) {
-  const lo = -0.25, hi = 0.25, x = v => ((Math.min(hi, Math.max(lo, v)) - lo) / (hi - lo)) * 100;
-  return `<div class="gauge"><div class="gauge-head"><span>${esc(inc.featureName)} · deviation</span><b>${signedMm(inc.measuredDeviationMm)}</b></div>
-    <div class="gauge-track" role="img" aria-label="Measured deviation +0.18 mm outside the ±0.10 mm tolerance band"><div class="gauge-axis"></div><div class="gauge-band" style="left:${x(-inc.toleranceMm)}%;width:${x(inc.toleranceMm) - x(-inc.toleranceMm)}%"></div><div class="gauge-nominal" style="left:${x(0)}%"></div><div class="gauge-mark" style="left:${x(inc.measuredDeviationMm)}%"></div></div>
-    <div class="gauge-scale">${[-0.2, -0.1, 0, 0.1, 0.2].map(v => `<span style="left:${x(v)}%">${v > 0 ? '+' : ''}${v.toFixed(2)}</span>`).join('')}</div></div>`;
+/** Loop A capacity gauge. Values appear only once they have been computed by the run. */
+function gaugeMarkup(inc, run) {
+  const lo = 700, hi = 1060, x = v => ((Math.min(hi, Math.max(lo, v)) - lo) / (hi - lo)) * 100;
+  const target = inc.itKw * (1 + inc.allowancePct / 100);
+  const summary = run.grooming.evidenceList.find(e => e.type === 'LOOP_SUMMARY');
+  const p95 = summary?.v.p95Kw ?? null;
+  const releasedKw = run.a2aMessages.find(m => m.from === 'workload')?.data.releasedKw ?? 0;
+  const confirmed = run.a2aMessages.some(m => m.from === 'cooling' && m.data.condition);
+  const load = p95 == null ? null : p95 - (confirmed ? releasedKw : 0);
+  const headroom = load == null ? null : inc.loopCapacityKw - load - target;
+  const head = p95 == null ? `<span class="muted">measured load not yet computed</span>` : `<b style="color:${headroom >= 0 ? 'var(--ok)' : 'var(--bad)'}">${headroom >= 0 ? '+' : '−'}${Math.abs(headroom).toFixed(1)} kW</b>`;
+  const seg = (a, b, cls, title) => `<div class="cap-seg ${cls}" style="left:${x(a)}%;width:${Math.max(0, x(b) - x(a))}%" title="${esc(title)}"></div>`;
+  return `<div class="gauge"><div class="gauge-head"><span>Loop A · load p95 + new rack vs ${int(inc.loopCapacityKw)} kW usable</span>${head}</div>
+    <div class="cap-track" role="img" aria-label="Loop A capacity gauge">
+      ${load == null ? seg(lo, hi, 'unknown', 'Measured during grooming') : seg(lo, load, 'load', `p95 ${load.toFixed(1)} kW`)}
+      ${confirmed ? seg(load, p95, 'freed', `released ${releasedKw} kW`) : ''}
+      ${load == null ? '' : seg(load, load + target, headroom >= 0 ? 'rack ok' : 'rack over', `R-17 target ${target} kW`)}
+      <div class="cap-limit" style="left:${x(inc.loopCapacityKw)}%"></div>
+    </div>
+    <div class="gauge-scale">${[700, 800, 900, 1000].map(v => `<span style="left:${x(v)}%">${v}</span>`).join('')}<span style="left:${x(1052)}%">kW</span></div>
+    <div class="cap-legend"><span><i class="load"></i>measured p95</span><span><i class="rack"></i>R-17 + 20 % (${target} kW)</span>${confirmed ? '<span><i class="freed"></i>released</span>' : ''}<span><i class="limit"></i>usable capacity</span></div></div>`;
 }
 
 export function mountDemo(el, app) {
   const { scenario: sc, engine } = app;
   const inc = sc.incident;
-  let preview = null, lastActiveKey = '', lastLogCount = 0;
+  let lastActiveKey = '', lastLogCount = 0;
+  layout(sc);
 
   el.innerHTML = `
   <div class="demo-head">
-    <div><span class="eyebrow"><i class="pip"></i>Live demo · simulated industrial scenario</span><h1 class="h2">One deviation. <span>Five systems, four specialists.</span></h1></div>
+    <div><span class="eyebrow"><i class="pip"></i>Live demo · AI factory · simulated scenario</span><h1 class="h2">One rack. One loop. <span>Four specialists.</span></h1></div>
   </div>
-  <div class="scenario-row" id="scenarios">${app.scenarios.map(s => `<button class="scenario" data-scenario="${s.id}" aria-pressed="${s.id === sc.id}"><span class="ic">${icon(s.icon, 18)}</span><span style="min-width:0"><b>${esc(s.title)}</b><small>${esc(s.domain)}</small></span><span class="tag ${s.status === 'ready' ? 'ok' : 'neutral'}">${s.status === 'ready' ? 'Live' : 'Preview'}</span></button>`).join('')}</div>
-  <div id="scenario-note"></div>
   <div class="glass incident-bar">
-    <div><div class="incident-id"><span class="tag bad">${icon('alert', 13)} ${esc(inc.id)}</span><span class="small muted">${esc(inc.site)} · station ${esc(inc.station)} · detected ${new Date(inc.detectedAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' })}</span></div>
-      <div class="incident-title">${esc(inc.title)}</div><div class="incident-sub">${esc(inc.part)} · serial ${esc(inc.serial)} — should production continue, and what do we do with the parts?</div></div>
-    ${gaugeMarkup(inc)}
+    <div><div class="incident-id"><span class="tag mcp">${icon('rack', 13)} ${esc(inc.id)}</span><span class="small muted">${esc(inc.site)} · received ${new Date(inc.detectedAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' })}</span></div>
+      <div class="incident-title">${esc(inc.title)}</div><div class="incident-sub">${esc(inc.rack)} · ${esc(inc.model)} · ${inc.itKw} kW design IT · ${esc(inc.position)} · ${esc(inc.plannedForLabel)}</div></div>
+    <div id="gauge"></div>
     <div class="controls">
       <button class="btn primary" id="btn-run"></button>
       <button class="btn" id="btn-step" title="Advance one step (→)" aria-label="Advance one step">${icon('step', 16)}</button>
@@ -115,25 +134,13 @@ export function mountDemo(el, app) {
   $('#btn-reset', el).addEventListener('click', () => { engine.reset(); lastActiveKey = ''; lastLogCount = 0; });
   el.querySelectorAll('[data-speed]').forEach(b => b.addEventListener('click', () => { engine.setSpeed(Number(b.dataset.speed)); el.querySelectorAll('[data-speed]').forEach(x => x.setAttribute('aria-pressed', String(x === b))); }));
   $('#to-technical', el).addEventListener('click', () => app.go('technical'));
-  $('#scenarios', el).addEventListener('click', e => {
-    const b = e.target.closest('[data-scenario]'); if (!b) return;
-    const s = app.scenarios.find(x => x.id === b.dataset.scenario);
-    preview = s.status === 'ready' || preview === s.id ? null : s.id;
-    renderPreview();
-  });
-  function renderPreview() {
-    el.querySelectorAll('[data-scenario]').forEach(b => b.setAttribute('aria-pressed', String(preview ? b.dataset.scenario === preview : b.dataset.scenario === sc.id)));
-    const s = preview && app.scenarios.find(x => x.id === preview);
-    $('#scenario-note', el).innerHTML = s ? `<div class="scenario-note"><div><b>${esc(s.title)} · prepared scenario.</b> ${esc(s.summary)} Agents: ${s.agents.map(esc).join(', ')}. Systems via MCP: ${s.servers.map(esc).join(', ')}. Same engine contract; data and reasoners not yet implemented.</div>${s.lab ? `<a class="btn sm" href="${s.lab}">Open the cooling Protocol Lab ${icon('external', 13)}</a>` : `<button class="btn sm ghost" data-close-preview>Back to manufacturing</button>`}</div>` : '';
-    $('[data-close-preview]', el)?.addEventListener('click', () => { preview = null; renderPreview(); });
-  }
-
   $('#log', el).addEventListener('click', e => { const r = e.target.closest('[data-ev]'); if (r) inspectEvent(app, engine.run, r.dataset.ev); });
   $('#now', el).addEventListener('click', e => { const r = e.target.closest('[data-ev]'); if (r) inspectEvent(app, engine.run, r.dataset.ev); });
 
   function update() {
     const { run, metrics } = app.live();
     renderControls(run);
+    $('#gauge', el).innerHTML = gaugeMarkup(inc, run);
     renderRail(run);
     renderPipeline(run, metrics);
     renderCanvas(run, metrics);
@@ -155,7 +162,7 @@ export function mountDemo(el, app) {
   function renderRail(run) {
     const idx = STATES.findIndex(s => s.id === run.state);
     el.querySelectorAll('.state-chip').forEach((c, i) => { c.classList.toggle('on', i === idx); c.classList.toggle('done', idx > i); });
-    const story = STORY.find(s => s.n === run.story);
+    const story = sc.story.find(s => s.n === run.story);
     $('#story-count', el).textContent = run.story ? `${String(run.story).padStart(2, '0')} / 10` : '00 / 10';
     const lead = run.status === 'completed' ? 'We compare AI cost with generated industrial value.' : story?.line;
     const detail = run.status === 'completed' ? 'Open AI economics to see whether it was worth it.' : run.narration;
@@ -172,7 +179,7 @@ export function mountDemo(el, app) {
     $('#raw-total', el).innerHTML = `<div>Raw records<b>${r.records ? int(r.records) : '—'}</b></div><div>Size<b>${r.bytes ? bytes(r.bytes) : '—'}</b></div><div>If sent as-is<b>${r.tokens ? `≈${compact(r.tokens)} tok` : '—'}</b></div>`;
     const done = run.grooming.stages;
     const currentStage = run.current?.kind === 'groom' ? run.current.stage : null;
-    $('#funnel', el).innerHTML = STAGE_LIST.map(st => {
+    $('#funnel', el).innerHTML = sc.stages.map(st => {
       const s = done.find(x => x.id === st.id);
       return `<div class="funnel-row ${s ? 'on' : ''} ${currentStage === st.id ? 'active' : ''}" title="${esc(st.operation)}"><span class="dotx"></span><b>${esc(st.label)}</b><span>${s ? `${int(s.recordsIn)} → ${int(s.recordsOut)}` : ''}</span><div class="bar"><i style="width:${s ? Math.max(1.5, (s.recordsOut / s.recordsIn) * 100) : 0}%"></i></div></div>`;
     }).join('');
@@ -208,17 +215,17 @@ export function mountDemo(el, app) {
     el.querySelectorAll('.mcp-pill').forEach(p => p.classList.remove('active'));
     const edgeFor = m => (m.from === 'orchestrator' || m.to === 'orchestrator') ? `e-orch--${m.from === 'orchestrator' ? m.to : m.from}` : `e-${pairId(m.from, m.to)}`;
     for (const m of run.a2aMessages) $(`#${edgeFor(m)}`, el)?.classList.add('used');
-    for (const c of run.mcpCalls) $(`#e-${c.server}`, el)?.classList.add('used');
+    for (const c of run.mcpCalls) $(`#e-${c.agent}--${c.server}`, el)?.classList.add('used');
     let pulse = '', key = a ? `${a.stepIndex}` : '';
     if (a?.kind === 'a2a') {
       const m = run.a2aMessages.at(-1), id = edgeFor(m); $(`#${id}`, el)?.classList.add('active');
-      const forward = id.startsWith('e-orch--') ? m.from === 'orchestrator' : [m.from, m.to].sort()[0] === m.from;
+      const forward = id.startsWith('e-orch--') ? m.from === 'orchestrator' : AGENT_X[m.from] < AGENT_X[m.to];
       pulse = dot(id, 'var(--a2a)', forward ? '0;1' : '1;0', 1.3);
     } else if (a?.kind === 'mcp') {
-      const c = run.mcpCalls.at(-1); $(`#e-${c.server}`, el)?.classList.add('active'); $(`#p-${c.server}`, el)?.classList.add('active');
-      pulse = dot(`e-${c.server}`, 'var(--mcp)', '0;1;0', 1.6);
+      const c = run.mcpCalls.at(-1), eid = `${c.agent}--${c.server}`; $(`#e-${eid}`, el)?.classList.add('active'); $(`#p-${eid}`, el)?.classList.add('active');
+      pulse = dot(`e-${eid}`, 'var(--mcp)', '0;1;0', 1.6);
     } else if (a?.kind === 'discover') {
-      $(`#e-${ev.ref.server}`, el)?.classList.add('active');
+      el.querySelectorAll(`.edge.mcp[id$="--${ev.ref.server}"]`).forEach(e => e.classList.add('active'));
     }
     if (key !== lastActiveKey) { $('#pulses', el).innerHTML = pulse; lastActiveKey = key; }
     if (!a) $('#pulses', el).innerHTML = '';
@@ -228,7 +235,7 @@ export function mountDemo(el, app) {
 
   function renderNow(run, metrics) {
     const box = $('#now', el), a = run.active, ev = run.events.at(-1);
-    if (run.status === 'idle') { box.dataset.kind = ''; box.innerHTML = `<div class="now-empty">Press <b>Start demo</b> to replay incident ${esc(inc.id)}. The engine executes each step through the MCP, A2A and model adapters; this panel shows the exchange in flight. <span class="muted">Space: start/pause · →: one step.</span></div>`; return; }
+    if (run.status === 'idle') { box.dataset.kind = ''; box.innerHTML = `<div class="now-empty">Press <b>Start demo</b> to replay request ${esc(inc.id)}. The engine executes each step through the MCP, A2A and model adapters; this panel shows the exchange in flight. <span class="muted">Space: start/pause · →: one step.</span></div>`; return; }
     if (!ev) return;
     box.dataset.kind = ev.kind;
     const [tc, tl] = KIND_TAG[ev.kind] ?? ['neutral', ev.kind];
@@ -236,7 +243,7 @@ export function mountDemo(el, app) {
     let body = '';
     if (ev.kind === 'mcp') {
       const c = run.mcpCalls.find(x => x.id === ev.ref.mcpCall);
-      body = head() + `<div class="now-grid"><div><small>Tool</small><span class="mono">${esc(c.tool)}</span></div><div class="wide"><small>Input</small><span class="mono">${esc(Object.entries(c.args).map(([k, v]) => `${k} = ${Array.isArray(v) ? `[${v.length} serials]` : v}`).join(', '))}</span></div><div><small>Latency · payload</small><span>${ms(c.latencyMs)} · ${bytes(c.payloadBytes)}</span></div><div class="full"><small>Result</small><span class="result">${esc(c.summary)}</span></div></div>`;
+      body = head() + `<div class="now-grid"><div><small>Tool</small><span class="mono">${esc(c.tool)}</span></div><div class="wide"><small>Input</small><span class="mono">${esc(Object.entries(c.args).map(([k, v]) => `${k} = ${Array.isArray(v) ? `[${v.length}]` : v}`).join(', '))}</span></div><div><small>Latency · payload</small><span>${ms(c.latencyMs)} · ${bytes(c.payloadBytes)}</span></div><div class="full"><small>Result</small><span class="result">${esc(c.summary)}</span></div></div>`;
     } else if (ev.kind === 'a2a') {
       const m = run.a2aMessages.find(x => x.id === ev.ref.message);
       body = head(`<span class="tag a2a">${esc(m.intent)}</span>`) + `<p class="now-message">“${esc(m.text)}”</p><div class="now-grid"><div><small>Payload</small><span>${m.tokens} tokens · ${Object.keys(m.data).length} fields</span></div><div class="wide"><small>Data</small><span class="mono">${esc(Object.keys(m.data).join(' · '))}</span></div><div><small>Transport</small><span>${ms(m.latencyMs)}</span></div></div>`;
@@ -282,13 +289,10 @@ export function mountDemo(el, app) {
     box.dataset.id = run.id;
     const d = r.disagreements[0];
     box.innerHTML = `<section class="recommendation" aria-labelledby="rec-title">
-      <div class="rec-head"><div><span class="tag ok">${icon('check', 13)} Evidence-based recommendation</span><h3 id="rec-title">${esc(r.decision)}</h3><p>${esc(r.production)}</p></div><span class="chip">${icon('shield', 14)} <b>Confidence</b> ${esc(r.confidence)}</span></div>
+      <div class="rec-head"><div><span class="tag ok">${icon('check', 13)} Evidence-based recommendation</span><h3 id="rec-title">${esc(r.decision)}</h3><p>${esc(r.summary)}</p></div><span class="chip">${icon('shield', 14)} <b>Confidence</b> ${esc(r.confidence)}</span></div>
       <div class="rec-grid">
-        <div class="rec-item"><small>What happened</small><p>${esc(r.whatHappened)}</p></div>
-        <div class="rec-item"><small>Affected units</small><p>${esc(r.affectedUnits)}</p></div>
-        <div class="rec-item"><small>Likely root cause</small><p>${esc(r.rootCause)}</p></div>
-        <div class="rec-item span2"><small>Corrective actions</small><ol>${r.actions.map(x => `<li>${esc(x)}</li>`).join('')}</ol></div>
-        <div class="rec-item"><small>Engineering</small><p>${esc(r.engineering)}</p><small style="margin-top:12px">Sustainability</small><p>${esc(r.sustainability)}</p></div>
+        ${r.items.map(it => `<div class="rec-item"><small>${esc(it.label)}</small><p>${esc(it.text)}</p></div>`).join('')}
+        <div class="rec-item"><small>Actions</small><ol>${r.actions.map(x => `<li>${esc(x)}</li>`).join('')}</ol></div>
       </div>
       ${d ? `<div class="disagree"><span class="ic">${icon('alert', 16)}</span><div><b>Disagreement detected · ${esc(d.topic)}</b><div class="pos">${d.positions.map(p => `<span class="chip"><b>${esc(label(sc, p.agent))}</b> ${esc(p.position)}</span>`).join('')}</div><p><b>Resolution:</b> ${esc(d.resolution)}</p></div></div>` : ''}
       <div class="spine"><div class="spine-words"><span style="--c:var(--mcp)">OPEN.</span><span style="--c:var(--lean)">LEAN.</span><span style="--c:var(--a2a)">ORCHESTRATE.</span><span style="--c:var(--ok)">MEASURE.</span></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-go="technical">Inspect the trace</button><button class="btn primary" data-go="economics">Was it worth it? ${icon('arrow', 15)}</button></div></div>
@@ -303,7 +307,6 @@ export function mountDemo(el, app) {
     lastLogCount = run.events.length;
   }
 
-  renderPreview();
   update();
   return { update };
 }

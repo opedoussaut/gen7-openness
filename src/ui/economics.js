@@ -27,7 +27,7 @@ export function mountEconomics(el, app) {
     </div>
 
     <div class="equation">
-      <div class="eq-card value"><small>ESTIMATED VALUE <span class="tag warn">assumptions</span></small><b>${eur(value.total)}</b><p>Avoided scrap, downtime and engineering time for this incident.</p></div>
+      <div class="eq-card value"><small>ESTIMATED VALUE <span class="tag warn">assumptions</span></small><b>${eur(value.total)}</b><p>${value.components.map(c => esc(c.label)).join(' + ')}.</p></div>
       <div class="eq-op">÷</div>
       <div class="eq-card"><small>AI EXECUTION COST <span class="tag lean">run telemetry</span></small><b>${eur(t.totalCost, { precise: true })}</b><p>${t.modelCalls} model calls · ${t.mcpCalls} MCP calls · ${t.a2aMessages} A2A messages · ${int(t.totalTokens)} tokens.</p></div>
       <div class="eq-op">=</div>
@@ -50,13 +50,13 @@ export function mountEconomics(el, app) {
       </section>
       <section class="panel econ-panel" aria-labelledby="val-h">
         <div class="panel-title"><span class="eyebrow" id="val-h">${icon('coins', 14)} Estimated business value</span><span class="tag warn">assumptions</span></div>
-        <p class="kind">What the decision is worth, estimated from stated assumptions and this run's outcome (${run.recommendation.outcome.reworkUnits} units reworked, ${run.recommendation.outcome.scrapUnits} scrapped). Not a measured customer value.</p>
+        <p class="kind">What the decision is worth, estimated from stated assumptions and this run's outcome (${esc(value.outcome)}). Not a measured customer value.</p>
         <table class="ledger"><tbody>
           ${value.components.map(c => `<tr><td>${esc(c.label)}<small>${esc(c.formula)}</small></td><td>${eur(c.value)}</td></tr>`).join('')}
           <tr class="total"><td>Estimated value</td><td>${eur(value.total)}</td></tr>
         </tbody></table>
         <div class="assumption"><b>Baseline assumed:</b> ${esc(value.baseline)}</div>
-        <div class="co2">${icon('leaf', 18)}<span>Not monetised: rework avoids ≈ <b>${Math.round(value.avoidedKgCO2e)} kgCO₂e</b> versus scrapping the recoverable units (illustrative LCA factors).</span></div>
+        <div class="co2">${icon('leaf', 18)}<span>Not monetised: timing the burn-in to the low-carbon window avoids ≈ <b>${Math.round(value.co2SavedKg)} kgCO₂e</b> (grid forecast, IT energy only).</span></div>
       </section>
     </div>
 
@@ -75,7 +75,7 @@ export function mountEconomics(el, app) {
           <div class="cmp-bar naive"><em>NAIVE</em><div class="track"><i style="width:100%"></i></div><span>${fmtUnit(r.unit, r.naive)}</span></div>
           <div class="cmp-bar lean"><em>LEAN</em><div class="track"><i style="width:${Math.max(0.4, r.lean / r.naive * 100)}%"></i></div><span>${fmtUnit(r.unit, r.lean)}</span></div></div>
           <span class="fx">${times(r.factor)}</span></div>`).join('')}
-        <div class="cmp-row"><b>Business decision</b><div class="small muted">Assumed equivalent for this comparison. In practice, burying 12 relevant units among ${int(m.context.rawRecords)} raw records also raises the risk of a worse decision; that effect is not quantified here.</div><span class="fx" style="color:var(--muted)">=</span></div>
+        <div class="cmp-row"><b>Business decision</b><div class="small muted">Assumed equivalent for this comparison. In practice, burying the relevant evidence among ${int(m.context.rawRecords)} raw records also raises the risk of a worse decision; that effect is not quantified here.</div><span class="fx" style="color:var(--muted)">=</span></div>
         <p class="cmp-note">${naive.totals.windowOverflows.map(o => `The naive ${esc(label(sc, o.agent))} context (${compact(o.tokens)} tokens) exceeds the ${compact(sc.models[naive.calls.find(c => c.agent === o.agent).model].contextWindow)}-token window and must be split into ${o.chunks} chunked calls.`).join(' ')} Bars are linear. Energy uses indicative per-token factors (${sc.energy.whPer1kInputTokens} Wh / 1k input, ${sc.energy.whPer1kOutputTokens} Wh / 1k output) — order of magnitude only.</p>
       </div>
     </section>
@@ -87,7 +87,7 @@ export function mountEconomics(el, app) {
         <div class="panel"><div class="eyebrow" style="margin-bottom:10px">Infrastructure</div><table class="mini-table"><tbody>
           <tr><td>Source extraction</td><td>€${sc.infra.extractionPerSourceEur} / source</td></tr><tr><td>MCP tool call</td><td>€${sc.infra.mcpCallEur} / call</td></tr><tr><td>A2A message</td><td>€${sc.infra.a2aMessageEur} / message</td></tr><tr><td>Grooming compute</td><td>€${sc.infra.computeEurPerCpuHour} / CPU-hour</td></tr></tbody></table></div>
         <div class="panel"><div class="eyebrow" style="margin-bottom:10px">Value assumptions</div><table class="mini-table"><tbody>
-          <tr><td>HX-7 part cost</td><td>€${sc.value.partCostEur}</td></tr><tr><td>Rework RW-112</td><td>€${sc.value.reworkCostEur} / unit</td></tr><tr><td>Cell cost</td><td>€${int(sc.value.cellCostPerHourEur)} / h</td></tr><tr><td>Hold: manual → orchestrated</td><td>${sc.value.manualHoldHours} h → ${sc.value.orchestratedHoldHours} h</td></tr><tr><td>Engineering: manual → review</td><td>${sc.value.manualEngineeringHours} h → ${sc.value.orchestratedReviewHours} h at €${sc.value.engineeringRateEur}/h</td></tr></tbody></table></div>
+          <tr><td>Rack online earlier</td><td>${sc.value.daysEarlier} days</td></tr><tr><td>Internal GPU-hour rate</td><td>€${sc.value.gpuHourEur.toFixed(2)}</td></tr><tr><td>Manual study → review</td><td>${sc.value.manualStudyHours} h → ${sc.value.reviewHours} h</td></tr><tr><td>Engineering rate</td><td>€${sc.value.engineeringRateEur} / h</td></tr></tbody></table></div>
       </div>
     </details>`;
   }

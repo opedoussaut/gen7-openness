@@ -1,6 +1,7 @@
 // LEARN — MCP + A2A for everyone, then the complete architecture.
 import { icon } from './icons.js';
-import { esc, $ } from './format.js';
+import { esc, $, int, compact, eur, pct, bytes, ms } from './format.js';
+import { computeMetrics } from '../engine/telemetry.js';
 import { PILLARS } from '../domain/models.js';
 
 const PILLAR_COLOR = { open: 'var(--mcp)', lean: 'var(--lean)', orchestrate: 'var(--a2a)', measure: 'var(--ok)' };
@@ -25,12 +26,13 @@ const glyphA2a = `<svg class="duo-glyph" viewBox="0 0 130 70" aria-hidden="true"
 export function mountLearn(el, app) {
   const { scenario } = app;
   const specialists = scenario.agents.filter(a => a.id !== 'orchestrator');
-  const sample = app.reference.run.a2aMessages.find(m => m.from === 'quality' && m.to === 'engineering');
-  const diagramAgents = [scenario.agents.find(a => a.id === 'quality'), scenario.agents.find(a => a.id === 'engineering'), scenario.agents.find(a => a.id === 'sustainability')];
+  const ref = app.reference.run, refM = computeMetrics(ref, scenario);
+  const sample = ref.a2aMessages.find(m => m.from === 'cooling' && m.to === 'workload') ?? ref.a2aMessages[0];
+  const diagramAgents = specialists.slice(0, 3);
   const nA = diagramAgents.length, nS = scenario.servers.length;
   const toolExamples = scenario.servers.map(s => ({ s, t: s.tools[0] }));
   const arch = [
-    { k: 'DATA', ic: 'database', c: '#7e95a8', p: 'Heterogeneous plant data: MES, historian, QMS, PLM, maintenance, suppliers.', page: 'demo' },
+    { k: 'DATA', ic: 'database', c: '#7e95a8', p: 'Heterogeneous facility data: CDU telemetry, PDUs, GPUs, scheduler, DCIM, grid.', page: 'demo' },
     { k: 'GROOM', ic: 'funnel', c: 'var(--lean)', p: 'Deterministic filter, normalise, deduplicate, correlate, aggregate, rank.', page: 'demo' },
     { k: 'SPECIALISED AGENTS', ic: 'plug', c: 'var(--mcp)', p: 'Narrow responsibilities. Each reaches its systems through MCP.', page: 'demo' },
     { k: 'A2A ORCHESTRATION', ic: 'team', c: 'var(--a2a)', p: 'Bounded, structured messages between specialists.', page: 'demo' },
@@ -44,7 +46,7 @@ export function mountLearn(el, app) {
   <div class="hero">
     <span class="eyebrow"><i class="pip"></i>GEN7 Openness · industrial AI, made observable</span>
     <h1 class="display">Open. Lean. Orchestrate. <span>Measure.</span></h1>
-    <p class="lede">See AI agents discover industrial tools, work together, spend tokens — and whether it was worth it. Four ideas, about a minute to read. Then watch them run on a simulated quality incident.</p>
+    <p class="lede">See AI agents discover industrial tools, work together, spend tokens — and whether it was worth it. Read the ideas here in a few minutes, then watch them run on a simulated AI-factory decision.</p>
     <div class="pillars">${PILLARS.map((p, i) => `<div class="pillar" style="--c:${PILLAR_COLOR[p.id]}"><i>0${i + 1}</i><b>${p.word}</b><p>${esc(p.line)}</p></div>`).join('')}</div>
   </div>
 
@@ -74,7 +76,7 @@ export function mountLearn(el, app) {
     <div class="learn-copy">
       <span class="tag a2a">${icon('team', 14)} A2A · Agent-to-Agent</span>
       <h2 class="h2" id="a2a-title">A2A lets specialised AI agents <span>work together.</span></h2>
-      <p>Instead of one all-knowing assistant, several specialists each own a narrow responsibility — quality, manufacturing, engineering, sustainability — and a coordinator orchestrates them.</p>
+      <p>Instead of one all-knowing assistant, several specialists each own a narrow responsibility — ${specialists.map(a => esc(a.name.replace(' Agent', '').toLowerCase())).join(', ')} — and an orchestrator coordinates them.</p>
       <p>They exchange short, structured messages: one sentence and the data that supports it. No essays. Each specialist keeps its own tools and expertise.</p>
     </div>
   </section>
@@ -84,16 +86,52 @@ export function mountLearn(el, app) {
     <div class="duo-card a2a">${glyphA2a}<div><h3><em>A2A</em> connects agents<br>to each other.</h3><p>Agent ↔ agent. “Can you assess this? Here is what I found.”</p></div></div>
   </div>
 
+  <section class="learn-section" aria-labelledby="lean-title">
+    <div class="learn-copy">
+      <span class="tag lean">${icon('funnel', 14)} LEAN · deterministic pre-processing</span>
+      <h2 class="h2" id="lean-title">Groom the data first. <span>Reason only where it is needed.</span></h2>
+      <p>Filtering, unit conversion, de-duplication, joins, averages and percentiles are not AI problems. Ordinary code does them exactly, in milliseconds, for almost nothing.</p>
+      <p>So the facility telemetry is prepared <b>before</b> any model sees it. Agents then reason over a small evidence pack instead of millions of raw values: fewer tokens, lower cost, faster answers — and a signal that is no longer buried.</p>
+      <p class="fine">Numbers from the reference run, computed in your browser.</p>
+    </div>
+    <div class="visual">
+      <div class="visual-top"><span class="eyebrow">Lean context pipeline · reference run</span><span class="tag lean">no AI involved</span></div>
+      <div class="lean-mini">
+        <div class="lm-col raw"><small>RAW TELEMETRY</small><b>${int(refM.context.rawRecords)}</b><span>records · ${bytes(refM.context.rawBytes)}</span><em>≈${compact(refM.context.rawTokens)} tokens</em></div>
+        <div class="lm-steps">${ref.grooming.stages.map(st => `<div><span>${esc(st.label)}</span><i>${int(st.recordsOut)}</i></div>`).join('')}</div>
+        <div class="lm-col lean"><small>EVIDENCE PACK</small><b>${int(refM.context.evidenceRecords)}</b><span>records · ${bytes(refM.context.evidenceBytes)}</span><em>≈${compact(refM.context.evidenceTokens)} tokens</em></div>
+      </div>
+      <div class="lean-mini-foot"><b>${pct(refM.context.reduction)}</b> less context · ${ms(refM.totals.groomCpuMs)} of CPU · €0 of tokens</div>
+    </div>
+  </section>
+
+  <section class="learn-section reverse" aria-labelledby="measure-title">
+    <div class="visual">
+      <div class="visual-top"><span class="eyebrow">Telemetry · reference run</span><span class="tag ok">every call counted</span></div>
+      <div class="measure-grid">
+        <div><small>Model calls</small><b>${refM.totals.modelCalls}</b></div><div class="mcp"><small>MCP calls</small><b>${refM.totals.mcpCalls}</b></div><div class="a2a"><small>A2A messages</small><b>${refM.totals.a2aMessages}</b></div>
+        <div><small>Tokens in</small><b>${int(refM.totals.inputTokens + refM.totals.cachedTokens)}</b></div><div><small>Tokens out</small><b>${int(refM.totals.outputTokens)}</b></div><div><small>AI execution cost</small><b>${eur(refM.totals.totalCost, { precise: true })}</b></div>
+      </div>
+      <div class="measure-agents">${refM.agents.map(a => `<div><span>${esc(a.name)}</span><b>${int(a.totalTokens)} tok</b><em>${eur(a.modelCost, { precise: true })}</em></div>`).join('')}</div>
+    </div>
+    <div class="learn-copy">
+      <span class="tag model">${icon('chart', 14)} MEASURE · telemetry</span>
+      <h2 class="h2" id="measure-title">Every token, call and euro <span>is accounted for.</span></h2>
+      <p>Each model call records its input, cached and output tokens; each MCP call its payload and latency; each A2A message its size. Costs are computed per agent and per run.</p>
+      <p>That is what lets us answer the only question that matters: was the AI worth what it cost?</p>
+    </div>
+  </section>
+
   <section class="architecture" aria-labelledby="arch-title">
     <span class="eyebrow"><i class="pip"></i>The complete architecture</span>
-    <h2 class="h2" id="arch-title">From raw plant data <span>to value per euro of AI.</span></h2>
+    <h2 class="h2" id="arch-title">From raw facility data <span>to value per euro of AI.</span></h2>
     <p class="lede" style="font-size:16px;margin-top:6px">Everything in this application follows one path. Deterministic work happens first; AI reasoning is reserved for what genuinely needs it; everything is measured.</p>
     <div class="arch-flow">${arch.map((s, i) => `<div class="arch-step" style="--c:${s.c}"><span class="ic">${icon(s.ic, 16)}</span><span class="n">0${i + 1}</span><b>${s.k}</b><p>${esc(s.p)}</p><button class="where" data-go="${s.page}">See it · ${pageName[s.page]} →</button></div>`).join('')}</div>
     <div class="arch-pillars"><span style="--c:var(--lean);grid-column:span 2">LEAN</span><span style="--c:var(--mcp)">OPEN</span><span style="--c:var(--a2a);grid-column:span 2">ORCHESTRATE</span><span style="--c:var(--ok);grid-column:span 2">MEASURE</span></div>
   </section>
 
   <div class="cta-band">
-    <div><div class="cta-spine">OPEN<span>·</span>LEAN<span>·</span>ORCHESTRATE<span>·</span>MEASURE</div><p>A drilled hole is 0.18 mm oversize. Watch five systems and four specialists decide what to do — and what it cost.</p></div>
+    <div><div class="cta-spine">OPEN<span>·</span>LEAN<span>·</span>ORCHESTRATE<span>·</span>MEASURE</div><p>A new 120 kW AI rack. One cooling loop. Watch five systems and four specialists decide — and what it cost.</p></div>
     <button class="btn" id="learn-cta">Run the live demo ${icon('arrow', 16)}</button>
   </div>`;
 

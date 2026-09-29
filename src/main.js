@@ -1,5 +1,5 @@
 // Application shell: routing, the live engine, a reference run, and page rendering.
-import { SCENARIOS } from './scenarios/index.js';
+import { scenario } from './scenarios/ai-factory/scenario.js';
 import { DemoEngine } from './engine/engine.js';
 import { computeMetrics, computeNaive, computeValue, checkInvariants } from './engine/telemetry.js';
 import { $, $$, esc } from './ui/format.js';
@@ -9,7 +9,6 @@ import { mountEconomics } from './ui/economics.js';
 import { mountTechnical } from './ui/technical.js';
 
 const PAGES = ['learn', 'demo', 'economics', 'technical'];
-const scenario = SCENARIOS[0];
 const engine = new DemoEngine(scenario);
 const reference = new DemoEngine(scenario);
 
@@ -23,7 +22,7 @@ function analyse(run) {
 }
 
 const app = {
-  scenario, scenarios: SCENARIOS, engine, reference,
+  scenario, engine, reference,
   page: 'learn',
   live: () => analyse(engine.run),
   /** Run shown on analysis pages: the live run once started, otherwise the instant reference run. */

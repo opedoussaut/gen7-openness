@@ -4,7 +4,6 @@
 // that could disagree with the engine.
 import { RUN_STATES } from '../domain/models.js';
 import { jsonBytes, estimateTokens, uid, now } from '../lib/util.js';
-import { flatten, runStage } from '../scenarios/manufacturing/pipeline.js';
 import { createMcpClient, inProcessMcpTransport } from '../adapters/mcp.js';
 import { createA2AClient, inProcessA2ATransport } from '../adapters/a2a.js';
 import { createScriptedModel } from '../adapters/model.js';
@@ -164,7 +163,7 @@ export class DemoEngine {
     switch (step.kind) {
       case 'incident':
         this.setAgentStatus([]);
-        return { lane: 'plant', durationMs: 0, event: { kind: 'incident', title: `Incident ${sc.incident.id} received`, detail: `${sc.incident.serial} · ${sc.incident.feature} +${sc.incident.measuredDeviationMm.toFixed(2)} mm vs ±${sc.incident.toleranceMm.toFixed(2)} mm` } };
+        return { lane: 'plant', durationMs: 0, event: { kind: 'incident', title: `Request ${sc.incident.id} received`, detail: `${sc.incident.rack} · ${sc.incident.model} · ${sc.incident.itKw} kW on Loop ${sc.incident.loop}, ${sc.incident.plannedForLabel}` } };
       case 'ingest': {
         if (!this.dataset) { const t = now(); this.dataset = sc.generateDataset(); run.raw.generationMs = now() - t; }
         const list = this.dataset[step.source], src = run.sources.find(s => s.id === step.source);
@@ -176,11 +175,11 @@ export class DemoEngine {
       case 'raw-summary':
         return { lane: 'plant', durationMs: 0, event: { kind: 'ingest', title: `${run.raw.records.toLocaleString('en-US')} raw records scanned`, detail: `${(run.raw.bytes / 1e6).toFixed(2)} MB · ≈${Math.round(run.raw.tokens / 1000).toLocaleString('en-US')}k tokens if sent as-is` } };
       case 'groom': {
-        if (!this.groomState) this.groomState = { list: flatten(this.dataset), links: null, bytes: run.raw.bytes };
-        const { stage, state } = runStage(step.stage, this.groomState);
+        if (!this.groomState) this.groomState = { list: sc.pipeline.flatten(this.dataset), links: null, bytes: run.raw.bytes };
+        const { stage, state } = sc.pipeline.runStage(step.stage, this.groomState);
         this.groomState = state;
         run.grooming.stages.push(stage);
-        if (step.stage === 'rank') {
+        if (step.stage === sc.stages.at(-1).id) {
           this.evidence = state.list;
           run.grooming.links = state.links;
           run.grooming.evidenceList = state.list;

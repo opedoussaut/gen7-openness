@@ -118,14 +118,9 @@ export function computeNaive(run, scenario, lean) {
 export function computeValue(run, scenario, metrics) {
   const o = run.recommendation?.outcome;
   if (!o) return null;
-  const v = scenario.value;
-  const components = [
-    { id: 'scrap', label: 'Avoided scrap', value: o.reworkUnits * (v.partCostEur - v.reworkCostEur), formula: `${o.reworkUnits} units reworked instead of scrapped × (€${v.partCostEur} part − €${v.reworkCostEur} rework)` },
-    { id: 'downtime', label: 'Avoided downtime', value: (v.manualHoldHours - v.orchestratedHoldHours) * v.cellCostPerHourEur, formula: `(${v.manualHoldHours} h manual MRB hold − ${v.orchestratedHoldHours} h station hold) × €${v.cellCostPerHourEur.toLocaleString('en-US')}/h cell cost` },
-    { id: 'engineering', label: 'Engineering time saved', value: (v.manualEngineeringHours - v.orchestratedReviewHours) * v.engineeringRateEur, formula: `(${v.manualEngineeringHours} h manual analysis − ${v.orchestratedReviewHours} h review) × €${v.engineeringRateEur}/h` }
-  ];
+  const components = scenario.valueComponents(o, scenario.value);
   const total = sum(components, c => c.value);
-  return { components, total, ratio: metrics.totals.totalCost > 0 ? total / metrics.totals.totalCost : null, avoidedKgCO2e: o.avoidedKgCO2e, baseline: v.baseline };
+  return { components, total, ratio: metrics.totals.totalCost > 0 ? total / metrics.totals.totalCost : null, co2SavedKg: o.co2SavedKg, outcome: scenario.outcomeLine(o), baseline: scenario.value.baseline };
 }
 
 /** Internal consistency checks, displayed in the Technical View. */

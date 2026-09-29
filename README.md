@@ -29,16 +29,19 @@ ES modules do not load from `file://`; always serve over HTTP.
 
 ## The scenario (simulated)
 
-Machining cell C3, station D-14. CMM-2 measures fastener hole H-3 on HX-7 housing **HT-2841** at **+0.18 mm** against **±0.10 mm**.
-The run determines what happened, whether production continues, which units are affected, the likely root cause, corrective actions, and the engineering and sustainability implications.
+AI factory, Hall 2. Deployment request **DR-0931**: install **R-17**, a GB200 NVL72-class rack (**120 kW** design IT), on **Cooling Loop A** (1,000 kW usable) on Thursday. The planning rule adds a 20 % allowance, so the target is 144 kW against the loop's measured p95 heat.
 
-Outcome of the reference run: hold D-14 · 12 units affected · root cause drill T-07 beyond tool life (coolant drift contributing) · rework 10 units under approved repair SR-HX7-03 · scrap 2 (edge distance below 2D after repair) · one Quality/Engineering disagreement detected and resolved.
+Four specialists and an orchestrator decide: Rack Deployment (DCIM, power), Liquid Cooling (BMS), Workload (scheduler, power) and Sustainability (grid carbon).
+
+Outcome of the reference run: Loop A p95 heat is 869 kW, computed from CDU flow × ΔT during grooming → **13 kW short** as-is. Cooling asks Workload to release load; Workload proposes moving low-priority, checkpointable `ft-sweep-17` from A-07 to idle B-05 (38.7 kW). Cooling re-runs the same deterministic check → **+25.6 kW**. Decision: deploy on Thursday, conditional on the migration; burn-in 01:00–07:00 at the lowest grid carbon intensity.
+
+A 12-minute presenter script is in [PRESENTER.md](PRESENTER.md).
 
 ## What is real, what is simulated
 
 **Actually computed on every run**
 
-- A seeded synthetic dataset (~13k raw records, ~4.2 MB, 7 sources with mixed units, time formats and gateway duplicates) is generated.
+- A seeded synthetic dataset (~11.8k raw records, ~3 MB, 7 sources with °F/°C, gpm/L/min, W/kW, three time formats and mirror duplicates) is generated.
 - The six grooming stages (filter, normalise, deduplicate, correlate, aggregate, rank) really execute; record counts, bytes and CPU time are measured.
 - MCP tools are deterministic handlers over the groomed evidence pack, called through JSON-RPC 2.0 `tools/list` / `tools/call` envelopes. Payload sizes are measured from the responses.
 - A2A messages are `message/send` envelopes with one sentence plus a data part, bounded to 200 tokens.
@@ -48,21 +51,18 @@ Outcome of the reference run: hold D-14 · 12 units affected · root cause drill
 
 - Agent reasoning is scripted (deterministic reasoners), not an LLM. Token usage is estimated from the actual context each agent receives (≈ 4 bytes/token) plus an assumed reasoning budget.
 - Model prices, latency profiles, infrastructure unit costs, energy factors, system latencies and business-value assumptions are illustrative. Business value is **estimated**, never presented as measured.
-- Automotive, Humanoid robotics and AI factory are prepared scenario cards; only manufacturing is implemented.
 
 ## Architecture
 
 ```
 src/
   domain/models.js            Run states, pillars, JSDoc domain types (Scenario, Agent, Tool, MCPCall, A2AMessage, …)
-  scenarios/
-    index.js                  Scenario registry (1 live, 3 prepared)
-    manufacturing/
-      dataset.js              Seeded raw data generator
-      pipeline.js             Lean context pipeline (6 deterministic stages)
-      tools.js                MCP servers: QMS, MES, PLM, Simulation, LCA
-      agents.js               Agents, system prompts, scripted reasoners
-      scenario.js             Incident, run script, pricing/value assumptions
+  scenarios/ai-factory/
+    dataset.js                Seeded raw telemetry generator (CDUs, PDUs, GPUs, scheduler, DCIM, CMMS, grid)
+    pipeline.js               Lean context pipeline (6 deterministic stages, heat = flow × ρ × cp × ΔT)
+    tools.js                  MCP servers: DCIM, Power, Scheduler, Cooling (BMS), Carbon
+    agents.js                 Agents, system prompts, scripted reasoners
+    scenario.js               Request, run script, pricing/value assumptions
   adapters/                   mcp.js · a2a.js · model.js — replaceable transports
   engine/
     engine.js                 DemoEngine: single state machine and clock (start, pause, step, reset, 1×/2×/4×)
@@ -75,7 +75,7 @@ To connect real systems: pass an `mcpTransport` that POSTs the same JSON-RPC req
 
 ## Protocol Lab (previous workshop, preserved)
 
-`lab.html` keeps the original two-tab cooling-capacity workshop (Rack Deployment Planner ↔ Liquid Cooling Engineer) with live JSON-RPC over HTTP when served by `npm start`. It is linked from the AI factory scenario card. Presenter script: [PROTOCOL-LAB-PRESENTER.md](PROTOCOL-LAB-PRESENTER.md).
+`lab.html` keeps the original two-tab cooling-capacity workshop (Rack Deployment Planner ↔ Liquid Cooling Engineer) with live JSON-RPC over HTTP when served by `npm start`. It is linked from the page footer. Presenter script: [PROTOCOL-LAB-PRESENTER.md](PROTOCOL-LAB-PRESENTER.md).
 
 This is a demonstrator, not a claim about deployed customer systems, and not an official 3DS product.
 
