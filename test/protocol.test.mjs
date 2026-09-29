@@ -15,7 +15,7 @@ test('invalid inputs and out-of-domain tools cannot yield a successful assessmen
   assert.equal(mcp({jsonrpc:'2.0',id:1,method:'tools/call',params:{name:'read_cooling_loop',arguments:{loopId:'A',existingLoadKw:870}}},'product').error.code,-32602);
   assert.equal((await a2a({...request(870),method:'tasks/get'})).error.code,-32601);
 });
-test('live server performs the specialist MCP calls over HTTP and serves only public app assets',async()=>{
+test('Protocol Lab: live server performs the specialist MCP calls over HTTP and serves only public app assets',async()=>{
   const server=createAppServer();await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const base=`http://127.0.0.1:${server.address().port}`;
   try{
     assert.equal((await fetch(`${base}/api/health`).then(r=>r.json())).mode,'live');
@@ -25,6 +25,6 @@ test('live server performs the specialist MCP calls over HTTP and serves only pu
     assert.ok(r.result.metadata.internalCalls.every(c=>c.transport.startsWith('HTTP JSON-RPC')));
     const invalid=await fetch(`${base}/api/a2a`,{method:'POST',body:'{'});assert.equal(invalid.status,400);assert.equal((await invalid.json()).error.code,-32700);
     assert.equal((await fetch(`${base}/server.mjs`)).status,404);assert.equal((await fetch(`${base}/package.json`)).status,404);
-    const html=await fetch(base).then(r=>r.text());assert.ok(html.includes('tab-understand'));assert.ok(html.includes('tab-demo'));
+    const lab=await fetch(`${base}/lab.html`).then(r=>r.text());assert.ok(lab.includes('tab-understand'));assert.ok(lab.includes('tab-demo'));
   }finally{await new Promise(resolve=>server.close(resolve));}
 });

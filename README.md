@@ -1,104 +1,82 @@
-# GEN7 · Openness Lab
+# GEN7 Openness · Industrial AI observatory
 
-A two-tab workshop experience for **horizontal openness**: understand MCP and A2A, then watch two specific specialists work together.
+An executive-quality, engineer-inspectable demonstrator of four ideas:
 
-- **Understand:** MCP is a helper using a tool. A2A is a helper asking another helper to do a job.
-- **Live demo:** a Rack Deployment Planner asks a Liquid Cooling Engineer whether a cooling loop can take a new AI rack.
-- Restrained blue industrial styling, soft surfaces, a rack illustration and animated protocol connections.
-- Pause, step, replay, inspect every exchange, export the trace, and use presentation mode.
+**OPEN → LEAN → ORCHESTRATE → MEASURE**
 
-![Understand MCP and A2A](docs/understand.jpg)
+1. **MCP** — agents discover and use tools and data through one standard interface.
+2. **A2A** — specialised agents collaborate through bounded, structured messages.
+3. **Lean AI** — deterministic grooming of plant data *before* any AI reasoning.
+4. **AI economics** — the recorded execution cost of a run, compared with the estimated value it enabled.
 
-![Specialist cooling demo](docs/demo.jpg)
-
-## Run the live HTTP version
-
-Install **Node.js 22 or later**, then:
-
-```bash
-git clone https://github.com/opedoussaut/gen7-openness.git
-cd gen7-openness
-npm start
-```
-
-Open **http://127.0.0.1:3000**. There are **no npm dependencies to install and no API key**. The interface detects the local server and selects live HTTP mode. If another app uses port 3000, set the `PORT` environment variable before starting.
-
-In GitHub Codespaces, use `HOST=0.0.0.0 npm start` and open the forwarded port 3000. Keep the port private. The agents and tools run together in one Node process; their protocol messages travel over HTTP.
-
-## Run from GitHub Pages
-
-The included workflow builds and publishes the **workshop browser simulation**. GitHub Pages is static hosting, so it cannot run the Node HTTP endpoints.
-
-For the first publication, open this repository's **Settings → Pages → Build and deployment → Source**, and select **GitHub Actions**. Then run or rerun **Verify and publish workshop** in the Actions tab. GitHub displays the resulting Pages URL after deployment. Subsequent pushes to `main` republish it.
-
-The static page clearly labels simulated exchanges. Calculations still execute live in the browser. It uses local assets and relative URLs, including at a repository subpath. For a local static build:
-
-```bash
-npm run build
-```
-
-Serve `dist/` with a static web server. ES modules require HTTP; do not double-click `index.html` as a `file://` document. For the simplest local presentation, use `npm start` and choose **Workshop** if you want simulated exchanges.
-
-## The example in one minute
-
-| Input or result | As planned | After rebalancing |
-| --- | ---: | ---: |
-| Usable cooling capacity of Loop A | 1,000 kW | 1,000 kW |
-| Existing allocation | 870 kW | 840 kW |
-| Available cooling | 130 kW | 160 kW |
-| New rack heat load | 120 kW | 120 kW |
-| Additional planning allowance (20% of rack load) | 24 kW | 24 kW |
-| Planning target | 144 kW | 144 kW |
-| Headroom after the target | **−14 kW** | **+16 kW** |
-
-The 120 kW scale is grounded in [NVIDIA's October 2024 GB200 NVL72 design contribution](https://developer.nvidia.com/blog/nvidia-contributes-nvidia-gb200-nvl72-designs-to-open-compute-project/). The 1 MW loop, its allocations and the +20% rule are explicit workshop assumptions. Assigning the entire example rack load to this loop simplifies the illustration. Actual installations must model liquid/air heat split and vendor conditions.
-
-Rebalance moves 30 kW of existing load away from Loop A. This is a scenario change, not an action against real equipment; the destination is outside the example.
-
-## What is real, and what is demonstrated?
-
-**Real:** computed results, inspectable JSON-RPC requests/responses, a served Agent Card, and live HTTP calls when running the included server. The specialist makes real loopback HTTP requests to its own MCP tool endpoint.
-
-**Scripted:** agent decisions and workflow order. There is no LLM, autonomous planning, enterprise connector, customer data, real 3DEXPERIENCE integration or engineering simulation. The illustration is not an official 3DS/Apple product or a claim of released 3DS protocol support.
-
-**Bounded protocol subsets:** MCP **2025-11-25** (`initialize`, `notifications/initialized`, `ping`, `tools/list`, `tools/call`), and A2A **0.3.0** (Agent Card, synchronous `message/send`, completed Task and Artifact). These are teaching implementations, not complete SDK servers or certified implementations. There is no authentication, streaming, durable task store or exposed production service configuration. The server binds to loopback by default.
-
-The visual sequence is paced for narration and replays internal calls returned with the completed A2A response. It is not a streaming task feed. The final artifact appears as a separate teaching moment and is labelled as part of the earlier response, not an additional network request.
-
-## Concrete responsibilities
-
-| Component | Responsibility |
+| Learn | Live demo |
 | --- | --- |
-| Rack Deployment Planner | Read R1's heat load, delegate the capacity assessment, display the returned evidence |
-| Liquid Cooling Engineer | Read Loop A, apply the agreed allowance, calculate headroom, return a recommendation and limits |
-| `read_rack_heat_load` | Read the example's 120 kW product requirement and public source |
-| `read_cooling_loop` | Subtract existing allocation from 1,000 kW |
-| `calculate_cooling_headroom` | Compare available capacity with 120 × 1.20 = 144 kW |
+| ![Learn](docs/learn.jpg) | ![Live demo](docs/live-demo.jpg) |
+| **AI economics** | **Technical view** |
+| ![AI economics](docs/economics.jpg) | ![Technical view](docs/technical.jpg) |
 
-Local endpoints: `/api/product-mcp`, `/api/cooling-mcp`, `/api/a2a`, `/.well-known/agent-card.json`, `/api/health`.
+## Run it
 
-## Presenter controls
-
-- **Present** hides the timeline and secondary controls, and enlarges the explanation.
-- **Space** starts/pauses when focus is on the demo background; form controls keep normal keyboard behavior.
-- **Right arrow** advances one step during a run; **Escape** leaves presentation mode.
-- Tabs support arrow-key navigation. Switching to Understand pauses a run; return and resume it.
-- Changing an input marks the old result stale until the next run.
-- **View the evidence** explains the arithmetic. Completed tool cards and timeline items open the exact messages.
-
-See [PRESENTER.md](PRESENTER.md) for a 12-minute script and rehearsal checklist.
-
-## Verify
+Node.js 22+. No dependencies, no API key.
 
 ```bash
-npm test
-npm run build
+npm start            # http://127.0.0.1:3000
+npm test             # engine, grooming, invariants, protocols, server
+npm run build        # static site in dist/ (GitHub Pages workflow included)
 ```
 
-Tests cover the two scenarios, the exact zero-headroom boundary, invalid inputs, domain-specific tools, live A2A-to-MCP HTTP calls, Agent Card discovery, malformed JSON and static-file restrictions.
+ES modules do not load from `file://`; always serve over HTTP.
 
-## Files
+## The scenario (simulated)
 
-`index.html`, `styles.css`, `app.js`, `icons.js`: interface. `protocol.js`: shared teaching protocol logic and scenario. `server.mjs`: dependency-free Node HTTP runtime. `scripts/build.mjs`: GitHub Pages assets. `.github/workflows/pages.yml`: verification and deployment.
+Machining cell C3, station D-14. CMM-2 measures fastener hole H-3 on HX-7 housing **HT-2841** at **+0.18 mm** against **±0.10 mm**.
+The run determines what happened, whether production continues, which units are affected, the likely root cause, corrective actions, and the engineering and sustainability implications.
 
-Protocol references: [MCP specification](https://modelcontextprotocol.io/specification/2025-11-25) · [A2A specification](https://a2a-protocol.org/v0.3.0/specification/) · [Why A2A and MCP complement each other](https://a2a-protocol.org/v0.3.0/topics/a2a-and-mcp/).
+Outcome of the reference run: hold D-14 · 12 units affected · root cause drill T-07 beyond tool life (coolant drift contributing) · rework 10 units under approved repair SR-HX7-03 · scrap 2 (edge distance below 2D after repair) · one Quality/Engineering disagreement detected and resolved.
+
+## What is real, what is simulated
+
+**Actually computed on every run**
+
+- A seeded synthetic dataset (~13k raw records, ~4.2 MB, 7 sources with mixed units, time formats and gateway duplicates) is generated.
+- The six grooming stages (filter, normalise, deduplicate, correlate, aggregate, rank) really execute; record counts, bytes and CPU time are measured.
+- MCP tools are deterministic handlers over the groomed evidence pack, called through JSON-RPC 2.0 `tools/list` / `tools/call` envelopes. Payload sizes are measured from the responses.
+- A2A messages are `message/send` envelopes with one sentence plus a data part, bounded to 200 tokens.
+- Every figure (tokens, cost, latency, naive-vs-lean, value, value/cost) is derived from one run model; ten consistency checks are shown in the Technical view.
+
+**Simulated or assumed (labelled in the UI)**
+
+- Agent reasoning is scripted (deterministic reasoners), not an LLM. Token usage is estimated from the actual context each agent receives (≈ 4 bytes/token) plus an assumed reasoning budget.
+- Model prices, latency profiles, infrastructure unit costs, energy factors, system latencies and business-value assumptions are illustrative. Business value is **estimated**, never presented as measured.
+- Automotive, Humanoid robotics and AI factory are prepared scenario cards; only manufacturing is implemented.
+
+## Architecture
+
+```
+src/
+  domain/models.js            Run states, pillars, JSDoc domain types (Scenario, Agent, Tool, MCPCall, A2AMessage, …)
+  scenarios/
+    index.js                  Scenario registry (1 live, 3 prepared)
+    manufacturing/
+      dataset.js              Seeded raw data generator
+      pipeline.js             Lean context pipeline (6 deterministic stages)
+      tools.js                MCP servers: QMS, MES, PLM, Simulation, LCA
+      agents.js               Agents, system prompts, scripted reasoners
+      scenario.js             Incident, run script, pricing/value assumptions
+  adapters/                   mcp.js · a2a.js · model.js — replaceable transports
+  engine/
+    engine.js                 DemoEngine: single state machine and clock (start, pause, step, reset, 1×/2×/4×)
+    telemetry.js              Metrics, naive comparison, business value, invariants
+  ui/                         learn · demo · economics · technical (render engine.run only)
+styles/app.css                Design system
+```
+
+To connect real systems: pass an `mcpTransport` that POSTs the same JSON-RPC requests to an MCP server, an `a2aTransport` that resolves Agent Cards and POSTs `message/send`, and a `model` adapter returning provider usage — the engine, telemetry and UI are unchanged.
+
+## Protocol Lab (previous workshop, preserved)
+
+`lab.html` keeps the original two-tab cooling-capacity workshop (Rack Deployment Planner ↔ Liquid Cooling Engineer) with live JSON-RPC over HTTP when served by `npm start`. It is linked from the AI factory scenario card. Presenter script: [PROTOCOL-LAB-PRESENTER.md](PROTOCOL-LAB-PRESENTER.md).
+
+This is a demonstrator, not a claim about deployed customer systems, and not an official 3DS product.
+
+Protocol references: [MCP specification](https://modelcontextprotocol.io/specification/2025-11-25) · [A2A specification](https://a2a-protocol.org/v0.3.0/specification/).

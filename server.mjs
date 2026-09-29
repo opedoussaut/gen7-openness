@@ -1,10 +1,17 @@
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { resolve } from 'node:path';
+import { resolve, extname } from 'node:path';
 import { mcp, a2a, agentCard, rpcError } from './protocol.js';
 const root = fileURLToPath(new URL('.', import.meta.url));
-const assets = { '/':['index.html','text/html'], '/index.html':['index.html','text/html'], '/styles.css':['styles.css','text/css'], '/app.js':['app.js','text/javascript'], '/protocol.js':['protocol.js','text/javascript'], '/icons.js':['icons.js','text/javascript'], '/favicon.svg':['favicon.svg','image/svg+xml'] };
+// Public files: legacy Protocol Lab assets, the GEN7 Openness app, and everything under src/ and styles/.
+const TOP = { '/': 'index.html', '/index.html': 'index.html', '/lab.html': 'lab.html', '/lab.css': 'lab.css', '/lab.js': 'lab.js', '/protocol.js': 'protocol.js', '/icons.js': 'icons.js', '/favicon.svg': 'favicon.svg' };
+const TYPES = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.svg': 'image/svg+xml' };
+function publicFile(path) {
+  if (TOP[path]) return TOP[path];
+  if (!/^\/(src|styles)\/[A-Za-z0-9_\-/]+\.(js|css)$/.test(path) || path.includes('..')) return null;
+  return path.slice(1);
+}
 export function createAppServer() {
   const server = createServer(async (req,res) => {
     const json = (status,body) => { res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'}); res.end(body === null ? undefined : JSON.stringify(body)); };
@@ -25,15 +32,16 @@ export function createAppServer() {
         const out = path === '/api/a2a' ? await a2a(body,invoke,'HTTP JSON-RPC · specialist → cooling tools') : mcp(body,path === '/api/product-mcp' ? 'product' : 'cooling');
         return json(out === null ? 202 : 200,out);
       }
-      if (req.method === 'GET' && assets[path]) {
-        const [file,type] = assets[path]; res.writeHead(200,{'Content-Type':`${type}; charset=utf-8`,'Cache-Control':'no-cache','X-Content-Type-Options':'nosniff'}); return res.end(await readFile(resolve(root,file)));
+      const file = req.method === 'GET' ? publicFile(path) : null;
+      if (file) {
+        const type = TYPES[extname(file)]; const body = await readFile(resolve(root,file)); res.writeHead(200,{'Content-Type':`${type}; charset=utf-8`,'Cache-Control':'no-cache','X-Content-Type-Options':'nosniff'}); return res.end(body);
       }
       json(404,{error:'Not found'});
-    } catch { if(!res.headersSent) json(500,{error:'Server error'}); else res.end(); }
+    } catch (e) { if(!res.headersSent) json(e?.code === 'ENOENT' ? 404 : 500,{error:e?.code === 'ENOENT' ? 'Not found' : 'Server error'}); else res.end(); }
   });
   return server;
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const port = Number(process.env.PORT || 3000), host = process.env.HOST || '127.0.0.1';
-  createAppServer().listen(port,host,() => console.log(`GEN7 Openness Lab: http://${host}:${port}\nLive MCP/A2A endpoints enabled. No API key or dependency install needed.`));
+  createAppServer().listen(port,host,() => console.log(`GEN7 Openness: http://${host}:${port}\nProtocol Lab (live MCP/A2A over HTTP): http://${host}:${port}/lab.html\nNo API key or dependency install needed.`));
 }

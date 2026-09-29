@@ -1,0 +1,43 @@
+// Line icons (24×24, stroke). Kept in one place so every surface shares one visual vocabulary.
+const P = {
+  compass: '<circle cx="12" cy="12" r="9"/><path d="m16 8-2.5 5.5L8 16l2.5-5.5Z"/>',
+  arrow: '<path d="M4 12h15m-5-5 5 5-5 5"/>',
+  back: '<path d="M20 12H5m5-5-5 5 5 5"/>',
+  plug: '<path d="M8 3v5m8-5v5M6 8h12v3a6 6 0 0 1-12 0Zm6 9v4"/>',
+  team: '<circle cx="8" cy="7" r="3"/><path d="M2 20v-3a6 6 0 0 1 12 0v3m2-16a3 3 0 0 1 0 6m2 4a5 5 0 0 1 4 5v1"/>',
+  orbit: '<circle cx="12" cy="12" r="3"/><path d="M12 3a9 9 0 0 1 9 9M12 21a9 9 0 0 1-9-9"/><circle cx="21" cy="12" r="1"/><circle cx="3" cy="12" r="1"/>',
+  shield: '<path d="M12 3 4 6v6c0 4.5 3.4 8 8 9 4.6-1 8-4.5 8-9V6Z"/><path d="m9 12 2 2 4-4"/>',
+  factory: '<path d="M3 21V10l6 4v-4l6 4V5h4l2 16Z"/><path d="M7 18h2m4 0h2"/>',
+  layers: '<path d="m12 3 9 5-9 5-9-5Z"/><path d="m3 13 9 5 9-5"/>',
+  wave: '<path d="M3 12c2.5-6 4.5-6 6 0s3.5 6 6 0 3.5-6 6 0"/>',
+  leaf: '<path d="M5 19c0-8 5-14 15-14 0 10-6 15-14 15"/><path d="M5 19c3-4 6-6 10-8"/>',
+  car: '<path d="M4 16v-4l2-5h12l2 5v4Z"/><path d="M3 16h18M7 16v2m10-2v2M4 12h16"/><circle cx="8" cy="13.5" r=".5"/><circle cx="16" cy="13.5" r=".5"/>',
+  hand: '<path d="M8 13V5a1.5 1.5 0 0 1 3 0v6m0-1V4a1.5 1.5 0 0 1 3 0v6m0 0V6a1.5 1.5 0 0 1 3 0v8c0 4-2.5 7-6.5 7-2.5 0-4-1-5.5-3L3.7 14a1.5 1.5 0 0 1 2.3-2l2 1.5"/>',
+  rack: '<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M5 8h14M5 14h14M8 5h.01M8 11h.01M8 18h.01M12 5h4m-4 6h4m-4 7h4"/>',
+  play: '<path d="m8 5 11 7-11 7Z"/>',
+  pause: '<path d="M8 5v14M16 5v14"/>',
+  step: '<path d="m5 5 10 7-10 7Zm14 0v14"/>',
+  reset: '<path d="M3 11a9 9 0 1 1 2 6M3 5v6h6"/>',
+  check: '<path d="m5 12 4 4L19 6"/>',
+  info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10h.01"/>',
+  database: '<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>',
+  funnel: '<path d="M3 4h18l-7 8v7l-4 2v-9Z"/>',
+  cpu: '<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4m6-4v4M9 18v4m6-4v4M2 9h4m-4 6h4m12-6h4m-4 6h4"/>',
+  coins: '<ellipse cx="9" cy="7" rx="6" ry="3"/><path d="M3 7v5c0 1.7 2.7 3 6 3s6-1.3 6-3V7"/><path d="M9 15v3c0 1.7 2.7 3 6 3s6-1.3 6-3v-5c0-1.6-2.4-2.9-5.5-3"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  bolt: '<path d="M13 2 4 14h7l-1 8 9-12h-7Z"/>',
+  download: '<path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/>',
+  close: '<path d="m6 6 12 12M6 18 18 6"/>',
+  spark: '<path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Z"/>',
+  alert: '<path d="m12 3 10 18H2ZM12 10v4m0 3h.01"/>',
+  target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+  message: '<path d="M4 5h16v11H9l-5 4Z"/><path d="M8 10h8"/>',
+  tool: '<path d="M14.5 6.5a4 4 0 0 0-5.3 5.3L3 18l3 3 6.2-6.2a4 4 0 0 0 5.3-5.3l-2.5 2.5-2.8-.7-.7-2.8Z"/>',
+  chart: '<path d="M4 20V10m6 10V4m6 16v-7m4 7H2"/>',
+  eye: '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
+  lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  external: '<path d="M14 4h6v6m0-6-9 9M19 14v6H4V5h6"/>'
+};
+export function icon(name, size = 20, stroke = 1.6) {
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${stroke}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[name] || P.compass}</svg>`;
+}

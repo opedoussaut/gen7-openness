@@ -1,75 +1,46 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0066ac"><meta name="description" content="Understand MCP and A2A, then watch a rack deployment planner collaborate with a liquid cooling engineer."><title>GEN7 · Openness Lab</title><link rel="icon" href="./favicon.svg"><link rel="stylesheet" href="./styles.css"></head>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f5f8fb">
+<meta name="description" content="GEN7 Openness — an industrial AI orchestration observatory: MCP, A2A, lean context engineering and AI economics, demonstrated on a simulated manufacturing quality incident.">
+<title>GEN7 Openness · Industrial AI observatory</title>
+<link rel="icon" href="./favicon.svg">
+<link rel="stylesheet" href="./styles/app.css">
+</head>
 <body>
-<a href="#content" class="skip-link">Skip to content</a>
-<header class="topbar">
-  <a class="brand" href="#understand" aria-label="Openness Lab home"><span class="brand-mark" data-icon="compass"></span><span><strong>Openness<span class="brand-light">Lab</span></strong><small>HIGH-TECH · GEN7</small></span></a>
-  <nav class="tabs" role="tablist" aria-label="Workshop chapters"><button role="tab" id="tab-understand" aria-controls="understand" aria-selected="true" tabindex="0" data-tab="understand"><span>01</span> Understand</button><button role="tab" id="tab-demo" aria-controls="demo" aria-selected="false" tabindex="-1" data-tab="demo"><span>02</span> Live demo</button></nav>
-  <div class="header-actions"><button class="icon-button" id="about" aria-label="About the demonstration" title="About this demonstration"><i data-icon="info"></i></button><button class="present-button" id="present"><i data-icon="expand"></i><span>Present</span></button></div>
+<a href="#main" class="skip-link">Skip to content</a>
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="#learn" aria-label="GEN7 Openness — Learn">
+      <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" width="34" height="34"><defs><linearGradient id="bm" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1aa3d6"/><stop offset="1" stop-color="#0a5fae"/></linearGradient></defs><circle cx="16" cy="16" r="15" fill="url(#bm)"/><circle cx="16" cy="16" r="3.2" fill="#fff"/><g stroke="#fff" stroke-width="1.4" fill="none" stroke-linecap="round" opacity=".92"><path d="M16 5.5v5M16 21.5v5M5.5 16h5M21.5 16h5"/><circle cx="16" cy="16" r="8" opacity=".45"/></g></svg></span>
+      <span class="brand-text"><strong>GEN7 <span>Openness</span></strong><small>Industrial AI observatory</small></span>
+    </a>
+    <nav class="tabs" role="tablist" aria-label="Sections">
+      <button role="tab" id="tab-learn" data-page="learn" aria-controls="page-learn" aria-selected="true"><i>01</i>Learn</button>
+      <button role="tab" id="tab-demo" data-page="demo" aria-controls="page-demo" aria-selected="false" tabindex="-1"><i>02</i>Live demo</button>
+      <button role="tab" id="tab-economics" data-page="economics" aria-controls="page-economics" aria-selected="false" tabindex="-1"><i>03</i>AI economics</button>
+      <button role="tab" id="tab-technical" data-page="technical" aria-controls="page-technical" aria-selected="false" tabindex="-1"><i>04</i>Technical view</button>
+    </nav>
+    <button class="run-pill" id="run-pill" type="button" aria-live="polite" title="Go to the live demo"><span class="dot"></span><b>Idle</b><em>Ready</em></button>
+  </div>
 </header>
-<main id="content">
-<section id="understand" role="tabpanel" aria-labelledby="tab-understand" tabindex="0">
-  <div class="intro-heading"><div class="eyebrow"><span></span> HORIZONTAL OPENNESS, SIMPLY EXPLAINED</div><h1>Good tools. <span>Great teamwork.</span></h1><p>Imagine a team of little helpers building a house.<br>They need two simple ways to work.</p></div>
-  <div class="concept-grid">
-    <article class="concept mcp-concept">
-      <div class="concept-top"><span class="protocol-label blue"><i data-icon="plug"></i>MCP</span><span class="long-name">Model Context Protocol</span></div>
-      <h2>“Let me use a tool.”</h2><p class="concept-copy">A helper picks up a ruler<br>to measure a piece of wood.</p>
-      <div class="analogy" aria-label="One helper uses a ruler and gets a measurement">
-        <div class="analogy-person"><span class="sculpture helper" data-icon="bot"></span><b>A helper</b></div>
-        <div class="analogy-link"><span>“How long is it?”</span><div class="analogy-line"><i></i><b data-icon="arrow"></b></div><small>“20 centimetres.”</small></div>
-        <div class="analogy-person"><span class="sculpture measuring-tool" data-icon="ruler"></span><b>A tool</b></div>
-      </div>
-      <div class="concept-bottom"><span class="concept-mini-icon" data-icon="plug"></span><p><b>For AI: connect to tools and information.</b><br>Read a product sheet. Look up a value. Run a calculation.</p></div>
-    </article>
-    <article class="concept a2a-concept">
-      <div class="concept-top"><span class="protocol-label purple"><i data-icon="team"></i>A2A</span><span class="long-name">Agent2Agent</span></div>
-      <h2>“Can you help with this?”</h2><p class="concept-copy">One helper asks a roof expert<br>to take care of the roof.</p>
-      <div class="analogy" aria-label="One helper gives the roof expert a job and gets a finished result">
-        <div class="analogy-person"><span class="sculpture helper" data-icon="bot"></span><b>A helper</b></div>
-        <div class="analogy-link"><span>“Build the roof.”</span><div class="analogy-line"><i></i><b data-icon="arrow"></b></div><small>“Done. Here it is.”</small></div>
-        <div class="analogy-person"><span class="sculpture expert" data-icon="house"></span><b>Another helper</b></div>
-      </div>
-      <div class="concept-bottom"><span class="concept-mini-icon" data-icon="team"></span><p><b>For AI: give a job to another specialist.</b><br>The specialist uses its own tools and sends back a result.</p></div>
-    </article>
-  </div>
-  <div class="takeaway"><div><span class="eyebrow">THE ONE THING TO REMEMBER</span><h3><span class="blue-text">MCP connects tools.</span><span class="takeaway-plus">+</span><span class="purple-text">A2A connects teammates.</span></h3><p>Tools from different systems. Specialists from different teams. Working together.</p></div><button class="primary-button" id="see-demo">See it in action <i data-icon="arrow"></i></button></div>
-  <div class="intro-foot"><span>Two complementary protocols. One open ecosystem.</span><span>Next: a real-world question, explained step by step <i data-icon="arrow" data-size="15"></i></span></div>
-</section>
-<section id="demo" role="tabpanel" aria-labelledby="tab-demo" tabindex="0" hidden>
-  <div class="demo-heading"><div><div class="eyebrow">FROM THE IDEA TO THE INDUSTRY</div><h1>One rack. <span>Two specialists.</span></h1><p>Can we add a 120 kW AI rack to Cooling Loop A?</p></div><div class="runtime-pill" id="runtime-pill"><span></span><b>Checking demo mode…</b></div></div>
-  <div class="demo-grid">
-    <aside class="scenario panel">
-      <div class="panel-label"><i data-icon="cube" data-size="16"></i>THE DEPLOYMENT</div>
-      <div class="rack-object" aria-hidden="true"><div class="rack-side"></div><div class="rack-front"><div class="rack-top">R1</div><div class="rack-slots"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="rack-base"><span></span> AI COMPUTE</div></div><span class="rack-shadow"></span><span class="rack-spec-line"></span><span class="rack-spec">120<small>kW heat load</small></span></div>
-      <h2>A high-density AI rack</h2><p class="scenario-intro">GB200-class scale · illustrative R1</p>
-      <div class="input-block"><label for="existing-load">Already allocated on Loop A</label><div class="number-field"><input type="number" id="existing-load" min="750" max="920" step="1" value="870" inputmode="numeric"><span>/ 1,000 kW</span></div><input type="range" id="load-slider" min="750" max="920" step="1" value="870" aria-label="Existing load on Loop A in kW"><div class="scale"><span>750 kW</span><span>920 kW</span></div></div>
-      <div class="presets"><button id="baseline" class="selected">As planned <b>870</b></button><button id="rebalance">Rebalance <b>840</b></button></div>
-      <p class="input-explainer" id="input-explainer">130 kW remains for the new rack.</p>
-      <div class="assumption"><i data-icon="info" data-size="16"></i><span>Add <b>20% planning allowance</b><br>120 + 24 = <b>144 kW target</b></span></div>
-      <div class="run-controls"><button id="run" class="primary-button"><i data-icon="play"></i><span>Run the check</span></button><button id="step" class="secondary-button" aria-label="Run step by step" title="Step by step"><i data-icon="step"></i></button></div>
-      <div class="secondary-controls"><button id="reset" class="text-button"><i data-icon="reset" data-size="15"></i>Reset</button><label class="sr-only" for="pace">Playback pace</label><select id="pace"><option value="presenter">Presenter pace</option><option value="quick">Quick playback</option></select></div>
-    </aside>
-    <section class="ecosystem panel" aria-label="Live MCP and A2A workflow">
-      <div class="canvas-header"><span class="panel-label">THE CONNECTED WORKFLOW</span><span id="run-status" class="canvas-status">Ready to connect</span></div>
-      <div class="diagram">
-        <div class="domain-label product-label">PRODUCT ENGINEERING</div><div class="domain-label cooling-label">DATA CENTER OPERATIONS</div>
-        <svg class="connections" viewBox="0 0 1000 500" preserveAspectRatio="none" aria-hidden="true"><defs><marker id="blue-arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="m0 0 6 3-6 3Z" fill="#0077c8"/></marker><marker id="purple-arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto-start-reverse"><path d="m0 0 6 3-6 3Z" fill="#7964c9"/></marker></defs><path id="route-a2a" class="route purple-route" d="M407 165H588" marker-end="url(#purple-arrow)" marker-start="url(#purple-arrow)"/><path id="route-product" class="route blue-route" d="M225 262V367" marker-end="url(#blue-arrow)"/><path id="route-loop" class="route blue-route" d="M770 262V312Q770 328 754 328H525Q510 328 510 344V367" marker-end="url(#blue-arrow)"/><path id="route-calc" class="route blue-route" d="M770 262V335Q770 347 782 347H812V367" marker-end="url(#blue-arrow)"/></svg>
-        <div class="agent planner" id="planner"><span class="agent-avatar" data-icon="cube"></span><small>DEPLOYMENT AGENT</small><h3>Rack Deployment<br>Planner</h3><p id="planner-state">Owns the rack introduction</p></div>
-        <div class="agent engineer" id="engineer"><span class="agent-avatar" data-icon="snow"></span><small>COOLING AGENT</small><h3>Liquid Cooling<br>Engineer</h3><p id="engineer-state">Owns the capacity assessment</p></div>
-        <div class="a2a-bridge"><b>A2A</b><span id="a2a-caption">Delegate the check</span></div><span class="mcp-chip product-chip">MCP</span><span class="mcp-chip cooling-chip">MCP</span>
-        <button class="tool product-tool" id="tool-rack" disabled><i data-icon="rack"></i><b>Read rack heat load</b><span id="rack-tool-value">Product specification</span></button><button class="tool loop-tool" id="tool-loop" disabled><i data-icon="snow"></i><b>Read cooling loop</b><span id="loop-tool-value">Capacity & existing load</span></button><button class="tool calc-tool" id="tool-calc" disabled><i data-icon="calculator"></i><b>Calculate headroom</b><span id="calc-tool-value">Apply the +20% allowance</span></button>
-      </div>
-      <div class="narration" id="narration" aria-live="polite"><span id="phase-number">01<small>/ 06</small></span><div><h3 id="phase-title">Start with the situation as planned.</h3><p id="phase-copy">Watch the blue tool calls and the purple handoff. Then free 30 kW and run the same check again.</p></div></div>
-      <div class="step-track" aria-label="Workflow progress"><span><i>1</i>Read</span><span><i>2</i>Delegate</span><span><i>3</i>Inspect</span><span><i>4</i>Calculate</span><span><i>5</i>Return</span><span><i>6</i>Decide</span></div>
-      <div class="diagram-legend"><span><i class="blue-dot"></i>MCP · use a tool</span><span><i class="purple-dot"></i>A2A · ask a specialist</span></div>
-    </section>
-    <aside class="evidence panel" aria-label="Assessment result"><div class="panel-label"><i data-icon="check" data-size="16"></i>THE ENGINEER'S ANSWER</div><div id="result" aria-live="polite"><div class="empty-result"><span data-icon="calculator"></span><h2>Show the working.</h2><p>A clear answer, backed by<br>the inputs and a simple calculation.</p></div></div><div class="evidence-facts"><div><span>Available cooling</span><b id="evidence-available">—</b></div><div><span>Rack + allowance</span><b>144 kW</b></div><div><span>Headroom</span><b id="evidence-margin">—</b></div></div><p class="evidence-context" id="evidence-context">The check compares available cooling with the 144 kW planning target.</p><button id="evidence-button" class="outline-button" disabled>View the evidence <i data-icon="arrow" data-size="16"></i></button><p class="scope-note">One capacity criterion. This is not installation approval.</p><p id="stale" class="stale" hidden>Input changed. Run again to update the answer.</p><p id="error" class="error" role="alert" hidden></p></aside>
-  </div>
-  <section class="trace-panel panel"><div class="trace-header"><div><span class="panel-label">FOLLOW THE EXCHANGES</span><span class="trace-hint" id="trace-count">Select a completed exchange to look inside.</span></div><button class="text-button" id="export" disabled><i data-icon="download" data-size="16"></i>Export trace</button></div><div id="timeline" class="timeline"><div class="timeline-empty"><span class="protocol-label blue">MCP</span> Read a value <i data-icon="arrow" data-size="17"></i><span class="protocol-label purple">A2A</span> Ask the engineer <i data-icon="arrow" data-size="17"></i> Get a result with evidence</div></div></section>
-  <footer class="demo-footer"><div><label for="mode" class="sr-only">Execution mode</label><select id="mode"><option value="rehearsal">Workshop · browser simulation</option><option value="live" disabled>Live · HTTP exchanges (local server)</option></select><span id="transport-note">Checking server availability…</span></div><button class="text-button" id="sources">Sources & assumptions <i data-icon="info" data-size="15"></i></button></footer>
-</section>
+<main id="main">
+  <section class="page" id="page-learn" role="tabpanel" aria-labelledby="tab-learn"></section>
+  <section class="page" id="page-demo" role="tabpanel" aria-labelledby="tab-demo" hidden></section>
+  <section class="page" id="page-economics" role="tabpanel" aria-labelledby="tab-economics" hidden></section>
+  <section class="page" id="page-technical" role="tabpanel" aria-labelledby="tab-technical" hidden></section>
 </main>
-<dialog id="inspector" aria-labelledby="inspector-title"><div class="dialog-header"><div><span class="eyebrow">OPEN THE BLACK BOX</span><h2 id="inspector-title">Inside the demonstration</h2></div><button id="close-dialog" class="icon-button" aria-label="Close details"><i data-icon="close"></i></button></div><div id="inspector-content"></div></dialog>
-<script type="module" src="./app.js"></script>
-</body></html>
+<footer class="site-foot">
+  <span>Simulated industrial scenario · illustrative data and pricing · no customer system connected</span>
+  <span><a href="./lab.html">Protocol Lab · cooling capacity check over live JSON-RPC</a></span>
+</footer>
+<dialog id="inspector" aria-labelledby="inspector-title">
+  <div class="dialog-head"><div><span class="eyebrow" id="inspector-kicker">Inspect</span><h2 id="inspector-title">Details</h2></div><button class="icon-btn" id="inspector-close" aria-label="Close">×</button></div>
+  <div class="dialog-body" id="inspector-body"></div>
+</dialog>
+<noscript><p style="padding:40px;text-align:center">GEN7 Openness needs JavaScript. Serve the folder over HTTP (npm start) — ES modules do not load from file://.</p></noscript>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
