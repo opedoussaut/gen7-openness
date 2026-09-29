@@ -1047,3 +1047,7 @@ dialog .term-tip { position: fixed; }
 .ad-say p { font-size: 14.5px; font-weight: 600; line-height: 1.5; color: var(--ink); background: var(--ok-soft); border-radius: 12px; padding: 10px 12px; }
 .ad-limit p { font-size: 13px; line-height: 1.5; color: var(--warn); background: var(--warn-soft); border-radius: 12px; padding: 10px 12px; }
 @media (max-width: 900px) { .ad-grid { grid-template-columns: minmax(0, 1fr); } .attr-detail { padding: 16px; } }
+.attr-card .plain { font-size: 14.5px; line-height: 1.4; color: var(--ink); font-family: var(--display); }
+.attr-card p i, .ad-example i { font-style: normal; font-weight: 700; color: var(--muted); }
+.attr-card p { font-size: 13px; color: var(--ink-2); }
+.ad-example { margin-top: 8px; font-size: 15px; line-height: 1.6; color: var(--ink-2); max-width: 980px; }

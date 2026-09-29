@@ -42,15 +42,22 @@ export function gen7Facts(sc, run) {
 }
 
 /** Five attributes of Dassault Systèmes' Industrial AI, each tied to where the demo shows it. Click a card for the full evidence. */
-export function attributesMarkup(f, selected = 'transformative') {
-  const proof = {
-    transformative: `${eur(f.leanCost, { precise: true })} per decision, so it can run on every one — not only on the few that justify an expert’s day.`,
-    scientific: `Loop heat p95 ${f.p95} kW from coolant flow × ΔT; headroom ${signed(f.head1)} → ${signed(f.head2)} kW from one deterministic tool.`,
-    actionable: `A conditional go, ${f.actions} actions, ${f.approvals} approvals by accountable people.`,
-    open: `Open at the agent layer; best model per task — a large reasoning model for ${f.largeAgents.join(' and ')}, small specialist models for ${f.smallAgents.join(', ')}.`,
-    trusted: `${int(f.skillCalls + f.a2a + f.modelCalls)} machine exchanges and ${f.humanActions} human actions recorded; every figure traceable; full trace exportable.`
+/** Plain-language version of each attribute, for a non-expert audience. Numbers come from the run. */
+export function attributePlain(f) {
+  const cents = Math.max(1, Math.ceil(f.leanCost * 100));
+  const r = v => Math.round(Math.abs(v));
+  return {
+    transformative: { plain: 'Not the same job done a little faster: questions you could not afford to ask before.', example: `Checking whether a new AI rack fits used to take three teams about four days (assumed), so it was done rarely. Here the AI part costs less than ${cents} cents, so it can be done for every rack, every time.` },
+    scientific: { plain: 'The answers are calculated with physics, not guessed by the AI.', example: `Can the cooling system take ${Math.round(f.targetKw)} kW more heat (a 120 kW rack plus a ${f.allowance} % safety margin)? The calculation says: not today, about ${r(f.head1)} kW short. After moving one job elsewhere, the same calculation says: yes, with about ${r(f.head2)} kW to spare.` },
+    actionable: { plain: 'The result is a decision you can act on, not a report to read.', example: `“Install the rack on Thursday, after moving one low-priority job.” ${f.actions} concrete steps, approved by ${f.approvals} named people.` },
+    open: { plain: 'Anyone can work with our agents, and each job gets the right AI.', example: 'People and other systems talk to our specialist agents, never straight to the raw tools. A powerful, more expensive AI is used only where judgement is needed; a smaller, cheaper one does the routine checks.' },
+    trusted: { plain: 'You can see and check everything the AI did.', example: `Every question the agents asked, every answer, every euro and every human approval is recorded — ${int(f.skillCalls + f.a2a + f.modelCalls + f.humanActions)} steps in this run — and can be opened or exported for an audit.` }
   };
-  return `<div class="attr-grid" role="tablist" aria-label="Five attributes">${ATTRIBUTES.map(a => `<button class="attr-card" role="tab" data-attr="${a.id}" aria-selected="${a.id === selected}"><small>${esc(a.word.toUpperCase())}</small><em>to stand apart from ${esc(a.against)}</em><p>${esc(proof[a.id])}</p><span class="where">Evidence ${icon('arrow', 12)}</span></button>`).join('')}</div>
+}
+
+export function attributesMarkup(f, selected = 'transformative') {
+  const P = attributePlain(f);
+  return `<div class="attr-grid" role="tablist" aria-label="Five attributes">${ATTRIBUTES.map(a => `<button class="attr-card" role="tab" data-attr="${a.id}" aria-selected="${a.id === selected}"><small>${esc(a.word.toUpperCase())}</small><em>to stand apart from ${esc(a.against)}</em><b class="plain">${esc(P[a.id].plain)}</b><p><i>In this demo:</i> ${esc(P[a.id].example)}</p><span class="where">Details &amp; evidence ${icon('arrow', 12)}</span></button>`).join('')}</div>
     <div class="attr-detail" id="attr-detail" role="tabpanel">${attributeDetail(f, selected)}</div>`;
 }
 
@@ -114,10 +121,11 @@ export function attributeDetail(f, id) {
       limit: 'Traceability is demonstrated; data residency and access control (“where the data is”) are platform properties this demonstrator does not show.'
     }
   }[a.id];
-  return `<div class="ad-head"><div><small>${esc(a.word.toUpperCase())}</small><h3>to stand apart from ${esc(a.against)}</h3></div></div>
+  const P = attributePlain(f)[a.id];
+  return `<div class="ad-head"><div><small>${esc(a.word.toUpperCase())} · to stand apart from ${esc(a.against)}</small><h3>${esc(P.plain)}</h3><p class="ad-example"><i>In this demo:</i> ${esc(P.example)}</p></div></div>
     <blockquote class="ad-claim">${esc(a.claim)}<cite>Dassault Systèmes Industrial AI messaging</cite></blockquote>
     <div class="ad-grid">
-      <div class="ad-evidence"><small>What this demo shows · and how each figure is obtained</small><ol>${D.evidence.map(e => `<li><b>${esc(e.what)}</b><span>${esc(e.how)}</span></li>`).join('')}</ol></div>
+      <div class="ad-evidence"><small>For the experts · the evidence, and how each figure is obtained</small><ol>${D.evidence.map(e => `<li><b>${esc(e.what)}</b><span>${esc(e.how)}</span></li>`).join('')}</ol></div>
       <div class="ad-side">
         <div><small>Where to see it</small>${D.where.map(([pg, l]) => `<button class="btn sm" data-go="${pg}">${esc(l)} ${icon('arrow', 12)}</button>`).join('')}</div>
         <div class="ad-say"><small>Say it in one sentence</small><p>“${esc(D.say)}”</p></div>
