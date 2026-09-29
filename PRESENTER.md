@@ -15,7 +15,13 @@ Run locally (`npm start`, http://127.0.0.1:3000). Set speed to **1×** for narra
   Optional (+2 min): click a step in the pipeline card, or scroll to **Inside the lean pipeline**, and walk the six steps with the *Next* button. Best three for a non-expert audience: **Normalize** (85.6 °F → 29.78 °C; heat computed with flow × density × specific heat × ΔT), **Aggregate** (16 readings → one 15-minute value, 97 windows → one p95), **Rank** (explicit rules with scores; 0.55 threshold). In the live demo, clicking a step in the Lean context pipeline opens the same worked example.
 - **Measure**: “Every token, call and euro is counted per agent.”
 
-- **Five attributes** (strip under the hero): each card names where the demo proves it — click to jump there.
+- **Five attributes** (under the hero): click a card to open its evidence panel — the official claim, what the demo shows and how each figure is obtained, where to see it, one sentence to say, and what the demo does not prove. Suggested one-liners:
+  - *Transformative* — “Not the old study done faster: a check we can now afford on every rack, every time.”
+  - *Scientific* — “Every figure behind the decision was computed by physics and site rules, and verified again. None was generated.”
+  - *Actionable* — “A go with one condition, 4 actions and 3 named people who approved it.”
+  - *Open* — “Open at the agent, and the right model for each job.”
+  - *Trusted* — “Every call, figure and approval can be opened, checked and exported.”
+  Always say the limit when asked: MODSIM/Virtual Twin not simulated; actions approved, not executed; data residency not shown.
 - **Companion → Competence → Skill**: “LEO, Mechanical Engineer, skill *Calculate cooling headroom*. People work with Companions and Competences; Skills run inside, through MCP.” MARIE is listed as not involved in this decision.
 - **Industry World Models** (before the architecture): the three pillars in official wording, with what the demo measured in each. Say the pillar 2 caveat out loud: here physics is a formula; in production it is MODSIM simulation and the Virtual Twin.
 

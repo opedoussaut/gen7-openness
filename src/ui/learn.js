@@ -5,7 +5,7 @@ import { explainGrooming } from '../scenarios/ai-factory/explain.js';
 import { esc, $, int, compact, eur, pct, bytes, ms } from './format.js';
 import { computeMetrics } from '../engine/telemetry.js';
 import { PILLARS } from '../domain/models.js';
-import { gen7Facts, attributesMarkup, iwmMarkup, companionsMarkup } from './gen7.js';
+import { gen7Facts, attributesMarkup, attributeDetail, iwmMarkup, companionsMarkup } from './gen7.js';
 
 const PILLAR_COLOR = { open: 'var(--mcp)', lean: 'var(--lean)', orchestrate: 'var(--a2a)', measure: 'var(--ok)' };
 
@@ -69,6 +69,7 @@ export function mountLearn(el, app) {
   <section class="attr-section" aria-labelledby="attr-title">
     <span class="eyebrow"><i class="pip"></i>Dassault Systèmes Industrial AI</span>
     <h2 class="h2" id="attr-title">Five attributes. <span>Each one visible in this demo.</span></h2>
+    <p class="lede" style="font-size:16px;margin-top:8px">Select an attribute: the official claim, what the demo shows and how each figure is obtained, where to see it, one sentence to say — and what the demo does not prove.</p>
     ${attributesMarkup(f7)}
   </section>
 
@@ -191,7 +192,11 @@ export function mountLearn(el, app) {
   };
   el.querySelectorAll('.seg [data-mode]').forEach(b => b.addEventListener('click', () => setOpen(b.dataset.mode)));
   setOpen('tool');
-  el.addEventListener('click', e => { const b = e.target.closest('[data-go]'); if (b) app.go(b.dataset.go); });
+  el.addEventListener('click', e => {
+    const at = e.target.closest('[data-attr]');
+    if (at) { el.querySelectorAll('[data-attr]').forEach(x => x.setAttribute('aria-selected', String(x === at))); el.querySelector('#attr-detail').innerHTML = attributeDetail(f7, at.dataset.attr); return; }
+    const b = e.target.closest('[data-go]'); if (b) app.go(b.dataset.go);
+  });
   $('#learn-cta', el).addEventListener('click', () => app.go('demo'));
   const host = el.querySelector('#gx-host');
   el.addEventListener('click', e => {

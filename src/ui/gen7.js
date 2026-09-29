@@ -2,7 +2,8 @@
 // Every number shown here is read from a completed run (live or reference) — nothing is typed in.
 import { icon } from './icons.js';
 import { esc, int, compact, eur, pct } from './format.js';
-import { computeMetrics, computeNaive } from '../engine/telemetry.js';
+import { computeMetrics, computeNaive, computeValue, checkInvariants, modelCost } from '../engine/telemetry.js';
+import { PRESETS, decisionsPerYear } from './scale.js';
 import { ATTRIBUTES, IWM_PILLARS, IWM_QUALITIES, COMPANIONS, COMPETENCE_DEF, SKILL_DEF, skillName } from '../domain/positioning.js';
 
 const signed = v => `${v >= 0 ? '+' : '−'}${Math.abs(v).toFixed(1)}`;
@@ -28,21 +29,101 @@ export function gen7Facts(sc, run) {
     humanMinutes: m.totals.humanMinutes, actions: run.recommendation?.actions.length ?? 0, allowance: sc.incident.allowancePct, co2: outcome.co2SavedKg ?? 0, released: outcome.releasedKw ?? 0,
     leanCost: m.totals.totalCost, bfCost: naive.totals.totalCost, bfTokens: naive.totals.contextTokens,
     overflows: naive.totals.windowOverflows.length, bfCalls: naive.totals.modelCalls, modelCalls: m.totals.modelCalls,
-    largeAgents: specialists.filter(a => a.model === 'reasoning-large').map(a => a.name.replace(' Agent', '')),
-    smallAgents: specialists.filter(a => a.model === 'specialist-small').map(a => a.name.replace(' Agent', ''))
+    largeAgents: sc.agents.filter(a => a.model === 'reasoning-large').map(a => a.name.replace(' Agent', '')),
+    smallAgents: sc.agents.filter(a => a.model === 'specialist-small').map(a => a.name.replace(' Agent', '')),
+    latencyMs: m.totals.latencyMs, humanActions: run.humanActions.length, decision: run.recommendation?.decision ?? '',
+    actionList: run.recommendation?.actions ?? [], approvers: run.humanActions.filter(h => h.type === 'approve' || h.type === 'sign-off').map(h => ({ who: sc.humans.find(x => x.id === h.from)?.name ?? h.from, text: h.text })),
+    checksOk: (() => { const c = checkInvariants(run, m, computeValue(run, sc, m)); return `${c.filter(x => x.ok).length} / ${c.length}`; })(),
+    buDecisions: (() => { const bu = PRESETS.find(p => p.id === 'bu'); return bu ? decisionsPerYear(bu) : null; })(),
+    modelsUsed: Object.entries(sc.models).map(([id, md]) => ({ id, label: md.label, agents: sc.agents.filter(a => a.model === id).map(a => a.name.replace(' Agent', '')), cost: run.modelCalls.filter(c => c.model === id).reduce((n, c) => n + modelCost(c, sc.models), 0), inPerM: md.inPerM, outPerM: md.outPerM })),
+    evidenceSample: run.grooming.evidenceList.find(e => e.type === 'LOOP_SUMMARY') ?? null,
+    verifyTool: sc.loop.verifyTool
   };
 }
 
-/** Five attributes of Dassault Systèmes' Industrial AI, each tied to where the demo shows it. */
-export function attributesMarkup(f) {
+/** Five attributes of Dassault Systèmes' Industrial AI, each tied to where the demo shows it. Click a card for the full evidence. */
+export function attributesMarkup(f, selected = 'transformative') {
   const proof = {
     transformative: `${eur(f.leanCost, { precise: true })} per decision, so it can run on every one — not only on the few that justify an expert’s day.`,
     scientific: `Loop heat p95 ${f.p95} kW from coolant flow × ΔT; headroom ${signed(f.head1)} → ${signed(f.head2)} kW from one deterministic tool.`,
     actionable: `A conditional go, ${f.actions} actions, ${f.approvals} approvals by accountable people.`,
-    open: `Open at the agent layer; best model per task — large reasoning for ${f.largeAgents.join(' and ')}, small specialist models for ${f.smallAgents.join(', ')}.`,
-    trusted: `${int(f.skillCalls + f.a2a + f.modelCalls)} exchanges recorded, every figure traceable to a source record, full trace exportable.`
+    open: `Open at the agent layer; best model per task — a large reasoning model for ${f.largeAgents.join(' and ')}, small specialist models for ${f.smallAgents.join(', ')}.`,
+    trusted: `${int(f.skillCalls + f.a2a + f.modelCalls)} machine exchanges and ${f.humanActions} human actions recorded; every figure traceable; full trace exportable.`
   };
-  return `<div class="attr-grid">${ATTRIBUTES.map(a => `<button class="attr-card" data-go="${a.page}"><small>${esc(a.word.toUpperCase())}</small><em>to stand apart from ${esc(a.against)}</em><p>${esc(proof[a.id])}</p><span class="where">See it ${icon('arrow', 12)}</span></button>`).join('')}</div>`;
+  return `<div class="attr-grid" role="tablist" aria-label="Five attributes">${ATTRIBUTES.map(a => `<button class="attr-card" role="tab" data-attr="${a.id}" aria-selected="${a.id === selected}"><small>${esc(a.word.toUpperCase())}</small><em>to stand apart from ${esc(a.against)}</em><p>${esc(proof[a.id])}</p><span class="where">Evidence ${icon('arrow', 12)}</span></button>`).join('')}</div>
+    <div class="attr-detail" id="attr-detail" role="tabpanel">${attributeDetail(f, selected)}</div>`;
+}
+
+/** Full documentation of one attribute: the claim, the evidence (with how each figure is obtained), where to see it, a presenter line and the honest limit. */
+export function attributeDetail(f, id) {
+  const a = ATTRIBUTES.find(x => x.id === id) ?? ATTRIBUTES[0];
+  const ev = (what, how) => ({ what, how });
+  const D = {
+    transformative: {
+      evidence: [
+        ev(`${eur(f.leanCost, { precise: true })} of AI per decision`, 'Measured: sum of every model call (tokens × price list) and every tool and message fee recorded in this run.'),
+        ev(`About ${Math.round(f.latencyMs / 1000)} seconds of AI time for the whole check`, 'Simulated end-to-end latency of the run (model, tool and message latencies on the critical path).'),
+        ev('Today the same question is a cross-team study of about four working days', 'Stated assumption, shown on the AI economics page; replace it with the customer’s own figure.'),
+        f.buDecisions ? ev(`So the check can be run on every request — ${int(f.buDecisions)} decisions a year for a business unit`, 'Projection on the At scale page: 5 sites × 80 decisions a day × 365 days. Not a measurement.') : null
+      ].filter(Boolean),
+      where: [['economics', 'AI economics · the headline and “What was it worth?”'], ['scale', 'At scale · the same decision, thousands of times']],
+      say: 'The point is not doing the old study faster. It is being able to check every rack, every time, on evidence — a question nobody could afford to ask before.',
+      limit: 'The per-decision cost is measured; the four-day study and the business-unit volume are assumptions. “Changes what an engineer can consider” is illustrated here, not measured.'
+    },
+    scientific: {
+      evidence: [
+        ev(`Loop A heat p95 = ${f.p95} kW`, f.evidenceSample?.v?.method ? `Computed by deterministic code from CDU telemetry: ${f.evidenceSample.v.method}; then the 95th percentile over ${f.evidenceSample.v.windows} fifteen-minute windows.` : 'Computed by deterministic code from CDU flow and temperatures.'),
+        ev(`Headroom ${f.formula1} = ${signed(f.head1)} kW`, `Calculated by the tool ${f.verifyTool}, never by a model. Target = 120 kW + ${f.allowance} % site planning allowance.`),
+        ev(`After the change: ${f.formula2} = ${signed(f.head2)} kW`, 'Same tool, same formula, re-run with the released load: the loop’s acceptance test.'),
+        ev('The model never does the arithmetic', 'The agents interpret results and decide what to ask next; every number they rely on comes back from a tool, labelled “science-grounded” in the live demo.')
+      ],
+      where: [['demo', 'Live demo · the gauge, the loop panel and the recommendation'], ['learn', 'Learn · Industry World Models, pillar 2']],
+      say: 'Every figure behind this decision was computed by physics and site rules, and verified again after the change. None was generated.',
+      limit: 'Here the physics is one formula. In production, this is where MODSIM simulation and the Virtual Twin run — not simulated in this demonstrator.'
+    },
+    actionable: {
+      evidence: [
+        ev(`Decision: “${f.decision}”`, 'The recommendation produced at the end of the run, with its single condition.'),
+        ev(`${f.actions} concrete actions`, f.actionList.map((x, i) => `${i + 1}. ${x}`).join(' ')),
+        ev(`${f.approvals} approvals by accountable people`, f.approvers.map(p => `${p.who}: “${p.text}”`).join(' · ')),
+        ev(`Measured effect on the plant: ${f.released} kW released on Loop A, ≈${Math.round(f.co2)} kgCO₂e avoided by the burn-in window`, 'From the Workload proposal and the grid carbon forecast used in the run.')
+      ],
+      where: [['demo', 'Live demo · recommendation and “Decided by people”'], ['economics', 'AI economics · what the decision is worth']],
+      say: `The answer is not a report. It is a go with one condition, ${f.actions} actions and ${f.approvals} named people who approved it.`,
+      limit: 'The actions are recommended and approved, not executed: the demo does not write to the scheduler or the facility systems.'
+    },
+    open: {
+      evidence: [
+        ev('The open interface is the agent layer (A2A)', `People and agents send a goal and receive a bounded answer: ≈${int(f.answerTokens)} tokens reach the Orchestrator, against ≈${int(f.toolTokens)} tokens if every raw tool were opened instead.`),
+        ...f.modelsUsed.filter(x => x.agents.length).map(x => ev(`${x.label} for ${x.agents.join(', ')}`, `€${x.inPerM}/€${x.outPerM} per million input/output tokens (illustrative price list) · ${eur(x.cost, { precise: true })} in this run.`)),
+        ev('Models are replaceable without touching the rest', 'Each agent calls its model through an adapter; a different provider or model plugs in without changing orchestration, tools or telemetry.')
+      ],
+      where: [['learn', 'Learn · “Open the system where the knowledge is”'], ['technical', 'Technical view · model calls per agent']],
+      say: 'Open where it is safe to be open — at the agent — and the right model for each job: a large one where judgement is needed, a small one where the task is structured.',
+      limit: 'The models are scripted stand-ins with illustrative prices; openness to other AI models is shown in the architecture, not with live third-party models.'
+    },
+    trusted: {
+      evidence: [
+        ev(`${int(f.skillCalls)} skill calls, ${int(f.a2a)} agent messages, ${int(f.modelCalls)} model calls and ${f.humanActions} human actions recorded`, 'Every exchange is stored with its request, response, size, latency and cost.'),
+        ev('Every figure traceable to its source records', f.evidenceSample ? `Example: record ${f.evidenceSample.id} (source: ${f.evidenceSample.src}) carries the value and the method used to compute it.` : 'Each evidence record carries its source and method.'),
+        ev(`${f.checksOk} consistency checks pass`, 'Totals are re-computed independently (tokens, costs, calls, messages, reduction, value) and compared in the Technical view.'),
+        ev('The full trace can be exported', 'One JSON file with the run, the assumptions, the telemetry and the checks — for audit or for replay.')
+      ],
+      where: [['technical', 'Technical view · timeline, consistency checks, Export trace'], ['demo', 'Live demo · Inspect on any exchange']],
+      say: 'Nothing here is a black box: every call, figure and approval can be opened, checked and exported.',
+      limit: 'Traceability is demonstrated; data residency and access control (“where the data is”) are platform properties this demonstrator does not show.'
+    }
+  }[a.id];
+  return `<div class="ad-head"><div><small>${esc(a.word.toUpperCase())}</small><h3>to stand apart from ${esc(a.against)}</h3></div></div>
+    <blockquote class="ad-claim">${esc(a.claim)}<cite>Dassault Systèmes Industrial AI messaging</cite></blockquote>
+    <div class="ad-grid">
+      <div class="ad-evidence"><small>What this demo shows · and how each figure is obtained</small><ol>${D.evidence.map(e => `<li><b>${esc(e.what)}</b><span>${esc(e.how)}</span></li>`).join('')}</ol></div>
+      <div class="ad-side">
+        <div><small>Where to see it</small>${D.where.map(([pg, l]) => `<button class="btn sm" data-go="${pg}">${esc(l)} ${icon('arrow', 12)}</button>`).join('')}</div>
+        <div class="ad-say"><small>Say it in one sentence</small><p>“${esc(D.say)}”</p></div>
+        <div class="ad-limit"><small>What this demo does not prove</small><p>${esc(D.limit)}</p></div>
+      </div>
+    </div>`;
 }
 
 /** Industry World Models: the three pillars, with what this demo does in each (measured) and what it does not. */
