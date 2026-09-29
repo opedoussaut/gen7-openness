@@ -2,6 +2,7 @@
 import { icon } from './icons.js';
 import { esc, int, compact, eur, ms, times, pct } from './format.js';
 import { receipt, pages, TOKENS_PER_PAGE } from '../engine/telemetry.js';
+import { PRESETS, perDecisionOf, decisionsPerYear, bigEur, bigNum } from './scale.js';
 
 const fmtUnit = (unit, v) => unit === 'eur' ? eur(v, { precise: true }) : unit === 'ms' ? ms(v) : unit === 'wh' ? `${v.toFixed(v < 10 ? 2 : 1)} Wh` : compact(v);
 
@@ -26,18 +27,34 @@ export function mountEconomics(el, app) {
       <div class="run-banner">${banner}</div>
     </div>
 
+    <nav class="journey" aria-label="How to read this page">
+      <a href="#part-cost"><i>1</i><span><b>What did it cost?</b><small>measured by telemetry</small></span></a>
+      <a href="#part-value"><i>2</i><span><b>What was it worth?</b><small>estimated value</small></span></a>
+      <a href="#sv-h"><i>3</i><span><b>Why so cheap?</b><small>brute force vs lean</small></span></a>
+      <button type="button" data-go="scale" class="go"><i>4</i><span><b>What about thousands a day?</b><small>open the At scale tab</small></span>${icon('arrow', 16)}</button>
+    </nav>
+
+    <div class="glossary" aria-label="Words used on this page">
+      <span><b>Token</b> — the unit AI providers bill: about ¾ of a word.</span>
+      <span><b>Model call</b> — one question sent to an AI model.</span>
+      <span><b>MCP call</b> — an agent reading a system (a tool).</span>
+      <span><b>A2A message</b> — one agent asking another.</span>
+      <span><b>Cached</b> — instructions re-read at a 90% discount.</span>
+    </div>
+
     <div class="equation">
-      <div class="eq-card value"><small>ESTIMATED VALUE <span class="tag warn">assumptions</span></small><b>${eur(value.total)}</b><p>${value.components.map(c => esc(c.label)).join(' + ')}.</p></div>
+      <div class="eq-card value"><small>ESTIMATED VALUE <span class="tag warn">assumptions</span></small><b>${eur(value.total)}</b><p>${value.components.map(c => esc(c.label)).join(' + ')}.</p><p class="plain">In plain words: what the business gains because this decision was made quickly and with evidence.</p></div>
       <div class="eq-op">÷</div>
-      <div class="eq-card"><small>AI EXECUTION COST <span class="tag lean">run telemetry</span></small><b>${eur(t.totalCost, { precise: true })}</b><p>${t.modelCalls} model calls · ${t.mcpCalls} MCP calls · ${t.a2aMessages} A2A messages · ${int(t.totalTokens)} tokens.</p></div>
+      <div class="eq-card"><small>AI EXECUTION COST <span class="tag lean">run telemetry</span></small><b>${eur(t.totalCost, { precise: true })}</b><p>${t.modelCalls} model calls · ${t.mcpCalls} MCP calls · ${t.a2aMessages} A2A messages · ${int(t.totalTokens)} tokens.</p><p class="plain">In plain words: the meter reading for this one decision — every word the AI read or wrote, and every tool it used, priced.</p></div>
       <div class="eq-op">=</div>
-      <div class="eq-card ratio"><small>VALUE / AI COST</small><b>${times(value.ratio)}</b><p>Even if every value assumption were ten times too optimistic, the ratio would remain above ${times(value.ratio / 10)}.</p></div>
+      <div class="eq-card ratio"><small>VALUE / AI COST</small><b>${times(value.ratio)}</b><p>For every €1 spent on AI, about ${bigEur(value.ratio)} of estimated value. Even if every value assumption were ten times too optimistic, the ratio would remain above ${times(value.ratio / 10)}.</p></div>
     </div>
 
     <div class="econ-split">
-      <section class="panel econ-panel" aria-labelledby="tel-h">
-        <div class="panel-title"><span class="eyebrow" id="tel-h">${icon('chart', 14)} Run telemetry</span><span class="tag lean">recorded per call</span></div>
-        <p class="kind">What this run consumed, computed from the run's own event log. Adapters are simulated: tokens are estimated from the actual context (≈4 bytes/token); prices are illustrative.</p>
+      <section class="panel econ-panel" id="part-cost" aria-labelledby="tel-h">
+        <div class="panel-title"><span class="eyebrow" id="tel-h"><i class="part">1</i> What did it cost? · run telemetry</span><span class="tag lean">recorded per call</span></div>
+        <p class="kind">Telemetry works like a taxi meter: every call is recorded with what it read, what it wrote and what that costs. Adapters are simulated here: tokens are estimated from the actual text (≈4 bytes per token); prices are illustrative.</p>
+        ${whereItGoes(view, sc)}
         <table class="ledger"><tbody>
           <tr class="group"><td colspan="2">MODELS</td></tr>
           ${m.byModel.filter(x => x.calls).map(x => `<tr><td>${esc(x.label)}<small>${x.calls} calls · ${int(x.tokens)} tokens</small></td><td>${eur(x.cost, { precise: true })}</td></tr>`).join('')}
@@ -48,9 +65,9 @@ export function mountEconomics(el, app) {
           <tr class="sub"><td>Tokens: cached · input · output</td><td>${int(t.cachedTokens)} · ${int(t.inputTokens)} · ${int(t.outputTokens)}</td></tr>
         </tbody></table>
       </section>
-      <section class="panel econ-panel" aria-labelledby="val-h">
-        <div class="panel-title"><span class="eyebrow" id="val-h">${icon('coins', 14)} Estimated business value</span><span class="tag warn">assumptions</span></div>
-        <p class="kind">What the decision is worth, estimated from stated assumptions and this run's outcome (${esc(value.outcome)}). Not a measured customer value.</p>
+      <section class="panel econ-panel" id="part-value" aria-labelledby="val-h">
+        <div class="panel-title"><span class="eyebrow" id="val-h"><i class="part">2</i> What was it worth? · estimated value</span><span class="tag warn">assumptions</span></div>
+        <p class="kind">Value is not measured by the system: it is estimated with simple, visible formulas that you can challenge. What the decision is worth, estimated from stated assumptions and this run's outcome (${esc(value.outcome)}). Not a measured customer value.</p>
         <table class="ledger"><tbody>
           ${value.components.map(c => `<tr><td>${esc(c.label)}<small>${esc(c.formula)}</small></td><td>${eur(c.value)}</td></tr>`).join('')}
           <tr class="total"><td>Estimated value</td><td>${eur(value.total)}</td></tr>
@@ -61,6 +78,8 @@ export function mountEconomics(el, app) {
     </div>
 
     ${savingsSection(view, sc)}
+
+    ${bridge(view)}
 
     <details class="more">
       <summary>Pricing, performance and value assumptions</summary>
@@ -73,11 +92,42 @@ export function mountEconomics(el, app) {
       </div>
     </details>`;
     el.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => app.go(b.dataset.go)));
+    el.querySelectorAll('.journey a').forEach(a => a.addEventListener('click', e => { e.preventDefault(); el.querySelector(a.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
   }
   return { update };
 }
 const label = (sc, id) => sc.agents.find(a => a.id === id)?.name ?? id;
 const sumBy = (list, fn) => list.reduce((a, x) => a + fn(x), 0);
+
+/** Where the lean cost goes: reading, instructions, writing, fixed fees — one stacked bar. */
+function whereItGoes(view, sc) {
+  const r = receipt(view.run.modelCalls, sc.models), fees = view.metrics.totals.infraCost, total = view.metrics.totals.totalCost;
+  const parts = [
+    { k: 'Reading data', v: r.reading.cost, c: 'var(--mcp-2)' },
+    { k: 'Re-reading instructions', v: r.instructions.cost, c: '#c9d6e0' },
+    { k: 'Writing answers & reasoning', v: r.writing.cost, c: 'var(--a2a)' },
+    { k: 'Tools & messages', v: fees, c: 'var(--lean)' }
+  ];
+  const top = [...parts].sort((a, b) => b.v - a.v)[0];
+  return `<div class="wig"><div class="wig-title">Where the ${eur(total, { precise: true })} goes</div>
+    <div class="wig-bar">${parts.map(p => `<i style="width:${p.v / total * 100}%;background:${p.c}" title="${esc(p.k)} ${eur(p.v, { precise: true })}"></i>`).join('')}</div>
+    <div class="wig-legend">${parts.map(p => `<span><i style="background:${p.c}"></i>${esc(p.k)} <b>${Math.round(p.v / total * 100)}%</b></span>`).join('')}</div>
+    <p class="wig-note">Once the data is prepared, the largest share is <b>${esc(top.k.toLowerCase())}</b> (${Math.round(top.v / total * 100)}%): the AI now pays mainly for thinking, not for reading.</p></div>`;
+}
+
+/** Part 4: a clear bridge to the At scale tab, using the same projection as that tab (Business unit preset). */
+function bridge(view) {
+  const bu = PRESETS.find(p => p.id === 'bu'), d = perDecisionOf(view), N = decisionsPerYear(bu);
+  const save = d.bfCost - d.lnCost;
+  return `<section class="bridge" aria-labelledby="br-h">
+    <div class="bridge-copy"><span class="eyebrow"><i class="part">4</i> What about thousands of decisions?</span>
+      <h2 id="br-h">This was one decision. <span>A business unit makes ${bigNum(N)} a year.</span></h2>
+      <p>${bu.sites} sites × ${bu.perDay} decisions a day × 365 days. The same saving, repeated, becomes a budget line.</p></div>
+    <div class="bridge-eq"><div><small>per decision</small><b>${eur(save, { precise: true })}</b></div><i>×</i><div><small>decisions a year</small><b>${bigNum(N)}</b></div><i>=</i><div class="hl"><small>AI spend avoided a year</small><b>${bigEur(save * N)}</b></div></div>
+    <button class="btn bridge-btn" data-go="scale">Explore it in the At scale tab ${icon('arrow', 18)}</button>
+    <p class="bridge-note">Projection from this one decision, not a measurement. Change sites, volume and model prices in the next tab.</p>
+  </section>`;
+}
 
 /** Plain-language, three-step explanation of the brute-force vs lean saving. Every number comes from the run. */
 function savingsSection(view, sc) {
@@ -102,12 +152,12 @@ function savingsSection(view, sc) {
       <tr class="total"><td>Total for one decision</td><td>${fmt(total)}</td></tr>
     </tbody></table></div>`;
   return `<section class="savings" aria-labelledby="sv-h">
-    <span class="eyebrow"><i class="pip"></i>Brute force vs lean</span>
+    <span class="eyebrow"><i class="part">3</i> Why was it so cheap? · brute force vs lean</span>
     <h2 class="h2" id="sv-h">Where the saving comes from, <span>in three steps.</span></h2>
     <p class="lede" style="font-size:16px;margin-top:8px"><b>Brute force:</b> give each AI specialist all the raw data of its domain and let it sort through it. <b>Lean:</b> sort the data first with ordinary software, then give the AI only the evidence. Same agents, same questions, same decision.</p>
 
     <div class="step">
-      <div class="step-copy"><span class="step-n">1</span><h3>The AI reads far less.</h3><p>AI providers bill by the <b>token</b> — roughly three quarters of a word. Brute force makes the models read the equivalent of <b>≈${int(pBF)} pages</b>. After grooming, they read <b>≈${Math.max(1, Math.round(pLN))} pages</b>.</p><p class="fine">Pages: 1 page ≈ 500 words ≈ ${TOKENS_PER_PAGE} tokens. Tokens: estimated at 4 bytes of text per token.</p></div>
+      <div class="step-copy"><span class="step-n">A</span><h3>The AI reads far less.</h3><p>AI providers bill by the <b>token</b> — roughly three quarters of a word. Brute force makes the models read the equivalent of <b>≈${int(pBF)} pages</b>. After grooming, they read <b>≈${Math.max(1, Math.round(pLN))} pages</b>.</p><p class="fine">Pages: 1 page ≈ 500 words ≈ ${TOKENS_PER_PAGE} tokens. Tokens: estimated at 4 bytes of text per token.</p></div>
       <div class="step-visual pages-visual">
         <div class="pv-row bf"><em>Brute force</em><div class="pv-track"><i style="width:100%"></i></div><b>≈${int(pBF)} pages</b><small>${compact(ctx.naive)} tokens</small></div>
         <div class="pv-row ln"><em>Lean</em><div class="pv-track"><i style="width:${Math.max(0.6, pLN / pBF * 100)}%"></i></div><b>≈${Math.max(1, Math.round(pLN))} pages</b><small>${compact(ctx.lean)} tokens</small></div>
@@ -116,7 +166,7 @@ function savingsSection(view, sc) {
     </div>
 
     <div class="step">
-      <div class="step-copy"><span class="step-n">2</span><h3>Reading and writing have a price.</h3><p>Reading one million tokens costs <b>€${sc.models['reasoning-large'].inPerM.toFixed(2)}</b> on the large model and <b>€${sc.models['specialist-small'].inPerM.toFixed(2)}</b> on the small one. Writing costs five times more. So the bill is simply <b>tokens × price</b>, plus small fixed fees for tools and messages.</p><p class="fine">Illustrative prices, typical of current models; not a vendor quote.</p></div>
+      <div class="step-copy"><span class="step-n">B</span><h3>Reading and writing have a price.</h3><p>Reading one million tokens costs <b>€${sc.models['reasoning-large'].inPerM.toFixed(2)}</b> on the large model and <b>€${sc.models['specialist-small'].inPerM.toFixed(2)}</b> on the small one. Writing costs five times more. So the bill is simply <b>tokens × price</b>, plus small fixed fees for tools and messages.</p><p class="fine">Illustrative prices, typical of current models; not a vendor quote.</p></div>
       <div class="step-visual receipts">
         ${rcpt('Brute force', 'bf', rBF, bf.infraCost, bf.totalCost, `${bf.modelCalls} model calls`)}
         ${rcpt('Lean', 'ln', rLN, ln.infraCost, ln.totalCost, `${ln.modelCalls} model calls`)}
@@ -124,7 +174,7 @@ function savingsSection(view, sc) {
     </div>
 
     <div class="step">
-      <div class="step-copy"><span class="step-n">3</span><h3>The saving is the difference.</h3>
+      <div class="step-copy"><span class="step-n">C</span><h3>The saving is the difference.</h3>
         <div class="saving-eq"><span>${fmt(bf.totalCost)}</span><i>−</i><span>${fmt(ln.totalCost)}</span><i>=</i><b>${fmt(saving)}</b></div>
         <p>saved on <b>this one decision</b>: ${pct(saving / bf.totalCost, 0)} less, and ${times(bf.latencyMs / ln.latencyMs)} faster (${ms(bf.latencyMs)} → ${ms(ln.latencyMs)}). Almost all of it comes from the agents whose raw data is largest.</p>
         <button class="btn sm" data-go="scale" style="margin-top:14px">What does this mean at scale? ${icon('arrow', 14)}</button></div>

@@ -36,10 +36,14 @@ Recommendation panel: conditional approval, the disagreement and its resolution,
 
 AI economics: €0.046 of AI for an estimated €12k of value. Stress the labels: telemetry is recorded per call; value is **estimated** from stated assumptions.
 
-Then scroll to **Brute force vs lean — three steps** (for non-experts):
+Use the four-part guide at the top of the page: **1 What did it cost? · 2 What was it worth? · 3 Why so cheap? · 4 What about thousands a day?** The glossary line under it defines token, model call, MCP call, A2A message and cached in one sentence each. In part 1, point at *Where the €0.046 goes*: once the data is prepared, the AI pays mainly for thinking (writing), not reading.
+
+Then part 3, **Brute force vs lean** in three steps (A, B, C) for non-experts:
 1. **The AI reads far less.** “Brute force makes the AI read about 1,100 pages; lean, about 5.” (1 page ≈ 500 words ≈ 667 tokens.)
 2. **Reading and writing have a price.** Point at the two receipts: tokens × price per million, plus small fixed fees. “Reading is cheap, writing is five times dearer — but reading 1,100 pages still dominates.”
 3. **The saving is the difference.** €1.51 − €0.046 ≈ €1.46 per decision; the per-agent bars show it comes from the two agents with the largest raw data.
+
+End on the green **part 4** band (“This was one decision…”) and click **Explore it in the At scale tab**.
 
 ## · At scale (2 minutes)
 

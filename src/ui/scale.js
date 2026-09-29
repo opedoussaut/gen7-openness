@@ -4,7 +4,7 @@ import { icon } from './icons.js';
 import { esc, int, compact, eur, times } from './format.js';
 import { pages, TOKENS_PER_PAGE } from '../engine/telemetry.js';
 
-const PRESETS = [
+export const PRESETS = [
   { id: 'pilot', label: 'Pilot', sub: '1 site · 20 decisions a day', sites: 1, perDay: 20 },
   { id: 'bu', label: 'Business unit', sub: '5 sites · 80 decisions a day', sites: 5, perDay: 80 },
   { id: 'enterprise', label: 'Enterprise', sub: '25 sites · 300 decisions a day', sites: 25, perDay: 300 }
@@ -23,26 +23,30 @@ function cumulative(yearly) {
   return `<svg class="cum" viewBox="0 0 ${W} ${H}" role="img" aria-label="Cumulative AI spend avoided month by month">${bars}</svg>`;
 }
 
+/** Per-decision figures of a completed view, with an optional model-price multiplier. Shared with AI economics. */
+export function perDecisionOf(v, price = 1) {
+  const bf = v.naive.totals, ln = v.metrics.totals;
+  const groom = v.metrics.infraLines.find(l => l.id === 'grooming')?.cost ?? 0;
+  const ctx = v.naive.comparison.find(r => r.id === 'context');
+  return {
+    run: v.run, source: v.source,
+    bfCost: bf.modelCost * price + bf.infraCost, lnCost: ln.modelCost * price + ln.infraCost,
+    bfTokens: bf.totalTokens, lnTokens: ln.totalTokens, bfPages: pages(ctx.naive), lnPages: pages(ctx.lean),
+    bfMs: bf.latencyMs, lnMs: ln.latencyMs, bfWh: bf.energyWh, lnWh: ln.energyWh, groom, groomMs: ln.groomCpuMs
+  };
+}
+export const decisionsPerYear = ({ sites, perDay, days = 365 }) => sites * perDay * days;
+export { bigEur, bigNum };
+
 export function mountScale(el, app) {
   const state = { preset: 'bu', sites: 5, perDay: 80, days: 365, price: 1 };
   let runKey = '';
 
-  function perDecision() {
-    const v = app.completed();
-    const bf = v.naive.totals, ln = v.metrics.totals;
-    const groom = v.metrics.infraLines.find(l => l.id === 'grooming')?.cost ?? 0;
-    const ctx = v.naive.comparison.find(r => r.id === 'context');
-    return {
-      run: v.run, source: v.source,
-      bfCost: bf.modelCost * state.price + bf.infraCost, lnCost: ln.modelCost * state.price + ln.infraCost,
-      bfTokens: bf.totalTokens, lnTokens: ln.totalTokens, bfPages: pages(ctx.naive), lnPages: pages(ctx.lean),
-      bfMs: bf.latencyMs, lnMs: ln.latencyMs, bfWh: bf.energyWh, lnWh: ln.energyWh, groom, groomMs: ln.groomCpuMs
-    };
-  }
+  const perDecision = () => perDecisionOf(app.completed(), state.price);
 
   function render() {
     const d = perDecision();
-    const N = state.sites * state.perDay * state.days;
+    const N = decisionsPerYear(state);
     const saving = d.bfCost - d.lnCost;
     const yBF = d.bfCost * N, yLN = d.lnCost * N, ySave = saving * N;
     const tokensAvoided = (d.bfTokens - d.lnTokens) * N, pagesAvoided = (d.bfPages - d.lnPages) * N;
