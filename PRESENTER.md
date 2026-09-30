@@ -94,6 +94,8 @@ Open `https://opedoussaut.github.io/gen7-openness/decision-intelligence/` — no
 
 - **Film (58 s):** Story tab → *System 1 · System 2* (the original 37-second film is the other choice).
 - **Read the orchestration panel top-down:** the dark **System 1 · triage** band runs on every request (decision model → confidence gate). Confident and bounded → the **fast path** on the left, System 2 greyed out. Complex or uncertain → straight down into **System 2**, where each agent carries *S1 selected · %*. The gate really chooses: the other branch is never executed.
+- **The clash (R-17):** when Cooling's check returns −13.1 kW, a red *Clash* panel opens above the canvas, a red arc joins Deployment (proceed) and Cooling (not as-is), and the Cooling agent and the BMS system pulse red. The six reaction steps light up as they happen — detected, Cooling objects, rebalance asked, proposal, people approve, re-check — and the panel turns green at +25.6 kW. Every step is read from the run, not scripted in the UI.
+- **Systems light up while they are called:** cyan while their data is extracted, blue with the tool name during an MCP call.
 - **The contrast (3 minutes):** Live demo → request switch. Run **R-22** first: *Decide · System 1* shows LOW / NO / DIRECT, the gate lets it through, one reversible reservation is made through MCP, the owner is notified — **no model calls**. Then **R-17**: HIGH / YES / ORCHESTRATE, all four agents; the gate escalates to System 2 and the familiar run follows.
 - **The line:** “A small model decides *whether* we need to think hard. Most requests don’t.”
 - **Proof it runs here:** Technical view → *SYSTEM 1 · what actually executed* — runtime (WebGPU or WASM), network call *None*, API cost *€0*, timings measured on this laptop.

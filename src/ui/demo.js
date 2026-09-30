@@ -103,6 +103,7 @@ function canvasSvg(sc) {
       ${MCP_EDGES.map(([a, sv]) => `<path class="edge mcp" id="e-${a}--${sv}" d="${mcpPath(a, sv)}"/>`).join('')}
     </g>
     ${MCP_EDGES.map(([a, sv]) => { const mx = (AGENT_X[a] + SERVER_X[sv]) / 2; return `<g class="mcp-pill" id="p-${a}--${sv}"><rect x="${mx - 17}" y="328" width="34" height="15" rx="7.5"/><text x="${mx}" y="338.6" text-anchor="middle">MCP</text></g>`; }).join('')}
+    <g class="clash-arc" id="clash-arc"><path d="M${AGENT_X.deployment + 60} ${AG_Y - 4} Q${AGENT_X.workload} ${AG_Y - 78} ${AGENT_X.cooling - 60} ${AG_Y - 4}"/><g transform="translate(${AGENT_X.workload} ${AG_Y - 42})"><rect x="-74" y="-12" width="148" height="24" rx="12"/><text y="4" text-anchor="middle" id="clash-arc-t">CLASH · −13.1 kW</text></g></g>
     <g class="node orch" id="n-orchestrator"><rect class="box" x="260" y="14" width="280" height="56" rx="14"/><rect class="ic-bg" x="272" y="27" width="30" height="30" rx="9"/><g class="ic">${nodeIcon(orch.icon, 278, 33)}</g><text class="name" x="312" y="38">${esc(orch.name)}</text><text class="role" x="312" y="53"><tspan class="cmp ${orch.companion.toLowerCase()}">${esc(orch.companion)}</tspan> · ${esc(orch.competence)} · plans &amp; coordinates</text><text class="meta" x="526" y="38" text-anchor="end" id="m-orchestrator"></text><circle class="think" cx="530" cy="22" r="3.5"/></g>
     ${agents.map(agentNode).join('')}
     ${sc.servers.map(serverNode).join('')}
@@ -172,6 +173,7 @@ export function mountDemo(el, app) {
     </section>
     <section class="panel canvas-panel" aria-labelledby="orch-title">
       <div class="panel-title"><span class="eyebrow" id="orch-title">${icon('orbit', 14)} Orchestration</span><span class="small muted" id="sim-clock"></span></div>
+      <div class="clash" id="clash" hidden aria-live="assertive"></div>
       <div class="canvas-wrap">${canvasSvg(sc)}</div>
       <div class="legend"><span><i class="s1"></i>System 1 · triage</span><span><i class="fast"></i>Fast path · bounded</span><span><i class="human"></i>People ↔ agents / people</span><span><i class="a2a"></i>A2A · the open layer, agent ↔ agent</span><span><i></i>MCP · inside an agent, agent ↔ its tools</span><span><i class="model"></i>Model reasoning</span></div>
       <div class="now-card" id="now" aria-live="polite"></div>
@@ -283,7 +285,10 @@ export function mountDemo(el, app) {
       const calls = run.mcpCalls.filter(c => c.server === s.id).length, disc = run.discoveries.find(d => d.server === s.id);
       n.classList.toggle('active', a?.kind === 'mcp' && a.ref && run.mcpCalls.at(-1)?.server === s.id || a?.kind === 'discover' && ev?.ref?.server === s.id);
       n.classList.toggle('used', usedServers.has(s.id) || !!disc);
-      $(`#m-${s.id}`, el).textContent = calls ? `${calls} call${calls > 1 ? 's' : ''}` : disc ? `${disc.tools.length} tool${disc.tools.length > 1 ? 's' : ''}` : '';
+      const live = a?.kind === 'mcp' && run.mcpCalls.at(-1)?.server === s.id ? run.mcpCalls.at(-1) : null;
+      const extracting = a?.kind === 'ingest' && SOURCE_SERVER[ev?.ref?.source] === s.id;
+      n.classList.toggle('extract', extracting);
+      $(`#m-${s.id}`, el).textContent = live ? `▶ ${live.tool}` : extracting ? '▶ extracting data' : a?.kind === 'discover' && ev?.ref?.server === s.id ? '▶ tools/list' : calls ? `${calls} call${calls > 1 ? 's' : ''}` : disc ? `${disc.tools.length} tool${disc.tools.length > 1 ? 's' : ''}` : '';
     }
     // edges: used / active
     el.querySelectorAll('#edges .edge').forEach(p => p.classList.remove('active', 'used'));
@@ -315,8 +320,30 @@ export function mountDemo(el, app) {
     if (key !== lastActiveKey) { $('#pulses', el).innerHTML = pulse; $('#h-pulses', el).innerHTML = hpulse; lastActiveKey = key; }
     if (!a) { $('#pulses', el).innerHTML = ''; $('#h-pulses', el).innerHTML = ''; }
     renderTriage(run, a);
+    renderClash(run, a);
     const dimAll = run.status === 'idle';
     el.querySelectorAll('.orch-svg .node').forEach(n => n.classList.toggle('dim', dimAll));
+  }
+
+  /** THE CLASH: Loop A would overload. Shows the moment it is detected and how the orchestration reacts, step by step. */
+  function renderClash(run, a) {
+    const c = clashState(run), box = $('#clash', el), svg = $('.orch-svg', el);
+    const phase = !c ? '' : c.resolved ? 'resolved' : 'open';
+    svg.classList.toggle('clash-open', phase === 'open'); svg.classList.toggle('clash-resolved', phase === 'resolved');
+    $('#n-cooling', el)?.classList.toggle('clash', phase === 'open');
+    $('#n-bms', el)?.classList.toggle('clash', phase === 'open' && a?.kind === 'mcp' && run.mcpCalls.at(-1)?.tool === 'calculateCoolingHeadroom');
+    $('#clash-arc-t', el).textContent = phase === 'resolved' ? `RESOLVED · +${c.after.toFixed(1)} kW` : c ? `CLASH · −${Math.abs(c.before).toFixed(1)} kW` : '';
+    $('#gauge', el).classList.toggle('alarm', phase === 'open');
+    if (!c) { box.hidden = true; box.innerHTML = ''; return; }
+    box.hidden = false; box.className = `clash ${phase}`;
+    const steps = c.steps.map((st, i) => `<li class="${i < c.at ? 'done' : i === c.at ? 'now' : ''}"><i>${i + 1}</i><span><b>${esc(st.t)}</b><small>${esc(st.d)}</small></span></li>`).join('');
+    const key = `${phase}|${c.at}`;
+    if (box.dataset.key === key) return; box.dataset.key = key;
+    box.innerHTML = `<div class="clash-head"><span class="clash-mark">${phase === 'resolved' ? icon('check', 16) : icon('alert', 16)}</span>
+      <div><b>${phase === 'resolved' ? `Resolved — Loop ${c.loop} fits R-17 with +${c.after.toFixed(1)} kW` : `Clash — Loop ${c.loop} would overload: −${Math.abs(c.before).toFixed(1)} kW`}</b>
+      <small>${phase === 'resolved' ? 'Same deterministic check, re-run by Cooling after the approved change. No rule was relaxed.' : `Deployment says proceed (space and power are free) · Cooling says not as-is (${c.p95} kW heat + ${c.target} kW target > ${c.cap} kW)`}</small></div>
+      <span class="clash-kw">${phase === 'resolved' ? `+${c.after.toFixed(1)}` : `−${Math.abs(c.before).toFixed(1)}`}<em>kW</em></span></div>
+      <ol class="clash-steps">${steps}</ol>`;
   }
 
   /** SYSTEM 1 triage: which path the gate chose, and what it means for System 2 (engaged, or bypassed). */
@@ -486,6 +513,26 @@ export function mountDemo(el, app) {
   return { update };
 }
 
+const SOURCE_SERVER = { cooling: 'bms', maintenance: 'bms', power: 'power', gpu: 'power', jobs: 'scheduler', dcim: 'dcim', carbon: 'carbon' };
+/** Reads the clash and the orchestration's reaction from the run (nothing scripted in the UI). */
+function clashState(run) {
+  const checks = run.mcpCalls.filter(c => c.tool === 'calculateCoolingHeadroom');
+  if (!checks.length || checks[0].data.headroomKw >= 0) return null;
+  const first = checks[0].data, fix = checks.find(c => c.data.headroomKw >= 0)?.data;
+  const msg = (f, t) => run.a2aMessages.find(m => m.from === f && m.to === t && (f !== 'cooling' || t !== 'orchestrator' || m.data.criterionMet === false));
+  const hum = (f, type) => run.humanActions.find(h => h.from === f && h.type === type);
+  const prop = run.agents.workload?.outputs.at(-1)?.output?.proposal;
+  const steps = [
+    { t: 'Detected', d: `Cooling · BMS check: ${first.headroomKw} kW`, ok: true },
+    { t: 'Cooling objects', d: 'A2A → orchestrator: not as-is', ok: !!msg('cooling', 'orchestrator') },
+    { t: 'Rebalance asked', d: `Cooling → Workload: free ≥ ${Math.abs(first.headroomKw)} kW`, ok: !!msg('cooling', 'workload') },
+    { t: 'Proposal', d: prop ? `${prop.job} → ${prop.toRack} · −${prop.releasedKw} kW` : 'smallest safe change', ok: !!hum('workload', 'approval-request') },
+    { t: 'People approve', d: 'Cluster Ops + Facility', ok: !!hum('clusterops', 'approve') },
+    { t: 'Re-check', d: fix ? `same check → +${fix.headroomKw} kW` : 'same check, re-run', ok: !!fix }
+  ];
+  const at = steps.findIndex(x => !x.ok);
+  return { loop: first.loopId, before: first.headroomKw, after: fix?.headroomKw ?? null, p95: first.p95HeatKw, target: first.targetKw, cap: first.usableCapacityKw, steps, at: at < 0 ? steps.length : at, resolved: !!fix };
+}
 const metricsCost = (c, sc) => modelCost(c, sc.models);
 const kindOf = (sc, id) => sc.humans?.find(h => h.id === id)?.name ?? label(sc, id);
 function peopleBlock(sc, run) {

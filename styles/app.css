@@ -1224,3 +1224,53 @@ dialog .term-tip { position: fixed; }
 .orch-svg .s2-banner #s2-banner-1 { font-size: 11px; font-weight: 800; letter-spacing: 1.4px; fill: var(--ink); }
 .orch-svg .s2-banner #s2-banner-2 { font-size: 11px; fill: #0d8f6f; font-weight: 650; }
 .legend i.s1 { width: 12px; height: 12px; border: 2px solid var(--s1-hi); border-radius: 50%; background: #0f1b2a; } .legend i.fast { border-top: 2px solid var(--s1-hi); }
+
+/* ---------- Systems: highlighted while they are called ---------- */
+@keyframes sysPulse { 0% { stroke-opacity: .9; stroke-width: 2; } 70% { stroke-opacity: 0; stroke-width: 14; } 100% { stroke-opacity: 0; stroke-width: 14; } }
+.orch-svg .node.server.active .box { fill: #e8f3fd; stroke: var(--mcp); stroke-width: 2.4; filter: drop-shadow(0 0 10px rgba(10, 114, 194, .45)); animation: sysBox 1.1s ease-in-out infinite; }
+@keyframes sysBox { 50% { filter: drop-shadow(0 0 16px rgba(10, 114, 194, .7)); } }
+.orch-svg .node.server.active .ic-bg { fill: var(--mcp); } .orch-svg .node.server.active .ic { color: #fff; }
+.orch-svg .node.server.active .meta { fill: var(--mcp); font-weight: 750; }
+.orch-svg .node.server.extract .box { fill: #e6f7f8; stroke: var(--lean); stroke-width: 2.2; filter: drop-shadow(0 0 10px rgba(6, 118, 136, .4)); }
+.orch-svg .node.server.extract .ic-bg { fill: var(--lean); } .orch-svg .node.server.extract .ic { color: #fff; }
+.orch-svg .node.server.extract .meta { fill: var(--lean); font-weight: 750; }
+.orch-svg .node.server.clash .box { fill: #fff0f0; stroke: var(--bad); stroke-width: 2.6; filter: drop-shadow(0 0 14px rgba(214, 60, 60, .55)); }
+.orch-svg .node.server.clash .ic-bg { fill: var(--bad); } .orch-svg .node.server.clash .meta { fill: var(--bad); }
+.orch-svg .mcp-pill.active rect { filter: drop-shadow(0 0 6px rgba(10, 114, 194, .6)); }
+
+/* ---------- The clash: Loop A would overload, and how the orchestration reacts ---------- */
+@keyframes clashGlow { 50% { box-shadow: 0 0 0 6px rgba(214, 60, 60, .12), 0 8px 26px rgba(214, 60, 60, .25); } }
+.clash { margin: 4px 0 12px; border-radius: 14px; padding: 12px 14px; border: 1.5px solid; transition: background .4s, border-color .4s; }
+.clash.open { background: #fff4f3; border-color: #e46a63; animation: clashGlow 1.4s ease-in-out infinite; }
+.clash.resolved { background: #effbf5; border-color: #53c08f; }
+.clash-head { display: flex; align-items: center; gap: 12px; }
+.clash-head > div { flex: 1; min-width: 0; }
+.clash-head b { display: block; font-size: 15px; color: var(--ink); }
+.clash-head small { display: block; font-size: 12px; color: var(--ink-2); margin-top: 2px; }
+.clash-mark { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; flex: none; color: #fff; }
+.clash.open .clash-mark { background: var(--bad); } .clash.resolved .clash-mark { background: var(--ok); }
+.clash-kw { font-family: var(--display); font-size: 30px; font-weight: 700; letter-spacing: -1px; font-variant-numeric: tabular-nums; }
+.clash-kw em { font-style: normal; font-size: 13px; margin-left: 3px; font-weight: 600; }
+.clash.open .clash-kw { color: var(--bad); } .clash.resolved .clash-kw { color: var(--ok); }
+.clash-steps { list-style: none; margin: 10px 0 0; padding: 0; display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.clash-steps li { display: flex; gap: 7px; align-items: flex-start; padding: 7px 8px; border-radius: 10px; background: rgba(255, 255, 255, .7); border: 1px solid var(--line); opacity: .5; transition: opacity .3s, border-color .3s; }
+.clash-steps li i { font-style: normal; flex: none; width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; font-size: 10px; font-weight: 800; background: var(--line-2); color: var(--muted); }
+.clash-steps li b { display: block; font-size: 11.5px; color: var(--ink); }
+.clash-steps li small { display: block; font-size: 10.5px; color: var(--muted); line-height: 1.35; margin-top: 1px; }
+.clash-steps li.done { opacity: 1; } .clash-steps li.done i { background: var(--ok); color: #fff; }
+.clash-steps li.now { opacity: 1; border-color: var(--a2a); box-shadow: 0 0 0 3px rgba(118, 87, 198, .12); } .clash-steps li.now i { background: var(--a2a); color: #fff; }
+.clash.open .clash-steps li:first-child.done i { background: var(--bad); }
+@media (max-width: 1100px) { .clash-steps { grid-template-columns: repeat(3, 1fr); } }
+/* in the canvas */
+.orch-svg .clash-arc { opacity: 0; transition: opacity .4s; }
+.orch-svg.clash-open .clash-arc, .orch-svg.clash-resolved .clash-arc { opacity: 1; }
+.orch-svg .clash-arc path { fill: none; stroke: var(--bad); stroke-width: 2.4; stroke-dasharray: 6 5; animation: dashflow .8s linear infinite; }
+.orch-svg .clash-arc rect { fill: var(--bad); }
+.orch-svg .clash-arc text { font-family: var(--font); font-size: 11px; font-weight: 800; letter-spacing: 1px; fill: #fff; }
+.orch-svg.clash-resolved .clash-arc path { stroke: var(--ok); animation: none; stroke-dasharray: none; opacity: .6; }
+.orch-svg.clash-resolved .clash-arc rect { fill: var(--ok); }
+@keyframes agentAlarm { 50% { filter: drop-shadow(0 0 14px rgba(214, 60, 60, .6)); } }
+.orch-svg .node.agent.clash .box { stroke: var(--bad); stroke-width: 2.4; fill: #fff6f5; animation: agentAlarm 1.2s ease-in-out infinite; }
+.orch-svg .node.agent.clash .ic-bg { fill: #fde3e1; } .orch-svg .node.agent.clash .ic { color: var(--bad); }
+#gauge.alarm .cap-seg.rack.over { animation: overBlink 1s ease-in-out infinite; }
+@keyframes overBlink { 50% { filter: brightness(1.25) drop-shadow(0 0 6px rgba(214, 60, 60, .8)); } }
