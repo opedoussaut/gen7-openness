@@ -1183,3 +1183,44 @@ dialog .term-tip { position: fixed; }
 /* ---------- Story · cinematic ---------- */
 .cine video { width: 100%; border-radius: var(--r-m); background: #05070a; aspect-ratio: 16 / 9; margin: 10px 0 6px; }
 .cine-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; }
+
+/* ---------- Orchestration: System 1 triage band, branch taken, System 2 bypassed ---------- */
+.orch-svg .band-s1 { fill: #0f1b2a; }
+.orch-svg .band-label.s1 { fill: var(--s1-hi); }
+.orch-svg .band-sub { font-family: var(--font); font-size: 10px; fill: #8fa3b6; }
+.orch-svg .band-s2 { fill: rgba(118, 87, 198, .035); stroke: rgba(118, 87, 198, .18); stroke-dasharray: 4 5; transition: opacity .4s; }
+.orch-svg .band-label.s2 { fill: var(--a2a); }
+.orch-svg #tri-in { fill: #7f95a9; }
+.orch-svg .node.tri .box { fill: #16283b; stroke: #2a4258; filter: none; }
+.orch-svg .node.tri .name { fill: #e6f0f8; }
+.orch-svg .node.tri .role { fill: #93a9bd; font-size: 10px; }
+.orch-svg .node.tri .ic-bg { fill: #203549; }
+.orch-svg .node.tri .ic { color: #8fb3c9; }
+.orch-svg .node.tri.active .box { stroke: var(--s1-hi); stroke-width: 2; }
+.orch-svg .node.tri.done .box, .orch-svg .node.tri.taken .box { stroke: var(--s1-hi); }
+.orch-svg .node.tri.done .ic, .orch-svg .node.tri.taken .ic { color: var(--s1-hi); }
+.orch-svg .node.tri.done .role, .orch-svg .node.tri.taken .role { fill: var(--s1-hi); }
+.orch-svg .node.tri.gate.esc .box { stroke: #a68cf0; } .orch-svg .node.tri.gate.esc .ic { color: #b9a4f5; } .orch-svg .node.tri.gate.esc .role { fill: #c3b2f7; }
+.orch-svg .node.tri.nottaken { opacity: .4; }
+.orch-svg .edge.tri { stroke: #3a536a; stroke-width: 1.6; stroke-dasharray: 4 5; }
+.orch-svg .edge.tri.taken { stroke: var(--s1-hi); stroke-width: 2.4; stroke-dasharray: none; }
+.orch-svg .edge.tri.s2.taken { stroke: var(--a2a); }
+.orch-svg .edge.tri.active { stroke: var(--s1-hi); stroke-width: 2.4; animation: dashflow .6s linear infinite; }
+.orch-svg .edge.tri.nottaken { opacity: .25; }
+.orch-svg .tri-lbl { font-family: var(--font); font-size: 9.5px; font-weight: 700; letter-spacing: .6px; fill: #6f879c; }
+.orch-svg.path-fast .tri-lbl.fast { fill: var(--s1-hi); }
+.orch-svg.path-s2 .tri-lbl.s2, .orch-svg.path-review .tri-lbl.s2 { fill: #b9a4f5; }
+.orch-svg.path-fast .tri-lbl.s2, .orch-svg.path-s2 .tri-lbl.fast, .orch-svg.path-review .tri-lbl.fast { opacity: .35; }
+.orch-svg .tri-tag { font-family: var(--font); font-size: 9.5px; font-weight: 750; letter-spacing: .3px; fill: var(--faint); }
+.orch-svg .tri-tag.sel { fill: #0d8f6f; } .orch-svg .tri-tag.skill { fill: #0d8f6f; } .orch-svg .tri-tag.off { fill: #a3b1bd; }
+.orch-svg .node.bypassed { opacity: .28; }
+.orch-svg .node.agent.skill-only .box { stroke: var(--s1-hi); stroke-width: 1.8; stroke-dasharray: 5 4; }
+.orch-svg.path-fast .band-s2, .orch-svg.path-review .band-s2 { opacity: .45; }
+.orch-svg.path-fast #edges .edge.a2a, .orch-svg.path-review #edges .edge.a2a { opacity: .25; }
+.orch-svg .s2-banner { opacity: 0; transition: opacity .4s; }
+.orch-svg .s2-banner.on { opacity: 1; }
+.orch-svg .s2-banner rect { fill: #fff; stroke: var(--line); }
+.orch-svg .s2-banner text { font-family: var(--font); }
+.orch-svg .s2-banner #s2-banner-1 { font-size: 11px; font-weight: 800; letter-spacing: 1.4px; fill: var(--ink); }
+.orch-svg .s2-banner #s2-banner-2 { font-size: 11px; fill: #0d8f6f; font-weight: 650; }
+.legend i.s1 { width: 12px; height: 12px; border: 2px solid var(--s1-hi); border-radius: 50%; background: #0f1b2a; } .legend i.fast { border-top: 2px solid var(--s1-hi); }

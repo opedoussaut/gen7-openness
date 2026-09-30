@@ -7,8 +7,8 @@ import { explainGrooming } from '../scenarios/ai-factory/explain.js';
 import { COMPANIONS, skillName } from '../domain/positioning.js';
 
 const STATES = [
-  { id: 'INGESTING', label: 'Observe', c: '#7e95a8' }, { id: 'GROOMING', label: 'Groom', c: 'var(--lean)' }, { id: 'SYSTEM1', label: 'Decide · System 1', c: 'var(--s1)' },
-  { id: 'ORCHESTRATING', label: 'Reason · System 2', c: 'var(--a2a)' }, { id: 'ANALYZING', label: 'Reason & act', c: 'var(--mcp)' }, { id: 'ACTING', label: 'Act · bounded', c: 'var(--mcp)' },
+  { id: 'INGESTING', label: 'Observe', c: '#7e95a8' }, { id: 'GROOMING', label: 'Groom', c: 'var(--lean)' }, { id: 'SYSTEM1', label: 'Triage · System 1', c: 'var(--s1)' },
+  { id: 'ORCHESTRATING', label: 'System 2 · orchestrate', c: 'var(--a2a)' }, { id: 'ANALYZING', label: 'System 2 · reason & act', c: 'var(--mcp)' }, { id: 'ACTING', label: 'Fast path · act', c: 'var(--s1-hi)' },
   { id: 'DECIDING', label: 'Approve', c: 'var(--model)' }, { id: 'COMPLETED', label: 'Measure', c: 'var(--ok)' }
 ];
 const KIND_TAG = { decide: ['s1', 'SYSTEM 1'], human: ['human', 'PEOPLE'], mcp: ['mcp', 'MCP'], a2a: ['a2a', 'A2A'], model: ['model', 'MODEL'], groom: ['lean', 'LEAN'], ingest: ['neutral', 'DATA'], discover: ['mcp', 'MCP'], incident: ['bad', 'INCIDENT'], decision: ['ok', 'DECISION'] };
@@ -40,13 +40,15 @@ const SV_W = 138;
 function nodeIcon(name, x, y, size = 18) { return `<g transform="translate(${x} ${y})">${icon(name, size, 1.7)}</g>`; }
 
 // People row (global coordinates; agents and tools are drawn 86 px lower).
-const OY = 100, HUMAN_X = { owner: 400, clusterops: 140, facility: 660 }, HU_Y = 26, HU_W = 164, HU_H = 50;
+// Layout, top to bottom: PEOPLE · SYSTEM 1 TRIAGE (every request) · SYSTEM 2 (only when escalated) · SKILLS via MCP · systems.
+const TB_Y = 106, TB_H = 166, OY = TB_Y + TB_H + 10, HUMAN_X = { owner: 400, clusterops: 140, facility: 660 }, HU_Y = 26, HU_W = 164, HU_H = 50;
 const humanEdges = [['owner', 'orchestrator'], ['clusterops', 'workload'], ['facility', 'orchestrator'], ['clusterops', 'facility']];
 const hid = (a, b) => `e-h-${[a, b].sort().join('--')}`;
 function humanPath(a, b) {
   const x = HUMAN_X[a], bottom = HU_Y + HU_H;
-  if (b === 'orchestrator') return a === 'owner' ? `M${x} ${bottom} L${x} ${OY + 14}` : `M${x} ${bottom} C${x} ${OY + 30} ${x - 60} ${OY + 42} 540 ${OY + 42}`;
-  if (b === 'workload') return `M${x} ${bottom} C${x} ${OY + 110} ${AGENT_X.workload - 40} ${OY + 130} ${AGENT_X.workload} ${AG_Y + OY}`;
+  // routed around the triage band so people ↔ System 2 edges never cross the System 1 nodes
+  if (b === 'orchestrator') return a === 'owner' ? `M${x} ${bottom} C${x} ${bottom + 22} 590 ${bottom + 14} 590 ${TB_Y + 40} L590 ${OY - 12} C590 ${OY + 2} 560 ${OY + 10} 540 ${OY + 22}` : `M${x} ${bottom} C${x} ${OY + 30} ${x - 60} ${OY + 42} 540 ${OY + 42}`;
+  if (b === 'workload') return `M${x} ${bottom} C${x} ${bottom + 20} 262 ${bottom + 16} 262 ${TB_Y + 40} L262 ${OY + 150} C262 ${OY + 176} ${AGENT_X.workload - 30} ${OY + 180} ${AGENT_X.workload} ${AG_Y + OY}`;
   // person ↔ person: an arc under the people row, so it does not cross the Program Owner
   return `M${x + 30} ${bottom} C${x + 120} ${bottom + 26} ${HUMAN_X[b] - 120} ${bottom + 26} ${HUMAN_X[b] - 30} ${bottom}`;
 }
@@ -58,15 +60,41 @@ function humansSvg(sc) {
     ${sc.humans.map(node).join('')}`;
 }
 
+// SYSTEM 1 · TRIAGE band (global coordinates)
+const S1N = { x: 290, y: TB_Y + 24, w: 220, h: 46 }, GATE = { x: 305, y: TB_Y + 92, w: 190, h: 42 }, FAST = { x: 16, y: TB_Y + 92, w: 200, h: 42 };
+function triageSvg() {
+  const node = (id, b, ic, name, role) => `<g class="node tri ${id}" id="n-${id}"><rect class="box" x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="${b.h / 2}"/><circle class="ic-bg" cx="${b.x + b.h / 2}" cy="${b.y + b.h / 2}" r="${b.h / 2 - 6}"/><g class="ic">${nodeIcon(ic, b.x + b.h / 2 - 8, b.y + b.h / 2 - 8, 16)}</g><text class="name" x="${b.x + b.h + 2}" y="${b.y + b.h / 2 - 3}" style="font-size:12px">${name}</text><text class="role" x="${b.x + b.h + 2}" y="${b.y + b.h / 2 + 11}" id="m-${id}">${role}</text></g>`;
+  const gx = GATE.x + GATE.w / 2;
+  return `<rect class="band-s1" x="0" y="${TB_Y}" width="800" height="${TB_H}" rx="14"/>
+    <text class="band-label s1" x="14" y="${TB_Y + 17}">SYSTEM 1 · TRIAGE</text><text class="band-sub" x="14" y="${TB_Y + 31}">every request · in this browser</text>
+    <text class="band-sub" x="${S1N.x - 12}" y="${S1N.y + S1N.h / 2 + 4}" text-anchor="end" id="tri-in">groomed evidence → 9 features</text>
+    <g id="tri-edges">
+      <path class="edge tri" id="e-tri-s1-gate" d="M${gx} ${S1N.y + S1N.h} L${gx} ${GATE.y}"/>
+      <path class="edge tri fast" id="e-tri-gate-fast" d="M${GATE.x} ${GATE.y + GATE.h / 2} L${FAST.x + FAST.w} ${FAST.y + FAST.h / 2}"/>
+      <path class="edge tri s2" id="e-tri-gate-s2" d="M${gx} ${GATE.y + GATE.h} L${gx} ${OY + 14}"/>
+      <path class="edge tri fast" id="e-tri-fast-dep" d="M${FAST.x + 78} ${FAST.y + FAST.h} C${FAST.x + 78} ${OY + 120} ${AGENT_X.deployment} ${OY + 150} ${AGENT_X.deployment} ${OY + AG_Y}"/>
+    </g>
+    <text class="tri-lbl fast" x="${(GATE.x + FAST.x + FAST.w) / 2}" y="${GATE.y + GATE.h / 2 - 16}" text-anchor="middle">confident</text>
+    <text class="tri-lbl fast" x="${(GATE.x + FAST.x + FAST.w) / 2}" y="${GATE.y + GATE.h / 2 - 5}" text-anchor="middle">&amp; bounded</text>
+    <text class="tri-lbl s2" x="${gx + 10}" y="${GATE.y + GATE.h + 18}">complex or uncertain → System 2</text>
+    ${node('s1', S1N, 'cpu', 'Decision model', 'waits for groomed evidence')}
+    ${node('gate', GATE, 'shield', 'Confidence gate', 'act alone only if ≥ 75 % sure')}
+    ${node('fast', FAST, 'bolt', 'Fast path · bounded act', 'no reasoning model')}`;
+}
+
 function canvasSvg(sc) {
   const agents = sc.agents.filter(a => a.id !== 'orchestrator');
   const orch = sc.agents.find(a => a.id === 'orchestrator');
-  const agentNode = a => { const x = AGENT_X[a.id] - AG_W / 2; return `<g class="node agent" id="n-${a.id}" data-agent="${a.id}"><title>${esc(`${a.companion} · ${a.competence} — ${COMPANIONS[a.companion]?.line ?? ''}`)}</title><rect class="box" x="${x}" y="${AG_Y}" width="${AG_W}" height="${AG_H}" rx="14"/><rect class="ic-bg" x="${x + 12}" y="${AG_Y + 12}" width="30" height="30" rx="9"/><g class="ic">${nodeIcon(a.icon, x + 18, AG_Y + 18)}</g><text class="name" x="${x + 50}" y="${AG_Y + 25}">${esc(a.name.replace(' Agent', ''))}</text><text class="role" x="${x + 50}" y="${AG_Y + 40}">${esc(a.tagline)}</text><text class="companion" x="${x + 12}" y="${AG_Y + 59}"><tspan class="cmp ${a.companion.toLowerCase()}">${esc(a.companion)}</tspan> · ${esc(a.competence.split(' · ')[0])}</text><text class="meta" x="${x + 12}" y="${AG_Y + 75}" id="m-${a.id}">idle</text><circle class="think" cx="${x + AG_W - 13}" cy="${AG_Y + 13}" r="4"/></g>`; };
+  const agentNode = a => { const x = AGENT_X[a.id] - AG_W / 2; return `<g class="node agent" id="n-${a.id}" data-agent="${a.id}"><title>${esc(`${a.companion} · ${a.competence} — ${COMPANIONS[a.companion]?.line ?? ''}`)}</title><rect class="box" x="${x}" y="${AG_Y}" width="${AG_W}" height="${AG_H}" rx="14"/><rect class="ic-bg" x="${x + 12}" y="${AG_Y + 12}" width="30" height="30" rx="9"/><g class="ic">${nodeIcon(a.icon, x + 18, AG_Y + 18)}</g><text class="name" x="${x + 50}" y="${AG_Y + 25}">${esc(a.name.replace(' Agent', ''))}</text><text class="role" x="${x + 50}" y="${AG_Y + 40}">${esc(a.tagline)}</text><text class="companion" x="${x + 12}" y="${AG_Y + 59}"><tspan class="cmp ${a.companion.toLowerCase()}">${esc(a.companion)}</tspan> · ${esc(a.competence.split(' · ')[0])}</text><text class="meta" x="${x + 12}" y="${AG_Y + 75}" id="m-${a.id}">idle</text><text class="tri-tag" x="${x + AG_W - 6}" y="${AG_Y - 6}" text-anchor="end" id="t-${a.id}"></text><circle class="think" cx="${x + AG_W - 13}" cy="${AG_Y + 13}" r="4"/></g>`; };
   const serverNode = s => { const x = SERVER_X[s.id] - SV_W / 2; return `<g class="node server" id="n-${s.id}"><rect class="box" x="${x}" y="${SV_Y}" width="${SV_W}" height="${SV_H}" rx="12"/><rect class="ic-bg" x="${x + 10}" y="${SV_Y + 12}" width="28" height="28" rx="8"/><g class="ic">${nodeIcon(s.icon, x + 15, SV_Y + 17)}</g><text class="name" x="${x + 46}" y="${SV_Y + 24}" style="font-size:12px">${esc(s.short)}</text><text class="role" x="${x + 46}" y="${SV_Y + 38}">${esc(s.system)}</text><text class="meta" x="${x + 46}" y="${SV_Y + 50}" id="m-${s.id}"></text></g>`; };
-  return `<svg class="orch-svg" viewBox="0 0 800 ${450 + OY}" role="img" aria-label="People, agents, tools; A2A messages at the agent layer and MCP calls inside each agent">
+  return `<svg class="orch-svg" viewBox="0 0 800 ${450 + OY}" role="img" aria-label="People; System 1 triage with a confidence gate; System 2 agents with A2A at the open layer, engaged only when the gate escalates; skills reached through MCP">
     ${humansSvg(sc)}
+    ${triageSvg()}
     <g transform="translate(0 ${OY})">
+    <rect class="band-s2" x="0" y="-4" width="800" height="${AG_Y + AG_H + 12}" rx="14"/>
+    <text class="band-label s2" x="14" y="13">SYSTEM 2 · DELIBERATE</text><text class="band-sub" x="14" y="27">only when the gate escalates</text>
     <rect class="band-a2a" x="0" y="84" width="800" height="104" rx="14"/><text class="band-label a2a" x="14" y="101">OPEN LAYER · AGENT ↔ AGENT (A2A)</text>
+    <g class="s2-banner" id="s2-banner"><rect x="560" y="10" width="232" height="58" rx="12"/><text x="676" y="33" text-anchor="middle" id="s2-banner-1">NOT ENGAGED</text><text x="676" y="51" text-anchor="middle" id="s2-banner-2">0 model calls</text></g>
     <line class="open-boundary" x1="0" x2="800" y1="188" y2="188"/>
     <rect class="band-mcp" x="0" y="286" width="800" height="90" rx="14"/><text class="band-label mcp" x="14" y="303">SKILLS · INSIDE EACH COMPETENCE · EXECUTED VIA MCP</text>
     <g id="edges">
@@ -145,7 +173,7 @@ export function mountDemo(el, app) {
     <section class="panel canvas-panel" aria-labelledby="orch-title">
       <div class="panel-title"><span class="eyebrow" id="orch-title">${icon('orbit', 14)} Orchestration</span><span class="small muted" id="sim-clock"></span></div>
       <div class="canvas-wrap">${canvasSvg(sc)}</div>
-      <div class="legend"><span><i class="human"></i>People ↔ agents / people</span><span><i class="a2a"></i>A2A · the open layer, agent ↔ agent</span><span><i></i>MCP · inside an agent, agent ↔ its tools</span><span><i class="model"></i>Model reasoning</span></div>
+      <div class="legend"><span><i class="s1"></i>System 1 · triage</span><span><i class="fast"></i>Fast path · bounded</span><span><i class="human"></i>People ↔ agents / people</span><span><i class="a2a"></i>A2A · the open layer, agent ↔ agent</span><span><i></i>MCP · inside an agent, agent ↔ its tools</span><span><i class="model"></i>Model reasoning</span></div>
       <div class="now-card" id="now" aria-live="polite"></div>
     </section>
     <section class="panel" aria-labelledby="tele-title">
@@ -215,7 +243,7 @@ export function mountDemo(el, app) {
     const detail = run.status === 'completed' ? 'Open AI economics to see whether it was worth it.' : run.narration;
     $('#narration', el).innerHTML = lead ? `${esc(lead)} <span>— ${esc(detail)}</span>` : esc(run.narration);
     if (run.status === 'completed') $('#story-count', el).textContent = '10 / 10';
-    $('#progress', el).style.width = `${run.status === 'idle' ? 0 : ((run.stepIndex + 1) / run.totalSteps) * 100}%`;
+    $('#progress', el).style.width = `${run.status === 'idle' ? 0 : (run.executed / run.totalSteps) * 100}%`;
     $('#sim-clock', el).innerHTML = run.status === 'idle' ? 'simulated time 00:00.0' : `simulated time <b class="num">${clock(run.simTimeMs)}</b>`;
   }
 
@@ -286,8 +314,43 @@ export function mountDemo(el, app) {
     }
     if (key !== lastActiveKey) { $('#pulses', el).innerHTML = pulse; $('#h-pulses', el).innerHTML = hpulse; lastActiveKey = key; }
     if (!a) { $('#pulses', el).innerHTML = ''; $('#h-pulses', el).innerHTML = ''; }
+    renderTriage(run, a);
     const dimAll = run.status === 'idle';
     el.querySelectorAll('.orch-svg .node').forEach(n => n.classList.toggle('dim', dimAll));
+  }
+
+  /** SYSTEM 1 triage: which path the gate chose, and what it means for System 2 (engaged, or bypassed). */
+  function renderTriage(run, a) {
+    const s1 = run.system1, path = s1?.gate.path, deciding = a?.kind === 'decide';
+    const svg = $('.orch-svg', el);
+    svg.classList.toggle('path-fast', path === 'BOUNDED_ACTION');
+    svg.classList.toggle('path-s2', path === 'SYSTEM_2' && run.requestKind === 'complex');
+    svg.classList.toggle('path-review', !!path && !(path === 'BOUNDED_ACTION' || (path === 'SYSTEM_2' && run.requestKind === 'complex')));
+    const set = (id, txt) => { const n = $(`#m-${id}`, el); if (n) n.textContent = txt; };
+    const cls = (id, on, c) => $(`#n-${id}`, el)?.classList.toggle(c, on);
+    cls('s1', deciding, 'active'); cls('s1', !!s1 && !deciding, 'done');
+    cls('gate', !!s1, 'done'); cls('gate', !!s1 && s1.gate.escalate, 'esc');
+    cls('fast', path === 'BOUNDED_ACTION', 'taken'); cls('fast', !!path && path !== 'BOUNDED_ACTION', 'nottaken');
+    set('s1', !s1 ? (deciding ? 'inferring…' : run.grooming.done ? 'ready' : 'waits for groomed evidence') : `${(s1.runtime?.backend ?? '').toUpperCase()} · ${s1.inferenceMs.toFixed(2)} ms · €0`);
+    set('gate', !s1 ? 'act alone only if ≥ 75 % sure' : path === 'BOUNDED_ACTION' ? `→ fast path · weakest ${Math.round(s1.gate.weakest.confidence * 100)} %` : path === 'HUMAN_REVIEW' ? '→ a person' : `→ escalate · ${s1.gate.reasons.length} reason${s1.gate.reasons.length > 1 ? 's' : ''}`);
+    set('fast', !path ? 'no reasoning model' : path === 'BOUNDED_ACTION' ? `${run.mcpCalls.some(c => c.tool === 'reserveRackSlot') ? 'slot reserved' : 'one governed skill'} · 0 model calls` : 'not taken');
+    const eds = { 'e-tri-s1-gate': !!s1, 'e-tri-gate-fast': path === 'BOUNDED_ACTION', 'e-tri-fast-dep': path === 'BOUNDED_ACTION', 'e-tri-gate-s2': !!path && path !== 'BOUNDED_ACTION' };
+    for (const [id, on] of Object.entries(eds)) { const e = $(`#${id}`, el); e?.classList.toggle('taken', on); e?.classList.toggle('nottaken', !!path && !on); }
+    $('#e-tri-s1-gate', el)?.classList.toggle('active', deciding);
+    // System 2: engaged with the agents System 1 selected, or bypassed
+    const sel = s1?.decisions.agents_required, engaged = path === 'SYSTEM_2' && run.requestKind === 'complex';
+    for (const ag of sc.agents.filter(x => x.id !== 'orchestrator')) {
+      const t = $(`#t-${ag.id}`, el), n = $(`#n-${ag.id}`, el); if (!t || !n) continue;
+      const p = sel?.probabilities[ag.id.toUpperCase()] ?? null, chosen = !!sel && sel.selected.includes(ag.id.toUpperCase());
+      const skillOnly = path === 'BOUNDED_ACTION' && ag.id === 'deployment';
+      t.textContent = !s1 ? '' : engaged ? (chosen ? `S1 selected · ${Math.round(p * 100)} %` : 'not selected') : skillOnly ? 'skill only · no reasoning' : 'not engaged';
+      t.setAttribute('class', `tri-tag ${engaged && chosen ? 'sel' : skillOnly ? 'skill' : s1 ? 'off' : ''}`);
+      n.classList.toggle('bypassed', !!path && !engaged && !skillOnly);
+      n.classList.toggle('skill-only', skillOnly);
+    }
+    $('#n-orchestrator', el)?.classList.toggle('bypassed', !!path && !engaged);
+    const bn = $('#s2-banner', el); bn.classList.toggle('on', !!path && !engaged);
+    if (path && !engaged) { $('#s2-banner-1', el).textContent = 'SYSTEM 2 NOT ENGAGED'; $('#s2-banner-2', el).textContent = path === 'BOUNDED_ACTION' ? 'fast path · 0 model calls' : 'escalated to a person · 0 model calls'; }
   }
 
   function renderNow(run, metrics) {
@@ -493,7 +556,7 @@ export function system1Markup(run, app) {
   const g = s1?.gate;
   const gateTile = !g ? `<div class="s1-gate pending"><small>CONFIDENCE GATE</small><b>—</b><p>Waits for the typed decisions.</p></div>`
     : `<div class="s1-gate ${g.escalate ? 'esc' : 'ok'}"><small>CONFIDENCE GATE · ≥ ${Math.round(g.threshold * 100)} %</small><b>${g.path === 'BOUNDED_ACTION' ? 'ACT · bounded' : g.path === 'HUMAN_REVIEW' ? 'ESCALATE · person' : 'ESCALATE · System 2'}</b><p>${g.escalate ? `Why: ${esc(g.reasons.join(' · '))}` : `Route DIRECT, no reasoning required, weakest decision ${Math.round(g.weakest.confidence * 100)} %.`}</p></div>`;
-  return `<div class="s1-head"><span class="eyebrow" id="s1-title"><b class="s1-mark">S1</b> DECIDE · System 1 · a small decision model running in this browser</span>${rtLine}${s1 ? `<span class="s1-ms">${s1.inferenceMs.toFixed(2)} ms · €0 · no network call</span><button class="btn sm ghost" data-s1-inspect>Inspect ${icon('eye', 13)}</button>` : ''}</div>
+  return `<div class="s1-head"><span class="eyebrow" id="s1-title"><b class="s1-mark">S1</b> TRIAGE · System 1 · a small model decides whether System 2 is needed</span>${rtLine}${s1 ? `<span class="s1-ms">${s1.inferenceMs.toFixed(2)} ms · €0 · no network call</span><button class="btn sm ghost" data-s1-inspect>Inspect ${icon('eye', 13)}</button>` : ''}</div>
     <div class="s1-row ${pending ? 'is-pending' : ''}">${['capacity_risk', 'reasoning_required', 'preferred_route', 'agents_required'].map(tile).join('')}<span class="s1-arrow">→</span>${gateTile}</div>`;
 }
 export function inspectSystem1(app, run) {
