@@ -12,7 +12,7 @@ export function mountEconomics(el, app) {
   let key = '';
   function update() {
     const view = app.completed();
-    const k = `${view.run.id}:${view.source}:${view.liveStatus ?? ''}`;
+    const k = `${view.run.id}:${view.source}:${view.liveStatus ?? ''}:${app.system1Info?.()?.backend ?? 'pending'}`;
     if (k === key) return;
     key = k;
     const { run, metrics: m, naive, value, source, liveStatus } = view;
@@ -223,34 +223,53 @@ function twoMechanisms(app) {
   const c = computeMetrics(app.reference.run, sc), s = computeMetrics(app.referenceSimple.run, sc), av = computeAvoided(s, c);
   const rt = app.system1Info?.();
   const r17 = app.reference.run, r22 = app.referenceSimple.run;
-  const s1ms = rt?.warmMs != null ? `${rt.warmMs.toFixed(2)} ms` : `${r22.system1.inferenceMs.toFixed(2)} ms`;
-  const s1rt = rt ? rt.runtime : 'Browser · JavaScript (reference evaluator)';
-  const row = (label, a, b, note = '') => `<tr><td>${label}${note}</td><td class="num">${a}</td><td class="num">${b}</td></tr>`;
+  const raw = r17.raw.records, ev = r17.grooming.evidence.records;
+  // System 1 latency: the browser runtime's warm median (same model, same cost per request). Browsers round
+  // performance.now() to ~0.1 ms outside cross-origin isolation, so single sub-millisecond readings are not shown.
+  const s1lat = rt?.warmMs != null ? `${rt.warmMs < 0.1 ? '< 0.1' : rt.warmMs.toFixed(2)} ms` : '< 1 ms';
+  const s1src = rt?.warmMs != null ? `${esc(rt.runtime)} · median of 20` : 'runtime loading';
+  const bar = (v, max, cls) => `<i class="mx-bar ${cls}"><em style="width:${max ? Math.max(v > 0 ? 3 : 0, (v / max) * 100) : 0}%"></em></i>`;
+  const metric = (label, tag, a, b, na, nb, max) => `<div class="mx-row"><div class="mx-label">${label}${tag ? ` <span class="mx-tag ${tag[0]}">${tag[1]}</span>` : ''}</div>
+      <div class="mx-cell c17"><b>${a}</b>${max != null ? bar(na, max, 'c17') : ''}</div><div class="mx-cell c22"><b>${b}</b>${max != null ? bar(nb, max, 'c22') : ''}</div></div>`;
   return `<section class="mech" aria-labelledby="mech-h">
     <span class="eyebrow"><i class="pip"></i>Two efficiency mechanisms</span>
     <h2 class="h2" id="mech-h">Reduce the input. <span>Then reduce the reasoning.</span></h2>
     <div class="mech-grid">
-      <div class="mech-card"><small>1 · REDUCE INPUT · GROOM</small><div class="mech-flow"><b>${int(r17.raw.records)}</b><span>records</span><i>→ groom →</i><b>${int(r17.grooming.evidence.records)}</b><span>relevant records</span></div>
-        <p>Deterministic, measured: ${(c.context.reduction * 100).toFixed(1)} % fewer tokens reach any model (≈${compact(c.context.rawTokens)} → ${compact(c.context.evidenceTokens)}). Grooming took ${ms(c.totals.groomCpuMs)} of CPU in this browser.</p></div>
-      <div class="mech-card"><small>2 · REDUCE REASONING · DECIDE</small><div class="mech-flow"><b>${int(r17.grooming.evidence.records)}</b><span>relevant records</span><i>→ System 1 →</i><b>?</b><span>is System 2 required?</span></div>
-        <p>A ${app.modelCard.parameters.toLocaleString('en-US')}-parameter model (${(app.modelCard.onnx.bytes / 1024).toFixed(1)} KB) answers in ${s1ms} on ${esc(s1rt)}, with no network call and no API cost. Only when the gate escalates are reasoning agents called.</p></div>
+      <article class="mech-card m1">
+        <header><span class="mech-n">1</span><div><small>Reduce the input</small><b>Groom</b></div><span class="mx-tag lean">measured</span></header>
+        <div class="mech-big"><span>${int(raw)}</span><i>→</i><span class="hi">${int(ev)}</span><em>records</em></div>
+        <div class="mech-bars"><div><i style="width:100%"></i><span>raw · ≈${compact(c.context.rawTokens)} tokens</span></div><div class="lean"><i style="width:${Math.max(0.8, (ev / raw) * 100)}%"></i><span>evidence · ≈${compact(c.context.evidenceTokens)} tokens</span></div></div>
+        <p><b>${(c.context.reduction * 100).toFixed(1)} %</b> fewer tokens reach any model. Ordinary deterministic code, ${ms(c.totals.groomCpuMs)} of CPU in this browser.</p>
+      </article>
+      <article class="mech-card m2">
+        <header><span class="mech-n">2</span><div><small>Reduce the reasoning</small><b>Decide · System 1</b></div><span class="mx-tag s1">in the browser</span></header>
+        <div class="mech-big"><span class="hi s1">${s1lat}</span><em>per triage · €0 · no network call</em></div>
+        <div class="mech-paths">
+          <div class="fast"><small>${esc(r22.incident.rack)} · routine</small><b>fast path</b><span>${s.totals.modelCalls} reasoning calls</span></div>
+          <div class="s2"><small>${esc(r17.incident.rack)} · complex</small><b>System 2</b><span>${c.totals.modelCalls} reasoning calls</span></div>
+        </div>
+        <p>A ${app.modelCard.parameters.toLocaleString('en-US')}-parameter model (${(app.modelCard.onnx.bytes / 1024).toFixed(1)} KB) decides whether agents are needed at all.${rt?.warmMs != null ? ` <span class="muted">${s1src}.</span>` : ''}</p>
+      </article>
     </div>
     <div class="mech-compare">
-      <div class="mech-approach"><small>Traditional approach</small><div class="mech-line"><b>Everything</b><i>→</i><b class="big">Large reasoning model</b></div></div>
-      <div class="mech-approach lean"><small>GEN7 lean approach</small><div class="mech-line"><b>Everything</b><i>→</i><b>GROOM</b><i>→</i><b>DECIDE</b><i>→</i><b>REASON only when necessary</b></div></div>
+      <div class="mech-approach trad"><small>Traditional approach</small><div class="mech-line"><span class="chip">Everything</span><i>→</i><span class="chip bad">Large reasoning model</span></div><p>Every request pays for full reasoning.</p></div>
+      <div class="mech-approach lean"><small>GEN7 lean approach</small><div class="mech-line"><span class="chip">Everything</span><i>→</i><span class="chip lean">Groom</span><i>→</i><span class="chip s1">Decide</span><i>→</i><span class="chip a2a">Reason · only when necessary</span></div><p>Reasoning is spent where the gate says it is needed.</p></div>
     </div>
-    <div class="table-wrap"><table class="data mech-table">
-      <thead><tr><th>Telemetry, per decision</th><th>${esc(r17.incident.rack)} · complex</th><th>${esc(r22.incident.rack)} · simple</th></tr></thead>
-      <tbody>
-        ${row('Grooming time', ms(c.totals.groomCpuMs), ms(s.totals.groomCpuMs), ' <span class="tag lean">measured</span>')}
-        ${row('System 1 inference', `${r17.system1.inferenceMs.toFixed(2)} ms`, `${r22.system1.inferenceMs.toFixed(2)} ms`, ' <span class="tag s1">measured · reference evaluator</span>')}
-        ${row('System 1 route', `${r17.system1.decisions.preferred_route.label} → System 2`, `${r22.system1.decisions.preferred_route.label} → bounded action`)}
-        ${row('System 2 reasoning calls', c.totals.modelCalls, s.totals.modelCalls)}
-        ${row('A2A messages', c.totals.a2aMessages, s.totals.a2aMessages)}
-        ${row('Model tokens', int(c.totals.totalTokens), int(s.totals.totalTokens))}
-        ${row('AI execution cost', eur(c.totals.totalCost, { precise: true }), eur(s.totals.totalCost, { precise: true }), ' <span class="tag warn">illustrative prices</span>')}
-      </tbody>
-    </table></div>
-    <div class="mech-avoided"><span class="tag warn">ESTIMATE</span> On ${esc(r22.incident.rack)}, System 1 avoided <b>${av.reasoningCallsAvoided}</b> reasoning calls, <b>${int(av.tokensAvoided)}</b> model tokens and <b>${eur(av.costAvoidedEur, { precise: true })}</b> of model cost — ${esc(av.basis)}. On ${esc(r17.incident.rack)} nothing is avoided: the gate correctly sent it to System 2.</div>
+    <div class="mx" role="table" aria-label="Telemetry per decision">
+      <div class="mx-head" role="row"><div class="mx-label">Telemetry, per decision</div>
+        <div class="mx-col c17"><b>${esc(r17.incident.rack)}</b><span>complex · ${esc(r17.system1.decisions.preferred_route.label)} → System 2</span></div>
+        <div class="mx-col c22"><b>${esc(r22.incident.rack)}</b><span>routine · ${esc(r22.system1.decisions.preferred_route.label)} → fast path</span></div></div>
+      ${metric('Grooming time', ['lean', 'measured'], ms(c.totals.groomCpuMs), ms(s.totals.groomCpuMs))}
+      ${metric('System 1 triage', ['s1', 'measured'], s1lat, s1lat)}
+      ${metric('System 2 reasoning calls', null, c.totals.modelCalls, s.totals.modelCalls, c.totals.modelCalls, s.totals.modelCalls, c.totals.modelCalls)}
+      ${metric('A2A messages', null, c.totals.a2aMessages, s.totals.a2aMessages, c.totals.a2aMessages, s.totals.a2aMessages, c.totals.a2aMessages)}
+      ${metric('Model tokens', null, int(c.totals.totalTokens), int(s.totals.totalTokens), c.totals.totalTokens, s.totals.totalTokens, c.totals.totalTokens)}
+      ${metric('AI execution cost', ['warn', 'illustrative prices'], eur(c.totals.totalCost, { precise: true }), eur(s.totals.totalCost, { precise: true }), c.totals.totalCost, s.totals.totalCost, c.totals.totalCost)}
+    </div>
+    <div class="mech-avoided">
+      <div class="mech-avoided-head"><span class="mx-tag warn">ESTIMATE</span><b>What triage avoided on ${esc(r22.incident.rack)}</b></div>
+      <div class="mech-avoided-nums"><div><b>${av.reasoningCallsAvoided}</b><span>reasoning calls</span></div><div><b>${int(av.tokensAvoided)}</b><span>model tokens</span></div><div><b>${eur(av.costAvoidedEur, { precise: true })}</b><span>model cost</span></div></div>
+      <p>Basis: ${esc(av.basis)}. On ${esc(r17.incident.rack)} nothing is avoided — the gate correctly sent it to System 2.</p>
+    </div>
   </section>`;
 }
