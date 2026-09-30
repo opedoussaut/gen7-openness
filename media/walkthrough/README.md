@@ -7,3 +7,7 @@ Regenerates `GEN7-live-interface-walkthrough-5min.mp4` from the **public preview
 3. `sound.py` writes a calm bed (numpy/scipy); mux with ffmpeg.
 
 Paths are set for a scratch directory (`WALK_DIR`, fonts converted from `../inter-*.woff2`); adjust before running. Requires Playwright (Chromium), OpenCV, Pillow, fontTools + brotli, ffmpeg.
+
+## Scenario 2 walkthrough (≈7 min)
+
+`compose_scenario2.py [seconds]` — R-17 only, end to end (triage, System 2, the Loop A clash and each reaction step, resolution, sign-off, telemetry), then the Story "what happened", AI economics (cost, value, where the saving comes from, bridge) and At scale (business unit, enterprise, why telemetry matters). Needs `capture.py` (step captures) and `capture_tabs.py` (Story / Economics / At scale after a live R-17 run). `START_FRAME=n` resumes a render. `sound.py <seconds> <timeline.json>` writes the bed.
