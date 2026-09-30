@@ -84,15 +84,22 @@ export function buildScript(key = 'R-17') {
   add({ kind: 'raw-summary', state: 'INGESTING', story: 3, narration: 'Sending all of this to a model would cost the most and bury the signal.' });
   STAGES.forEach(st => add({ kind: 'groom', stage: st.id, state: 'GROOMING', story: 4, narration: `${st.label}: ${cfg.kind === 'simple' ? st.operation.replaceAll('Loop A', `Loop ${I.loop}`).replaceAll('R-17', I.rack) : st.operation}` }));
   add({ kind: 'decide', state: 'SYSTEM1', story: 4, narration: 'DECIDE · System 1: a small decision model, running in this browser, answers four typed questions from the groomed state — then the confidence gate chooses the path.' });
-  if (cfg.kind === 'simple') {
-    add({ kind: 'discover', server: 'dcim', state: 'ACTING', story: 6, narration: 'Bounded action: no reasoning agents. One governed skill of the Deployment competence is reached through MCP.' });
-    add({ kind: 'mcp', agent: 'deployment', server: 'dcim', tool: 'reserveRackSlot', args: () => ({ rackId: I.rack, loopId: I.loop, row: I.row, designItKw: I.itKw, plannedFor: I.plannedFor }), state: 'ACTING', story: 6, narration: 'ACT: the slot is reserved in DCIM — a bounded, reversible action within delegated authority.' });
-    add({ kind: 'human', from: 'deployment', to: 'owner', type: 'notify', minutes: 1, state: 'ACTING', story: 8, text: () => `${I.rack} reserved on Loop ${I.loop} · Row ${I.row} for ${I.plannedForLabel}, within delegated authority. No action needed — reply to reverse.`, narration: 'Accountability: the Program Owner is informed and can reverse the action.' });
-    add({ kind: 'decision', state: 'COMPLETED', story: 8, narration: 'Decided by System 1 within delegated authority. No reasoning model was called.' });
-    return steps;
-  }
+  // TRIAGE — everything below is chosen at run time by the confidence gate (step.branch lists the gate paths that run it).
+  // SYSTEM_2 needs a reasoning script: in this demo only the complex request (R-17) has one; the simple request routes
+  // an escalation to a person instead. The paths not taken are skipped, and the UI shows them as not engaged.
+  const FAST = ['BOUNDED_ACTION'], S2 = ['SYSTEM_2'], REVIEW = cfg.kind === 'complex' ? ['HUMAN_REVIEW'] : ['HUMAN_REVIEW', 'SYSTEM_2'];
+  const fast = [], review = [], s2start = steps.length;
+  const branch = (list, b) => (step, same) => { add({ ...step, branch: b }, same); list.push(steps.at(-1)); };
+  const addF = branch(fast, FAST), addR = branch(review, REVIEW);
+  addF({ kind: 'discover', server: 'dcim', state: 'ACTING', story: 6, narration: 'FAST PATH · bounded action: no reasoning agents. One governed skill of the Deployment competence is reached through MCP.' });
+  addF({ kind: 'mcp', agent: 'deployment', server: 'dcim', tool: 'reserveRackSlot', args: () => ({ rackId: I.rack, loopId: I.loop, row: I.row, designItKw: I.itKw, plannedFor: I.plannedFor }), state: 'ACTING', story: 6, narration: 'ACT: the slot is reserved in DCIM — a bounded, reversible action within delegated authority.' });
+  addF({ kind: 'human', from: 'deployment', to: 'owner', type: 'notify', minutes: 1, state: 'ACTING', story: 8, text: () => `${I.rack} reserved on Loop ${I.loop} · Row ${I.row} for ${I.plannedForLabel}, within delegated authority. No action needed — reply to reverse.`, narration: 'Accountability: the Program Owner is informed and can reverse the action.' });
+  addF({ kind: 'decision', state: 'COMPLETED', story: 8, narration: 'Decided on the fast path within delegated authority. No reasoning model was called.' });
+  addR({ kind: 'human', from: 'deployment', to: 'owner', type: 'review-request', minutes: 0, state: 'DECIDING', story: 8, text: run => `System 1 did not clear ${I.rack} for a bounded action (${run.system1?.gate.reasons.join('; ') || 'escalated'}). Please review it with the planning team.`, narration: 'ESCALATED TO A PERSON: the gate did not allow an automatic action, and no reasoning script covers this request.' });
+  addR({ kind: 'decision', state: 'COMPLETED', story: 8, narration: 'No automatic action: the request is with people for review.' });
+  if (cfg.kind !== 'complex') return steps;
   SERVERS.forEach((s, i) => add({ kind: 'discover', server: s.id, state: 'ORCHESTRATING', story: 5, narration: 'Inside each agent: its own tools are discovered through MCP — private to the agent, not the open interface.' }, i > 0));
-  add({ kind: 'model', agent: 'orchestrator', purpose: 'plan', state: 'ORCHESTRATING', story: 5, narration: 'REASON · System 2: escalated by the gate, the orchestrator plans which specialists this decision needs.' });
+  add({ kind: 'model', agent: 'orchestrator', purpose: 'plan', state: 'ORCHESTRATING', story: 5, narration: run => `SYSTEM 2 · escalated by the gate (${run.system1?.gate.reasons.join(', ') ?? 'escalated'}). The orchestrator engages the specialists System 1 selected: ${run.system1?.decisions.agents_required.selected.map(a => a.toLowerCase()).join(', ') || 'none'}.` });
   add({ kind: 'a2a', from: 'orchestrator', to: 'deployment', state: 'ORCHESTRATING', story: 7, narration: 'A2A: a bounded task to the Rack Deployment Agent.' });
   add({ kind: 'a2a', from: 'orchestrator', to: 'sustainability', state: 'ORCHESTRATING', story: 7, narration: 'A2A, in parallel: a bounded task to the Sustainability Agent.' }, true);
   add({ kind: 'mcp', agent: 'deployment', server: 'dcim', tool: 'getRackSpec', args: () => ({ rackId: I.rack }), state: 'ANALYZING', story: 6, narration: 'MCP: the Deployment Agent reads the rack specification from DCIM.' });
@@ -126,6 +133,9 @@ export function buildScript(key = 'R-17') {
   add({ kind: 'human', from: 'facility', to: 'orchestrator', type: 'approve', minutes: 15, state: 'DECIDING', story: 8, text: run => `Approved — install ${I.rack}; burn-in ${burnIn(run)}.`, narration: 'Person → agent: the Facility Manager approves, with the conditions.' });
   add({ kind: 'human', from: 'owner', to: 'orchestrator', type: 'sign-off', minutes: 10, state: 'DECIDING', story: 8, text: () => `Signed off. Proceed on ${I.plannedForLabel}.`, narration: 'The Program Owner signs off.' });
   add({ kind: 'decision', state: 'COMPLETED', story: 8, narration: 'Decision taken by people, on evidence prepared by agents.' });
+  // System 2 steps are the ones added after the fast and review branches
+  const tagged = new Set([...fast, ...review]);
+  for (let i = s2start; i < steps.length; i++) if (!tagged.has(steps[i])) steps[i] = { ...steps[i], branch: S2 };
   return steps;
 }
 
@@ -145,6 +155,18 @@ export const LOOP = {
 };
 
 const r1 = v => Math.round(v * 10) / 10;
+/** Recommendation when the gate escalated to a person (or to System 2 where no reasoning script exists). */
+export function reviewRecommendation(run, cfg) {
+  const s1 = run.system1, d = s1.decisions, I = cfg.incident;
+  return {
+    decision: `No automatic action for ${I.rack} — routed to people for review`,
+    summary: `The confidence gate did not allow a bounded action (${s1.gate.reasons.join('; ')}). The request, the typed decisions and the evidence are with the Program Owner.`,
+    items: [{ label: 'System 1 · typed decisions', text: `Capacity risk ${d.capacity_risk.label} · reasoning required ${d.reasoning_required.label} · route ${d.preferred_route.label} · weakest confidence ${Math.round(s1.gate.weakest.confidence * 100)} %.` }],
+    actions: ['Planning team reviews the request with the groomed evidence.'],
+    disagreements: [], confidence: 'Escalated · below the gate', outcome: { approved: false, review: true }
+  };
+}
+
 /** Recommendation for a bounded System 1 decision (no reasoning agents involved). */
 export function boundedRecommendation(run, cfg) {
   const s1 = run.system1, b = s1.features.basis, I = cfg.incident, d = s1.decisions;
@@ -171,5 +193,5 @@ export const scenario = {
   incident: INCIDENT, agents: AGENTS, humans: HUMANS, loop: LOOP, scienceTools: ['getLoopHeatLoad', 'calculateCoolingHeadroom'], reasoners: REASONERS, servers: SERVERS, sources: SOURCE_META,
   models: MODELS, infra: INFRA, energy: ENERGY, value: VALUE_ASSUMPTIONS, valueComponents, outcomeLine, naiveRouting: NAIVE_ROUTING,
   story: STORY, stages: STAGES, pipeline: { flatten, runStage },
-  generateDataset, buildScript, requests: REQUESTS, anchorFor, boundedRecommendation
+  generateDataset, buildScript, requests: REQUESTS, anchorFor, boundedRecommendation, reviewRecommendation
 };

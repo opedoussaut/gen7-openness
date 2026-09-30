@@ -73,3 +73,38 @@ test('the gate escalates on low confidence even when the route is DIRECT', () =>
   assert.equal(g.escalate, true);
   assert.match(g.reasons.join(' '), /low confidence on capacity risk/);
 });
+
+// ---------- Triage is causal: the confidence gate chooses the branch at run time ----------
+const fixed = probs => ({ kind: 'test', describe: () => ({ backend: 'test' }), decide: async () => ({ probs, inferenceMs: 0.1, info: { backend: 'test', runtime: 'test' } }) });
+const P = { routine: { capacity_risk: [0.97, 0.02, 0.01], reasoning_required: [0.98, 0.02], preferred_route: [0.98, 0.01, 0.01], agents_required: [0.01, 0.01, 0.01, 0.01] },
+            unsure: { capacity_risk: [0.55, 0.40, 0.05], reasoning_required: [0.9, 0.1], preferred_route: [0.9, 0.05, 0.05], agents_required: [0.01, 0.01, 0.01, 0.01] } };
+const withS1 = async (key, probs) => { const e = new DemoEngine(sc, { request: key, system1: fixed(probs) }); const r = await e.runInstant(); return { run: r, metrics: computeMetrics(r, sc) }; };
+
+test('triage: the same complex request takes the fast path when System 1 says it is routine and confident', async () => {
+  const { run: r, metrics } = await withS1('R-17', P.routine);
+  assert.equal(r.path, 'BOUNDED_ACTION');
+  assert.equal(r.status, 'completed');
+  assert.equal(metrics.totals.modelCalls ?? r.events.filter(e => e.kind === 'model').length, 0);
+  assert.equal(r.a2aMessages.length, 0);
+  assert.ok(r.mcpCalls.some(c => c.tool === 'reserveRackSlot'));
+  assert.equal(r.executed, r.totalSteps);
+});
+
+test('triage: low confidence blocks the automatic action and routes the request to a person', async () => {
+  const { run: r } = await withS1('R-22', P.unsure);
+  assert.equal(r.path, 'SYSTEM_2');                       // weakest confidence 55 % < 75 % → escalate
+  assert.equal(r.mcpCalls.length, 0);                     // no action taken
+  assert.equal(r.events.filter(e => e.kind === 'model').length, 0);
+  assert.ok(r.recommendation.outcome.review);
+  assert.ok(r.humanActions.some(h => h.type === 'review-request'));
+});
+
+test('triage: with the shipped model, the branch taken matches the gate and skipped branches never execute', async () => {
+  for (const key of ['R-17', 'R-22']) {
+    const { run: r } = await run(key);
+    assert.equal(r.executed, r.totalSteps, key);
+    assert.equal(r.path, key === 'R-17' ? 'SYSTEM_2' : 'BOUNDED_ACTION');
+    if (key === 'R-17') assert.ok(!r.mcpCalls.some(c => c.tool === 'reserveRackSlot'));
+    else assert.equal(r.a2aMessages.length, 0);
+  }
+});

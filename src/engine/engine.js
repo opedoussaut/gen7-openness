@@ -22,7 +22,8 @@ export function createRun(scenario, steps, requestKey = 'R-17') {
     id: `RUN-${uid('').slice(1, 7).toUpperCase()}`,
     scenarioId: scenario.id,
     state: 'IDLE', status: 'idle', error: null,
-    stepIndex: -1, totalSteps: steps.length, current: null, story: 0,
+    stepIndex: -1, executed: 0, path: null, current: null, story: 0,
+    totalSteps: steps.filter(x => !x.branch || x.branch.includes(cfg?.kind === 'simple' ? 'BOUNDED_ACTION' : 'SYSTEM_2')).length,
     narration: 'Ready. Start the demo to replay the incident.',
     startedAt: null, completedAt: null,
     simTimeMs: 0,
@@ -130,12 +131,15 @@ export class DemoEngine {
   async loop(token, paced) {
     let beat = 0, beatStart = 0, beatEnd = 0, lanes = {};
     for (let i = 0; i < this.steps.length; i++) {
+      // TRIAGE: steps on a branch run only when the confidence gate chose that path.
+      if (this.steps[i].branch && !this.steps[i].branch.includes(this.run.system1?.gate.path)) continue;
       if (paced) await this.gate(token);
       if (this.stepRequested) this.stepRequested = false;
       const step = this.steps[i];
       if (step.beat !== beat) { beat = step.beat; beatStart = beatEnd; lanes = {}; }
       this.run.stepIndex = i; this.run.current = step;
-      this.run.state = step.state; this.run.story = step.story; this.run.narration = step.narration;
+      this.run.state = step.state; this.run.story = step.story; this.run.executed = (this.run.executed ?? 0) + 1;
+      this.run.narration = typeof step.narration === 'function' ? step.narration(this.run) : step.narration;
       const { lane, durationMs, event } = await this.execute(step);
       this.check(token);
       const tStart = beatStart + (lanes[lane] ?? 0);
@@ -209,6 +213,8 @@ export class DemoEngine {
         const r = await this.system1.decide(features.vector);
         const decisions = decode(r.probs), g = gate(decisions);
         run.system1 = { features, decisions, gate: g, inferenceMs: r.inferenceMs, runtime: r.info, requestKey: this.requestKey };
+        run.path = g.path;
+        run.totalSteps = this.steps.filter(x => !x.branch || x.branch.includes(g.path)).length;
         const where = g.path === 'BOUNDED_ACTION' ? 'bounded action' : g.path === 'HUMAN_REVIEW' ? 'escalate to a person' : 'escalate to System 2';
         return { lane: 'system1', durationMs: Math.max(1, Math.round(r.inferenceMs)), event: { kind: 'decide', title: `System 1 → ${where}`, detail: `risk ${decisions.capacity_risk.label} · reasoning ${decisions.reasoning_required.label} · route ${decisions.preferred_route.label} · ${r.info.backend} · ${r.inferenceMs.toFixed(2)} ms`, ref: { system1: true } } };
       }
@@ -266,7 +272,10 @@ export class DemoEngine {
         return { lane: `human:${step.from}`, durationMs: 0, event: { kind: 'human', title: `${label(sc, step.from)} → ${label(sc, step.to)}`, detail: text, ref: { human: action.id } } };
       }
       case 'decision': {
-        run.recommendation = this.requestCfg?.kind === 'simple' ? sc.boundedRecommendation(run, this.requestCfg) : run.agents.orchestrator.outputs.at(-1)?.output ?? null;
+        const path = run.system1?.gate.path, cfg = this.requestCfg;
+        run.recommendation = path === 'BOUNDED_ACTION' ? sc.boundedRecommendation(run, cfg)
+          : path === 'HUMAN_REVIEW' || cfg?.kind !== 'complex' ? sc.reviewRecommendation(run, cfg)
+          : run.agents.orchestrator.outputs.at(-1)?.output ?? null;
         return { lane: 'orchestrator', durationMs: 0, event: { kind: 'decision', title: 'Recommendation generated', detail: run.recommendation?.decision ?? '' } };
       }
     }
