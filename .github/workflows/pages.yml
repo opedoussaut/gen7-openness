@@ -20,6 +20,24 @@ jobs:
           node-version: '22'
       - run: npm test
       - run: npm run build
+      # Preview of the decision-intelligence branch, published under /decision-intelligence/.
+      # Additive only: the stable site at the root is built exactly as before, and a failure
+      # in the preview never blocks it (continue-on-error).
+      - name: Check out the decision-intelligence preview
+        id: preview
+        continue-on-error: true
+        uses: actions/checkout@v4
+        with:
+          ref: decision-intelligence
+          path: _preview
+      - name: Test and build the preview under /decision-intelligence/
+        if: steps.preview.outcome == 'success'
+        continue-on-error: true
+        working-directory: _preview
+        run: |
+          npm test
+          npm run build
+          mv dist ../dist/decision-intelligence
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
