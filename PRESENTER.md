@@ -87,3 +87,13 @@ Rehearse once: run at 1×, then Reset. If asked “is this a real LLM?” — no
 
 - **Opening (1 minute):** the site opens on *The story · before the demo*: the situation, who takes part (3 people, a coordinator, 4 specialists, ordinary software) and the five questions we will test, each with a *watch for* hint. No answers yet — do not spoil the moment the cooling check fails.
 - **Closing (1–2 minutes):** after your live run, the recommendation panel has *The story: what happened*; the tab now shows the answers from your run — the eleven steps, the five questions ticked, the result and what the demo is and is not. The switch at the top lets you flip between the two moments at any time.
+
+## · Decision Intelligence preview (branch `decision-intelligence`)
+
+Open `https://opedoussaut.github.io/gen7-openness/decision-intelligence/` — nothing to install. Give the page a few seconds after it opens: the decision model (8.5 KB) and ONNX Runtime Web load in the background.
+
+- **Film (50 s):** Story tab → *System 1 · System 2* (the original 37-second film is the other choice).
+- **The contrast (3 minutes):** Live demo → request switch. Run **R-22** first: *Decide · System 1* shows LOW / NO / DIRECT, the gate lets it through, one reversible reservation is made through MCP, the owner is notified — **no model calls**. Then **R-17**: HIGH / YES / ORCHESTRATE, all four agents; the gate escalates to System 2 and the familiar run follows.
+- **The line:** “A small model decides *whether* we need to think hard. Most requests don’t.”
+- **Proof it runs here:** Technical view → *SYSTEM 1 · what actually executed* — runtime (WebGPU or WASM), network call *None*, API cost *€0*, timings measured on this laptop.
+- **Economics:** *Two mechanisms* — reduce input (grooming) and reduce reasoning (the gate). Avoided reasoning on R-22 is an ESTIMATE against the R-17 run; say so.

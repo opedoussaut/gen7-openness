@@ -1,0 +1,18 @@
+name: Publish decision-intelligence preview
+# GitHub Pages has one site per repository, published by main's workflow. When this branch changes,
+# ask main's workflow to rebuild: the stable site stays at the root, this branch goes to /decision-intelligence/.
+on:
+  push:
+    branches: [decision-intelligence]
+  workflow_dispatch:
+permissions:
+  actions: write
+  contents: read
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Rebuild GitHub Pages from main (root) + this branch (subpath)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run pages.yml --repo "${{ github.repository }}" --ref main

@@ -1,0 +1,394 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face { font-family: Inter; font-weight: 200; src: url(inter-latin-200-normal.woff2); }
+@font-face { font-family: Inter; font-weight: 300; src: url(inter-latin-300-normal.woff2); }
+@font-face { font-family: Inter; font-weight: 400; src: url(inter-latin-400-normal.woff2); }
+@font-face { font-family: Inter; font-weight: 600; src: url(inter-latin-600-normal.woff2); }
+@font-face { font-family: Inter; font-weight: 700; src: url(inter-latin-700-normal.woff2); }
+@font-face { font-family: Inter; font-weight: 800; src: url(inter-latin-800-normal.woff2); }
+html, body { margin: 0; background: #02070e; }
+canvas { display: block; }
+</style></head>
+<body><canvas id="c" width="1920" height="1080"></canvas>
+<script>
+// GEN7 Decision Intelligence — cinematic intro (System 1 / System 2). Deterministic: render(t) draws the frame at t seconds.
+// Storyline: COMPLEXITY → GROOM → DECIDE → CONFIDENCE GATE → REASON → ACT → HUMAN ACCOUNTABILITY → MEASURE → ENDING.
+// Figures in MEASURE come from the simulated R-17 reference run of the demo (System 1 confidences are the real model outputs).
+const W = 1920, H = 1080, cv = document.getElementById('c'), g = cv.getContext('2d');
+const DURATION = 52.5;
+// ---------- helpers ----------
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, k) => a + (b - a) * k;
+const seg = (t, a, b) => clamp((t - a) / (b - a));
+const eio = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+const eout = k => 1 - Math.pow(1 - k, 3);
+const fade = (t, a, b, c, d) => Math.min(eio(seg(t, a, b)), 1 - eio(seg(t, c, d)));
+function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let x = Math.imul(seed ^ seed >>> 15, 1 | seed); x = x + Math.imul(x ^ x >>> 7, 61 | x) ^ x; return ((x ^ x >>> 14) >>> 0) / 4294967296; }; }
+const R = rng(11);
+const COL = { cyan: [61, 192, 255], blue: [70, 150, 235], violet: [156, 124, 244], amber: [236, 168, 74], green: [60, 214, 150], mint: [31, 209, 165], white: [235, 245, 255], grey: [120, 150, 178] };
+const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+const sprites = {};
+function sprite(name) {
+  if (sprites[name]) return sprites[name];
+  const s = document.createElement('canvas'); s.width = s.height = 64; const x = s.getContext('2d'), c = COL[name];
+  const gr = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+  gr.addColorStop(0, rgba([255, 255, 255], 1)); gr.addColorStop(.12, rgba(c, .95)); gr.addColorStop(.4, rgba(c, .28)); gr.addColorStop(1, rgba(c, 0));
+  x.fillStyle = gr; x.fillRect(0, 0, 64, 64); return (sprites[name] = s);
+}
+function glow(x, y, r, name, a) { if (a <= 0.003) return; g.globalAlpha = Math.min(1, a); g.drawImage(sprite(name), x - r, y - r, 2 * r, 2 * r); g.globalAlpha = 1; }
+function text(str, x, y, { size = 48, weight = 600, color = COL.white, a = 1, align = 'center', track = 0 } = {}) {
+  if (a <= 0.003) return;
+  g.font = `${weight} ${size}px Inter`; g.textAlign = align; g.textBaseline = 'middle'; g.letterSpacing = `${track}px`;
+  g.fillStyle = rgba(color, Math.min(1, a)); g.fillText(str, x, y); g.letterSpacing = '0px';
+}
+function tw(str, size, weight, track = 0) { g.font = `${weight} ${size}px Inter`; g.letterSpacing = `${track}px`; const w = g.measureText(str).width; g.letterSpacing = '0px'; return w; }
+function line(x1, y1, x2, y2, c, a, w = 1.5, dash = null) {
+  if (a <= 0.003) return; g.strokeStyle = rgba(c, a); g.lineWidth = w; g.setLineDash(dash ?? []); g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke(); g.setLineDash([]);
+}
+function curve(p0, p1, p2, p3, c, a, w = 1.5, dash = null, upto = 1) {
+  if (a <= 0.003 || upto <= 0) return; g.strokeStyle = rgba(c, a); g.lineWidth = w; g.setLineDash(dash ?? []); g.beginPath(); g.moveTo(p0[0], p0[1]);
+  const n = 40; for (let i = 1; i <= n * upto; i++) { const q = bez(p0, p1, p2, p3, i / n); g.lineTo(q[0], q[1]); } g.stroke(); g.setLineDash([]);
+}
+function rrect(x, y, w, h, r, fill, stroke, lw = 1.5, dash = null) {
+  g.beginPath(); g.roundRect(x, y, w, h, r);
+  if (fill) { g.fillStyle = fill; g.fill(); }
+  if (stroke) { g.strokeStyle = stroke; g.lineWidth = lw; g.setLineDash(dash ?? []); g.stroke(); g.setLineDash([]); }
+}
+function ring(x, y, r, c, a, w = 2, from = 0, to = 1) { if (a <= 0.003 || to <= from) return; g.strokeStyle = rgba(c, a); g.lineWidth = w; g.beginPath(); g.arc(x, y, r, -Math.PI / 2 + from * 6.2832, -Math.PI / 2 + to * 6.2832); g.stroke(); }
+const bez = (p0, p1, p2, p3, k) => { const u = 1 - k; return [u*u*u*p0[0] + 3*u*u*k*p1[0] + 3*u*k*k*p2[0] + k*k*k*p3[0], u*u*u*p0[1] + 3*u*u*k*p1[1] + 3*u*k*k*p2[1] + k*k*k*p3[1]]; };
+const add = () => { g.globalCompositeOperation = 'lighter'; }, norm = () => { g.globalCompositeOperation = 'source-over'; };
+
+// ---------- static data ----------
+const C = [960, 560];
+const stars = Array.from({ length: 200 }, () => ({ x: R() * W, y: R() * H, z: .2 + R() * .8, p: R() * 6.28 }));
+const DOMAINS = ['WORKLOADS', 'ENERGY', 'COOLING', 'CAPACITY', 'CARBON', 'OPERATIONS', 'CONSTRAINTS'];
+const DCOL = ['violet', 'amber', 'cyan', 'blue', 'green', 'cyan', 'amber'];
+const D = DOMAINS.map((n, k) => { const an = -Math.PI / 2 + k * 2 * Math.PI / 7; return { n, x: C[0] + Math.cos(an) * 650, y: C[1] + 12 + Math.sin(an) * 310, c: DCOL[k] }; });
+const N = 1500, EVIDENCE = 60, RAW = 11825;
+const P = Array.from({ length: N }, (_, i) => {
+  const s = i % 7, b = (s + 1 + Math.floor(R() * 5)) % 7;
+  const ev = i < EVIDENCE;
+  return { s, b, spd: .07 + R() * .12, off: R(), side: (R() - .5) * 520, sz: 3 + R() * 5, col: D[s].c, born: .6 + R() * 4.2,
+    arrive: ev ? 7.4 + R() * 3.2 : 7.0 + Math.pow(R(), .85) * 4.2, spin: (R() - .5) * 2.4 };
+});
+const NON_EV = N - EVIDENCE;
+const EV_CLUSTER = Array.from({ length: EVIDENCE }, (_, i) => { const an = i * 2.39996, r = 9.5 * Math.sqrt(i + .5); return [C[0] + r * Math.cos(an), C[1] + r * Math.sin(an)]; });
+const M0 = [620, 560], M1 = [400, 560];           // System 1 module: DECIDE position → GATE position
+const READ = [
+  { l: 'CAPACITY RISK', v: 'HIGH', c: COL.amber, p: .969 },
+  { l: 'COOLING CONSTRAINT', v: 'ACTIVE', c: COL.amber, p: .991 },
+  { l: 'SYSTEM 2 REQUIRED', v: 'YES', c: COL.violet, p: .984 },
+  { l: 'ROUTE', v: 'MULTI-AGENT', c: COL.violet, p: .968 }
+];
+const ORCH = [960, 380];
+const AG = [['WORKLOAD', 450], ['COOLING', 790], ['SUSTAINABILITY', 1130], ['DEPLOYMENT', 1470]].map(([n, x]) => ({ n, x, y: 680 }));
+const A2A = [[0, 1], [1, 2], [1, 3]];
+
+// ---------- layers ----------
+function background(t) {
+  norm(); g.fillStyle = '#02070e'; g.fillRect(0, 0, W, H);
+  const rg = g.createRadialGradient(W / 2, H * .55, 50, W / 2, H * .55, 1100);
+  rg.addColorStop(0, 'rgba(16,52,90,.5)'); rg.addColorStop(.5, 'rgba(8,26,48,.32)'); rg.addColorStop(1, 'rgba(2,7,14,0)');
+  g.fillStyle = rg; g.fillRect(0, 0, W, H);
+  const on = eio(seg(t, .2, 2.4)) * .8;
+  const hz = 660, vx = W / 2 + Math.sin(t * .1) * 50;
+  add();
+  for (let i = -24; i <= 24; i++) { const bx = W / 2 + i * 140; line(vx, hz, bx + (bx - vx) * 1.8, H + 40, COL.cyan, .05 * on, 1); }
+  const drift = (t * .25) % 1;
+  for (let k = 0; k < 16; k++) { const z = (k + 1 - drift) / 16; const y = hz + Math.pow(z, 2.6) * (H - hz + 60); line(0, y, W, y, COL.cyan, .075 * on * z, 1); }
+  for (const s of stars) { const a = (.25 + .35 * Math.sin(t * 1.1 * s.z + s.p)) * s.z * clamp(t / 1.5); const x = (s.x - t * 6 * s.z + W) % W; glow(x, s.y, 3 + 5 * s.z, 'cyan', a * .4); }
+  norm();
+}
+function vignette() {
+  const v = g.createRadialGradient(W / 2, H / 2, 480, W / 2, H / 2, 1250); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,.72)');
+  g.fillStyle = v; g.fillRect(0, 0, W, H);
+}
+// kicker (small tracked, coloured) + one calm line
+function headline(t, a, b, c, d, kicker, l1, kc = COL.cyan, l1c = COL.white, y = 128) {
+  const k = fade(t, a, b, c, d), rise = (1 - eout(seg(t, a, b))) * 16;
+  if (kicker) text(kicker, W / 2, y + rise, { size: 18, weight: 700, color: kc, a: k, track: 7 });
+  if (l1) text(l1, W / 2, y + 52 + rise, { size: 44, weight: 300, color: l1c, a: k * .97, track: -.5 });
+}
+
+// 1 · COMPLEXITY and 2 · GROOM — one particle field
+function chaosPos(p, t) {
+  const A = D[p.s], B = D[p.b];
+  const ph = (p.off + t * p.spd) % 1, q = eio(ph < .5 ? ph * 2 : 2 - ph * 2);
+  const dx = B.x - A.x, dy = B.y - A.y, L = Math.hypot(dx, dy) || 1, nx = -dy / L, ny = dx / L;
+  return bez([A.x, A.y], [A.x + dx * .3 + nx * p.side, A.y + dy * .3 + ny * p.side], [A.x + dx * .7 + nx * p.side * .6, A.y + dy * .7 + ny * p.side * .6], [B.x, B.y], q);
+}
+function field(t) {
+  if (t > 14) return;
+  add();
+  for (let i = 0; i < N; i++) {
+    const p = P[i]; if (t < p.born) continue;
+    let a = .55 * seg(t, p.born, p.born + .8), r = p.sz, col = p.col;
+    let [x, y] = chaosPos(p, t);
+    const k = eio(seg(t, p.arrive - 1.5, p.arrive));
+    if (k > 0) {
+      const dx = x - C[0], dy = y - C[1], rot = k * p.spin, cs = Math.cos(rot), sn = Math.sin(rot), s = 1 - k;
+      x = C[0] + (dx * cs - dy * sn) * s; y = C[1] + (dx * sn + dy * cs) * s;
+    }
+    if (i >= EVIDENCE) {
+      if (t > p.arrive) { const dk = seg(t, p.arrive, p.arrive + .3); if (dk >= 1) continue; a *= 1 - dk; r *= 1 + dk; }
+    } else {
+      // evidence: survives the filter, orbits, then settles into a calm disc and is absorbed by System 1
+      if (t > p.arrive) { const o = (t - p.arrive) * 1.6 + i; x = C[0] + Math.cos(o) * 34 * seg(t, p.arrive, p.arrive + .4); y = C[1] + Math.sin(o) * 20 * seg(t, p.arrive, p.arrive + .4); col = 'white'; }
+      const st = eio(seg(t, 11.3 + (i % 10) * .04, 12.3 + (i % 10) * .04));
+      if (st > 0) { x = lerp(x, EV_CLUSTER[i][0], st); y = lerp(y, EV_CLUSTER[i][1], st); col = 'cyan'; r = lerp(r, 7.5, st); a = lerp(a, .95, st); }
+      const ab = eio(seg(t, 12.8 + (i % 12) * .03, 13.6 + (i % 12) * .03));
+      if (ab > 0) { const mx = lerp(C[0], M0[0], ab), my = lerp(C[1], M0[1], ab); x = lerp(x, mx, ab); y = lerp(y, my, ab); r *= 1 - .6 * ab; a *= 1 - seg(t, 13.4, 13.9); col = ab > .5 ? 'mint' : col; }
+    }
+    glow(x, y, r, col, a);
+  }
+  norm();
+}
+function domains(t) {
+  const a = fade(t, .8, 2.4, 6.6, 7.8); if (a <= 0) return;
+  add();
+  // tangled dependencies between domains
+  for (let i = 0; i < 7; i++) for (let j = i + 1; j < 7; j++) { const k = a * seg(t, 1.2 + (i + j) * .08, 2.2 + (i + j) * .08); line(D[i].x, D[i].y, D[j].x, D[j].y, COL.cyan, .045 * k, 1); }
+  D.forEach((d, i) => { const k = a * seg(t, .9 + i * .14, 1.8 + i * .14); glow(d.x, d.y, 30 + 4 * Math.sin(t * 2 + i), d.c, k * .9); glow(d.x, d.y, 80, d.c, k * .18); });
+  norm();
+  D.forEach((d, i) => { const k = a * seg(t, 1.1 + i * .14, 2.0 + i * .14); const up = d.y < C[1]; text(d.n, d.x, d.y + (up ? -40 : 42), { size: 17, weight: 700, color: [196, 220, 240], a: k, track: 5 }); });
+}
+function filterRings(t) {
+  const a = fade(t, 6.8, 7.6, 11.2, 12.0); if (a <= 0) return;
+  add();
+  for (let k = 0; k < 4; k++) { const ph = ((t - 6.8) * .55 + k / 4) % 1; const r = lerp(260, 40, eout(ph)); ring(C[0], C[1], r, COL.cyan, a * .35 * Math.sin(ph * Math.PI), 1.5); }
+  glow(C[0], C[1], 70, 'cyan', a * .35);
+  norm();
+}
+function recordCounter(t) {
+  const a = fade(t, 1.6, 2.6, 12.6, 13.2); if (a <= 0) return;
+  let v, lab = 'RECORDS', col = COL.cyan;
+  if (t < 6.8) v = Math.round(RAW * eout(seg(t, 1.6, 5.8)));
+  else {
+    let gone = 0; for (let i = EVIDENCE; i < N; i++) if (t > P[i].arrive + .15) gone++;
+    v = Math.round(RAW - (RAW - EVIDENCE) * gone / NON_EV);
+    if (gone === NON_EV) { v = EVIDENCE; lab = 'PIECES OF EVIDENCE'; col = COL.mint; }
+  }
+  text(v.toLocaleString('en-US'), W / 2, 930, { size: 64, weight: 200, color: col, a, track: 2 });
+  text(lab, W / 2, 984, { size: 15, weight: 700, color: [140, 176, 206], a: a * .9, track: 6 });
+}
+
+// 3 · DECIDE (System 1) — compact, immediate, parallel
+function modulePos(t) { const k = eio(seg(t, 19.5, 20.5)); return [lerp(M0[0], M1[0], k), lerp(M0[1], M1[1], k)]; }
+function s1module(t) {
+  const a = fade(t, 13.1, 13.9, 24.6, 25.3); if (a <= 0) return;
+  const [mx, my] = modulePos(t), s = 190, fire = Math.exp(-5 * Math.max(0, t - 14.4)) * seg(t, 14.2, 14.4);
+  add(); glow(mx, my, 150, 'mint', a * (.18 + .5 * fire)); norm();
+  rrect(mx - s / 2, my - s / 2, s, s, 30, `rgba(15,27,42,${.88 * a})`, rgba(COL.mint, .75 * a), 2);
+  // a tiny network: 9 → 32 → 32 → 12, drawn as 4 compact columns
+  const cols = [5, 7, 7, 4], xs = [-54, -18, 18, 54];
+  add();
+  cols.forEach((n, c) => { for (let j = 0; j < n; j++) { const yy = my + (j - (n - 1) / 2) * 17, xx = mx + xs[c];
+    if (c < 3) for (let q = 0; q < cols[c + 1]; q += 2) line(xx, yy, mx + xs[c + 1], my + (q - (cols[c + 1] - 1) / 2) * 17, COL.mint, .07 * a, 1);
+    const act = fire * (.5 + .5 * Math.sin(j * 2.1 + c)) + .25; glow(xx, yy, 7, 'mint', a * act); } });
+  norm();
+  text('SYSTEM 1', mx, my + s / 2 + 36, { size: 17, weight: 700, color: COL.mint, a, track: 6 });
+  text('small decision model · < 1 ms', mx, my + s / 2 + 64, { size: 15, weight: 400, color: [140, 176, 206], a: a * seg(t, 14.6, 15.4) });
+}
+function readouts(t) {
+  const a = fade(t, 14.2, 14.4, 19.0, 19.7); if (a <= 0) return;
+  const x0 = 900, x1 = 1500, ox = M0[0] + 95, oy = M0[1];
+  READ.forEach((r, i) => {
+    const y = 440 + i * 82, t0 = 14.3 + i * .05, k = a * eout(seg(t, t0, t0 + .22));
+    const lk = seg(t, 14.2, 14.42);
+    line(ox, oy, lerp(ox, x0 - 24, lk), lerp(oy, y, lk), COL.mint, .35 * a, 1.2);
+    add(); if (t > 14.2 && t < 14.5) { const q = seg(t, 14.2, 14.42); glow(lerp(ox, x0 - 24, q), lerp(oy, y, q), 10, 'mint', a); } glow(x0 - 24, y, 7, 'mint', k * .8); norm();
+    text(r.l, x0, y - 6, { size: 16, weight: 700, color: [150, 184, 210], a: k, align: 'left', track: 4 });
+    text(r.v, x1, y - 8, { size: 28, weight: 700, color: r.c, a: k, align: 'right', track: 3 });
+    const bk = eout(seg(t, t0 + .1, t0 + .45));
+    g.fillStyle = rgba([60, 90, 120], .45 * a); g.fillRect(x0, y + 22, x1 - x0, 2);
+    g.fillStyle = rgba(COL.mint, .85 * a); g.fillRect(x0, y + 22, (x1 - x0) * r.p * bk, 2);
+  });
+  text('CONFIDENCE', x1, 440 + 3 * 82 + 56, { size: 12, weight: 700, color: [110, 140, 168], a: a * seg(t, 15, 15.6), align: 'right', track: 5 });
+}
+
+// 4 · CONFIDENCE GATE
+function gateScene(t) {
+  const a = fade(t, 19.9, 20.6, 24.4, 25.2); if (a <= 0) return;
+  const [mx, my] = modulePos(t), sx = mx + 96, GX = 980, YU = 420, YL = 700, EX = 1500;
+  const pk = eio(seg(t, 20.3, 21.0));
+  const up = [[sx, my], [sx + 200, my], [GX - 260, YU], [GX - 20, YU]], lo = [[sx, my], [sx + 200, my], [GX - 260, YL], [GX - 20, YL]];
+  curve(...up, COL.mint, .5 * a, 1.6, null, pk); curve(...lo, COL.amber, .45 * a, 1.6, null, pk);
+  // gates
+  const open = eio(seg(t, 23.0, 23.5)), gc = open > 0 ? COL.violet : [110, 130, 150];
+  g.fillStyle = rgba(COL.mint, .9 * a * pk); g.fillRect(GX - 3, YU - 58, 6, 34); g.fillRect(GX - 3, YU + 24, 6, 34);
+  g.fillStyle = rgba(gc, .9 * a * pk); g.fillRect(GX - 3, YL - 22 - 36 * open, 6, 34); g.fillRect(GX - 3, YL - 12 + 36 * open, 6, 34);
+  // straight-through (known, confident) and escalation (complex, uncertain)
+  line(GX + 20, YU, lerp(GX + 20, EX - 30, eio(seg(t, 21.2, 21.8))), YU, COL.mint, .5 * a, 1.6);
+  line(GX + 20, YL, lerp(GX + 20, EX - 30, eio(seg(t, 23.3, 24.0))), YL, COL.violet, .6 * a, 2);
+  add();
+  if (t > 20.9 && t < 22.0) { const q = seg(t, 20.9, 21.8); const p = q < .6 ? bez(...up, q / .6) : [lerp(GX, EX - 30, (q - .6) / .4), YU]; glow(p[0], p[1], 14, 'mint', a); }
+  if (t > 21.5) { const q = seg(t, 21.5, 22.1); let p = bez(...lo, q); if (t > 23.3) p = [lerp(GX - 20, EX - 30, eio(seg(t, 23.3, 24.1))), YL];
+    const hold = t > 22.1 && t < 23.3 ? .5 + .5 * Math.sin((t - 22.1) * 7) : 1; glow(p[0], p[1], 15, t > 23.2 ? 'violet' : 'amber', a * hold); }
+  glow(EX, YU, 26, 'mint', a * seg(t, 21.6, 22.0)); glow(EX, YL, 34 + 20 * seg(t, 24, 25), 'violet', a * seg(t, 23.9, 24.3));
+  if (t > 22.1 && t < 23.4) glow(GX, YL, 60, 'amber', a * .35 * seg(t, 22.1, 22.4));
+  norm();
+  text('KNOWN · CONFIDENT', (sx + GX) / 2 + 40, YU - 44, { size: 15, weight: 700, color: COL.mint, a: a * seg(t, 20.6, 21.2), track: 5 });
+  text('COMPLEX · UNCERTAIN', (sx + GX) / 2 + 40, YL + 46, { size: 15, weight: 700, color: COL.amber, a: a * seg(t, 20.8, 21.4), track: 5 });
+  text('CONTINUE', EX + 40, YU, { size: 17, weight: 700, color: COL.mint, a: a * seg(t, 21.7, 22.2), align: 'left', track: 5 });
+  text('ESCALATE', EX + 44, YL - 12, { size: 17, weight: 700, color: COL.violet, a: a * seg(t, 24.0, 24.4), align: 'left', track: 5 });
+  text('SYSTEM 2', EX + 44, YL + 14, { size: 13, weight: 700, color: [170, 150, 235], a: a * seg(t, 24.1, 24.5), align: 'left', track: 5 });
+  // what the model saw
+  [['COMPLEXITY', 'MULTI-DOMAIN'], ['REASONING REQUIRED', 'YES']].forEach(([l, v], i) => {
+    const k = a * seg(t, 22.3 + i * .15, 22.7 + i * .15), y = 812 + i * 40;
+    text(l, GX - 12, y, { size: 15, weight: 700, color: [150, 184, 210], a: k, align: 'right', track: 4 });
+    text(v, GX + 12, y, { size: 17, weight: 700, color: COL.violet, a: k, align: 'left', track: 4 });
+  });
+}
+
+// 5 · REASON (System 2) — slower, richer, orchestrated; then zoom into one agent
+function reason(t) {
+  const a = fade(t, 24.9, 25.9, 40, 41); if (a <= 0 || t > 34) return;
+  const z = eio(seg(t, 32.2, 33.7)), F = AG[1], s = lerp(1, 2.3, z), fx = lerp(F.x, 560, z), fy = lerp(F.y, 560, z);
+  g.save(); g.setTransform(s, 0, 0, s, fx - s * F.x, fy - s * F.y);
+  const rest = a * (1 - z);
+  const ek = i => eio(seg(t, 25.8 + i * .25, 27.0 + i * .25));
+  AG.forEach((n, i) => curve([ORCH[0], ORCH[1] + 30], [ORCH[0], ORCH[1] + 150], [n.x, n.y - 170], [n.x, n.y - 34], COL.violet, .4 * rest, 1.6, [7, 7], ek(i)));
+  A2A.forEach(([i, j], q) => { const A = AG[i], B = AG[j], k = eio(seg(t, 27.4 + q * .3, 28.4 + q * .3)); curve([A.x, A.y + 34], [A.x, A.y + 130 + q * 18], [B.x, B.y + 130 + q * 18], [B.x, B.y + 34], COL.violet, .3 * rest, 1.4, [3, 6], k); });
+  add();
+  glow(ORCH[0], ORCH[1], 40 + 3 * Math.sin(t * 1.2), 'white', rest * seg(t, 25.0, 26.0)); glow(ORCH[0], ORCH[1], 120, 'violet', rest * .25 * seg(t, 25.0, 26.0));
+  AG.forEach((n, i) => {
+    const k = a * seg(t, 26.2 + i * .25, 27.2 + i * .25) * (i === 1 ? (1 - seg(t, 33.4, 33.9)) : (1 - z));
+    glow(n.x, n.y, 30 + 3 * Math.sin(t * .9 + i), 'violet', k); glow(n.x, n.y, 95, 'violet', k * .2);
+    // deliberation: slow satellites
+    for (let m = 0; m < 3; m++) { const o = t * .7 + m * 2.094 + i; glow(n.x + Math.cos(o) * 50, n.y + Math.sin(o) * 50, 6, 'violet', k * .7); }
+  });
+  // slow A2A traffic: orchestrator ↔ agents, agent ↔ agent
+  AG.forEach((n, i) => { const t0 = 27.2 + i * .55; if (t > t0) { const ph = ((t - t0) / 2.8) % 1, down = ph < .5, q = eio(down ? ph * 2 : 2 - ph * 2);
+    const p = bez([ORCH[0], ORCH[1] + 30], [ORCH[0], ORCH[1] + 150], [n.x, n.y - 170], [n.x, n.y - 34], q); glow(p[0], p[1], 11, down ? 'violet' : 'white', rest * .9); } });
+  A2A.forEach(([i, j], q) => { const t0 = 28.6 + q * .7; if (t > t0) { const A = AG[i], B = AG[j], ph = ((t - t0) / 3.4) % 1; const p = bez([A.x, A.y + 34], [A.x, A.y + 130 + q * 18], [B.x, B.y + 130 + q * 18], [B.x, B.y + 34], eio(ph)); glow(p[0], p[1], 9, 'violet', rest * .8); } });
+  norm();
+  text('ORCHESTRATOR', ORCH[0], ORCH[1] - 58, { size: 15, weight: 700, color: [210, 200, 245], a: a * seg(t, 25.4, 26.2) * (1 - seg(t, 32.1, 32.6)), track: 6 });
+  AG.forEach((n, i) => text(n.n, n.x, n.y + 72, { size: 16, weight: 700, color: [205, 196, 240], a: a * seg(t, 26.5 + i * .25, 27.3 + i * .25) * (1 - seg(t, 32.1, 32.6)), track: 5 }));
+  text('A2A', (AG[1].x + AG[2].x) / 2, AG[1].y + 148, { size: 13, weight: 700, color: COL.violet, a: a * seg(t, 28.2, 28.8) * (1 - seg(t, 32.1, 32.6)), track: 6 });
+  g.restore();
+}
+
+// 6 · ACT — one agent, its skills, governed capabilities (MCP inside the agent, not the orchestrator)
+function act(t) {
+  const a = fade(t, 33.4, 33.9, 37.6, 38.4); if (a <= 0) return;
+  const AX = 560, AY = 560, bx0 = 860, bx1 = 1500, by0 = 330, by1 = 800;
+  add(); glow(AX, AY, 70 + 4 * Math.sin(t * 1.4), 'violet', a); glow(AX, AY, 180, 'violet', a * .22);
+  for (let m = 0; m < 3; m++) { const o = t * .7 + m * 2.094 + 1; glow(AX + Math.cos(o) * 115, AY + Math.sin(o) * 115, 12, 'violet', a * .7); }
+  norm();
+  ring(AX, AY, 88, COL.violet, a * .55, 2);
+  text('COOLING AGENT', AX, AY + 150, { size: 17, weight: 700, color: [210, 200, 245], a, track: 6 });
+  const bk = a * eio(seg(t, 34.0, 34.8));
+  rrect(bx0, by0, bx1 - bx0, by1 - by0, 26, `rgba(20,40,70,${.18 * bk})`, rgba(COL.blue, .45 * bk), 1.4, [6, 7]);
+  text('GOVERNED CAPABILITIES', bx0 + 28, by0 + 34, { size: 13, weight: 700, color: [140, 180, 225], a: bk, align: 'left', track: 6 });
+  text('SKILLS', bx1 - 28, by0 + 34, { size: 13, weight: 700, color: [140, 180, 225], a: bk * .7, align: 'right', track: 6 });
+  ['READ LOOP HEAT', 'CALCULATE HEADROOM', 'VERIFY AFTER CHANGE'].forEach((n, i) => {
+    const y = 450 + i * 116, k = a * eout(seg(t, 34.4 + i * .2, 35.0 + i * .2)), cx0 = 940, cw = 480, t0 = 35.2 + i * .7;
+    const hot = Math.exp(-3 * Math.max(0, t - t0 - .45)) * seg(t, t0 + .35, t0 + .45);
+    curve([AX + 90, AY], [AX + 220, AY], [cx0 - 150, y], [cx0, y], COL.violet, .35 * k, 1.4, null, eio(seg(t, 34.4 + i * .2, 35.0 + i * .2)));
+    rrect(cx0, y - 32, cw, 64, 32, `rgba(24,34,60,${.85 * k})`, rgba(COL.violet, (.35 + .5 * hot) * k), 1.5);
+    text(n, cx0 + 34, y, { size: 18, weight: 700, color: [225, 232, 250], a: k, align: 'left', track: 3 });
+    // MCP: a small tag inside the capability — the governed connection to the system behind it
+    rrect(cx0 + cw - 84, y - 15, 60, 30, 15, `rgba(40,80,140,${.35 * k})`, rgba(COL.blue, .7 * k), 1.2);
+    text('MCP', cx0 + cw - 54, y + 1, { size: 12, weight: 700, color: [150, 195, 245], a: k, track: 3 });
+    add();
+    if (t > t0 && t < t0 + .5) { const p = bez([AX + 90, AY], [AX + 220, AY], [cx0 - 150, y], [cx0, y], eio(seg(t, t0, t0 + .45))); glow(p[0], p[1], 11, 'violet', a); }
+    if (t > t0 + .45 && t < t0 + 1.2) { const q = eio(seg(t, t0 + .45, t0 + 1.1)); glow(lerp(cx0 + cw - 54, bx1 + 90, q), y, 9, 'blue', a * (1 - q * .6)); }
+    glow(bx1 + 90, y, 8, 'blue', k * .45 + hot * .4);
+    norm();
+    line(cx0 + cw - 24, y, bx1 + 82, y, COL.blue, .22 * k, 1, [2, 5]);
+  });
+}
+
+// 7 · HUMAN ACCOUNTABILITY
+const PEOPLE = [['PROGRAM OWNER', 560], ['CLUSTER OPS LEAD', 960], ['FACILITY MANAGER', 1360]];
+function human(t) {
+  const a = fade(t, 38.1, 38.9, 41.9, 42.7); if (a <= 0) return;
+  const rise = eout(seg(t, 38.2, 39.2)), cy = lerp(540, 470, rise), cw = 560, ch = 160;
+  add(); glow(W / 2, cy, 220, 'violet', a * .12); norm();
+  rrect(W / 2 - cw / 2, cy - ch / 2, cw, ch, 22, `rgba(22,32,56,${.9 * a})`, rgba([200, 190, 245], .45 * a), 1.4);
+  text('RECOMMENDATION', W / 2 - cw / 2 + 34, cy - ch / 2 + 36, { size: 13, weight: 700, color: [200, 190, 245], a, align: 'left', track: 6 });
+  [.82, .64, .72].forEach((w, i) => { g.fillStyle = rgba([200, 215, 235], .2 * a * seg(t, 38.6 + i * .1, 39.0 + i * .1)); g.beginPath(); g.roundRect(W / 2 - cw / 2 + 34, cy - 12 + i * 26, (cw - 68) * w, 8, 4); g.fill(); });
+  const PY = 780;
+  PEOPLE.forEach(([n, x], i) => {
+    const k = a * seg(t, 39.0 + i * .12, 39.6 + i * .12), lk = eio(seg(t, 39.4 + i * .1, 40.1 + i * .1));
+    curve([W / 2, cy + ch / 2], [W / 2, cy + ch / 2 + 90], [x, PY - 130], [x, PY - 40], COL.amber, .45 * a, 1.4, [3, 6], lk);
+    add(); glow(x, PY, 26, 'amber', k); glow(x, PY, 80, 'amber', k * .18);
+    const rk = eio(seg(t, 40.3 + i * .35, 40.9 + i * .35)); if (rk >= 1) glow(x, PY, 60, 'amber', k * .25 * Math.exp(-3 * (t - 40.9 - i * .35)));
+    norm();
+    ring(x, PY, 40, COL.amber, .9 * k, 2, 0, rk);
+    text(n, x, PY + 72, { size: 15, weight: 700, color: [240, 208, 160], a: k, track: 5 });
+  });
+}
+
+// 8 · MEASURE
+const TILES = [
+  { l: 'DATA REDUCED', v: k => `${Math.round(lerp(0, 11825, k)).toLocaleString('en-US')} → 60`, s: 'records → evidence' },
+  { l: 'DECISIONS', v: k => `${Math.round(4 * k)}`, s: 'typed · System 1 · < 1 ms each' },
+  { l: 'REASONING CALLS', v: k => `${Math.round(7 * k)}`, s: 'System 2 · only when needed' },
+  { l: 'TOKENS', v: k => Math.round(7621 * k).toLocaleString('en-US'), s: 'reasoning tokens, counted' },
+  { l: 'LATENCY', v: k => `≈ ${Math.round(16 * k)} s`, s: 'end to end · simulated' },
+  { l: 'VALUE', v: k => `€${(12.3 * k).toFixed(1)}k`, s: 'estimate · illustrative' }
+];
+function measure(t) {
+  const a = fade(t, 42.6, 43.3, 46.6, 47.2); if (a <= 0) return;
+  TILES.forEach((tl, i) => {
+    const cx = 560 + (i % 3) * 400, cy = 470 + Math.floor(i / 3) * 230, k = a * eout(seg(t, 42.9 + i * .1, 43.5 + i * .1)), n = eout(seg(t, 43.2 + i * .12, 44.5 + i * .12));
+    rrect(cx - 180, cy - 90, 360, 180, 20, `rgba(20,60,50,${.12 * k})`, rgba(COL.green, .28 * k), 1.2);
+    text(tl.l, cx, cy - 52, { size: 13, weight: 700, color: [150, 200, 180], a: k, track: 6 });
+    text(tl.v(n), cx, cy + 4, { size: 50, weight: 200, color: [225, 250, 240], a: k, track: 1 });
+    text(tl.s, cx, cy + 56, { size: 14, weight: 400, color: [130, 170, 160], a: k * .95 });
+  });
+}
+
+// 9 · ENDING
+const BACKBONE = [['GROOM', 'cyan'], ['DECIDE', 'mint'], ['REASON', 'violet'], ['ACT', 'blue'], ['MEASURE', 'green']];
+function ending(t) {
+  if (t < 47.0) return;
+  const mv = eio(seg(t, 49.4, 50.4)), y = lerp(520, 330, mv), size = lerp(34, 22, mv), gap = lerp(90, 60, mv);
+  const ws = BACKBONE.map(([w]) => tw(w, size, 600, 8)), total = ws.reduce((s, w) => s + w, 0) + gap * 4;
+  let x = W / 2 - total / 2;
+  BACKBONE.forEach(([w, c], i) => {
+    const k = seg(t, 47.3 + i * .35, 47.9 + i * .35), cx = x + ws[i] / 2;
+    add(); glow(cx, y - lerp(46, 32, mv), lerp(12, 8, mv), c, k); norm();
+    text(w, cx, y, { size, weight: 600, color: [225, 238, 250], a: k, track: 8 });
+    if (i < 4) { const lk = seg(t, 47.6 + i * .35, 48.1 + i * .35); line(x + ws[i] + gap * .25, y, x + ws[i] + gap * .25 + gap * .5 * lk, y, COL.grey, .6 * lk, 1.2); }
+    x += ws[i] + gap;
+  });
+  const flash = Math.exp(-5 * Math.max(0, t - 50.1)) * seg(t, 49.8, 50.1);
+  add();
+  const rr = eout(seg(t, 50.0, 51.6)) * 1200; g.strokeStyle = rgba(COL.cyan, .4 * (1 - seg(t, 50.0, 51.6))); g.lineWidth = 2.5; g.beginPath(); g.arc(W / 2, 560, rr, 0, 6.283); g.stroke();
+  glow(W / 2, 560, 220 + 320 * flash, 'cyan', .7 * flash + .14 * seg(t, 50.2, 51.5));
+  norm();
+  const k1 = eout(seg(t, 50.0, 51.0)), k2 = seg(t, 50.7, 51.5);
+  text('GEN7', W / 2, 560 + (1 - k1) * 24, { size: 150, weight: 800, a: k1, track: -4 });
+  text('The right intelligence. At the right moment.', W / 2, 690, { size: 38, weight: 300, color: [205, 225, 242], a: k2 });
+}
+function footer(t) {
+  const k = fade(t, 43.2, 44.0, 51.9, 52.4);
+  text('SIMULATED AI-FACTORY SCENARIO · ILLUSTRATIVE FIGURES', W / 2, 1022, { size: 13, weight: 600, color: [90, 120, 150], a: k * .9, track: 4 });
+}
+
+function headlines(t) {
+  const k = fade(t, 1.0, 2.0, 5.8, 6.6), rise = (1 - eout(seg(t, 1.0, 2.0))) * 14;
+  text('INDUSTRIAL AI STARTS WITH COMPLEXITY', W / 2, 130 + rise, { size: 34, weight: 600, a: k, track: 10 });
+  headline(t, 7.2, 8.1, 12.3, 12.9, 'GROOM', 'Keep only what matters.', COL.cyan);
+  headline(t, 13.6, 14.4, 19.2, 19.8, 'DECIDE · SYSTEM 1', 'Fast intelligence for bounded decisions.', COL.mint);
+  headline(t, 20.2, 20.9, 24.3, 24.9, 'CONFIDENCE GATE', 'Continue when confident. Escalate when not.', COL.mint);
+  headline(t, 25.6, 26.5, 31.9, 32.6, 'REASON · SYSTEM 2', 'Specialized intelligence collaborates only when needed.', COL.violet);
+  headline(t, 33.9, 34.7, 37.4, 38.0, 'ACT', 'Agents access governed capabilities.', COL.blue);
+  headline(t, 38.5, 39.3, 41.8, 42.4, 'HUMAN ACCOUNTABILITY', 'AI proposes. People remain accountable.', COL.amber);
+  headline(t, 42.9, 43.7, 46.5, 47.0, 'MEASURE', 'Know the cost. Know the value.', COL.green);
+}
+
+window.render = t => {
+  background(t);
+  domains(t); filterRings(t); field(t); s1module(t); readouts(t); gateScene(t); reason(t); act(t); human(t); measure(t); ending(t);
+  vignette();
+  headlines(t); recordCounter(t); footer(t);
+  const fi = 1 - seg(t, 0, .9), fo = seg(t, DURATION - .6, DURATION);
+  if (fi > 0 || fo > 0) { g.fillStyle = `rgba(0,0,0,${Math.max(fi, fo)})`; g.fillRect(0, 0, W, H); }
+};
+window.DURATION = DURATION;
+window.ready = document.fonts.load('800 20px Inter').then(() => Promise.all([200, 300, 400, 600, 700].map(w => document.fonts.load(`${w} 20px Inter`)))).then(() => true);
+</script></body></html>

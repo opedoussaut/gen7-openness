@@ -4,3 +4,6 @@ dist/
 !.env.example
 *.log
 .DS_Store
+media/silent-*.mp4
+media/sound-*.wav
+__pycache__/

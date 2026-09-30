@@ -75,6 +75,20 @@ styles/app.css                Design system
 
 To connect real systems: pass an `mcpTransport` that POSTs the same JSON-RPC requests to an MCP server, an `a2aTransport` that resolves Agent Cards and POSTs `message/send`, and a `model` adapter returning provider usage — the engine, telemetry and UI are unchanged.
 
+## Decision Intelligence (branch `decision-intelligence`)
+
+**OBSERVE → GROOM → DECIDE → REASON → ACT → MEASURE.** A small decision model (System 1) now sits between grooming and the agents. It answers four bounded questions in under a millisecond, in the browser, and a confidence gate decides whether agents (System 2) are needed at all.
+
+- **Runs entirely from GitHub Pages.** No server, no Ollama, no API key, no install. Preview: `https://opedoussaut.github.io/gen7-openness/decision-intelligence/` (the stable site at the root is unchanged).
+- **The model** — `models/system1/decision-mlp.onnx` (8.5 KB, 1,772 parameters; MLP 9 → 32 → 32 → 12, four heads). Trained by `models/system1/train.py` (numpy, seed 7, reproducible byte for byte) on 9,000 synthetic samples labelled by planning rules; holdout accuracy in `model-card.json`. Inputs are nine deterministic features of the groomed evidence (`src/system1/features.js`).
+- **Typed outputs** — `capacity_risk` LOW/MEDIUM/HIGH · `reasoning_required` YES/NO · `preferred_route` DIRECT/ORCHESTRATE/HUMAN_REVIEW · `agents_required` ⊆ {WORKLOAD, COOLING, SUSTAINABILITY, DEPLOYMENT}, each with probabilities.
+- **Runtime** — ONNX Runtime Web 1.22.0, vendored in `vendor/` (MIT). WebGPU when the browser has an adapter, otherwise WASM (CPU, single-threaded because Pages is not cross-origin isolated), otherwise a pure-JavaScript evaluator of the same weights — clearly labelled as a fallback. The Technical view shows what actually executed: runtime, load/cold/warm timings, parity with the JS evaluator, network call *None*, API cost *€0*.
+- **Gate** — act directly only if route = DIRECT, reasoning = NO and every confidence ≥ 75 %; otherwise System 2, or a person when the route is HUMAN_REVIEW.
+- **Two requests** — **R-17** (complex, 120 kW NVL72 on Loop A): HIGH / YES / ORCHESTRATE / all four agents → System 2 runs as before. **R-22** (simple, 34 kW DGX on Loop B): LOW / NO / DIRECT → one bounded, reversible MCP action (`reserveRackSlot`), owner notified, **0 model calls**. Avoided reasoning is shown as an ESTIMATE against the R-17 run.
+- **Cinematic** — `media/GEN7-cinematic-intro-system1-system2.mp4` (52.5 s; source `media/scene-system1-system2.html`, renderer `media/render-system1-system2.py`). The original 37-second film is kept unchanged; both are selectable in the Story tab.
+
+Retrain: `cd models/system1 && python3 train.py` (numpy, onnx). Tests: `npm test` (includes ONNX hash, JS-vs-ONNX golden parity, holdout accuracy, R-17 escalation, R-22 bounded path).
+
 ## Protocol Lab (previous workshop, preserved)
 
 `lab.html` keeps the original two-tab cooling-capacity workshop (Rack Deployment Planner ↔ Liquid Cooling Engineer) with live JSON-RPC over HTTP when served by `npm start`. It is linked from the page footer. Presenter script: [PROTOCOL-LAB-PRESENTER.md](PROTOCOL-LAB-PRESENTER.md).
