@@ -54,7 +54,21 @@ export function computeMetrics(run, scenario) {
   t.energyWh = (t.cachedTokens + t.inputTokens) / 1000 * energy.whPer1kInputTokens + t.outputTokens / 1000 * energy.whPer1kOutputTokens;
   const raw = run.raw, ev = run.grooming.evidence;
   const context = { rawRecords: raw.records, rawBytes: raw.bytes, rawTokens: raw.tokens, evidenceRecords: ev?.records ?? null, evidenceBytes: ev?.bytes ?? null, evidenceTokens: ev?.tokens ?? null, reduction: ev && raw.tokens ? 1 - ev.tokens / raw.tokens : null };
-  return { totals: t, agents, byModel, infraLines, context };
+  const s1 = run.system1;
+  const system1 = s1 ? { decisions: Object.keys(s1.decisions).length, inferenceMs: s1.inferenceMs, backend: s1.runtime?.backend, runtime: s1.runtime?.runtime, path: s1.gate.path, escalated: s1.gate.escalate } : null;
+  t.system2Calls = t.modelCalls;
+  return { totals: t, agents, byModel, infraLines, context, system1 };
+}
+
+/**
+ * Reasoning avoided by System 1 on a bounded request, estimated against a reference run that went through
+ * System 2 (R-17). ESTIMATE: it assumes the full agent path would cost what the reference run cost.
+ */
+export function computeAvoided(simpleMetrics, complexMetrics) {
+  const c = complexMetrics.totals, s = simpleMetrics.totals;
+  return { estimate: true, basis: 'if this request had been sent through the full agent path, assuming the same usage as the R-17 run',
+    reasoningCallsAvoided: c.modelCalls - s.modelCalls, tokensAvoided: c.totalTokens - s.totalTokens, a2aAvoided: c.a2aMessages - s.a2aMessages,
+    costAvoidedEur: c.modelCost - s.modelCost, latencyAvoidedMs: c.latencyMs - s.latencyMs };
 }
 
 /**
@@ -121,9 +135,10 @@ export function computeNaive(run, scenario, lean) {
 export function computeValue(run, scenario, metrics) {
   const o = run.recommendation?.outcome;
   if (!o) return null;
-  const components = scenario.valueComponents(o, scenario.value);
+  const v = scenario.requests?.[run.requestKey]?.value ?? scenario.value;
+  const components = scenario.valueComponents(o, v);
   const total = sum(components, c => c.value);
-  return { components, total, ratio: metrics.totals.totalCost > 0 ? total / metrics.totals.totalCost : null, co2SavedKg: o.co2SavedKg, outcome: scenario.outcomeLine(o), baseline: scenario.value.baseline };
+  return { components, total, ratio: metrics.totals.totalCost > 0 ? total / metrics.totals.totalCost : null, co2SavedKg: o.co2SavedKg, outcome: scenario.outcomeLine(o), baseline: v.baseline };
 }
 
 /** Internal consistency checks, displayed in the Technical View. */

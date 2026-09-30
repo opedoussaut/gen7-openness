@@ -11,10 +11,15 @@ import { mountTechnical } from './ui/technical.js';
 import { mountScale } from './ui/scale.js';
 import { mountPrereq } from './ui/prereq.js';
 import { mountStory } from './ui/story.js';
+import { createBrowserSystem1, initSystem1, system1Status } from './system1/runtime.js';
+import { FEATURES } from './system1/features.js';
+import { MODEL_CARD } from './system1/model.js';
 
 const PAGES = ['story', 'learn', 'demo', 'economics', 'scale', 'prereq', 'technical'];
-const engine = new DemoEngine(scenario);
+// Live engine: System 1 runs in the browser (WebGPU → WASM → labelled JS fallback). Reference runs use the JS evaluator of the same weights.
+const engine = new DemoEngine(scenario, { system1: createBrowserSystem1() });
 const reference = new DemoEngine(scenario);
+const referenceSimple = new DemoEngine(scenario, { request: 'R-22' });
 
 /** Derived view model: everything the pages display comes from one run through these functions. */
 function analyse(run) {
@@ -26,18 +31,20 @@ function analyse(run) {
 }
 
 const app = {
-  scenario, engine, reference,
+  scenario, engine, reference, referenceSimple,
+  system1Info: () => system1Status().info, system1Features: { FEATURES }, modelCard: MODEL_CARD,
+  reference22: () => analyse(referenceSimple.run),
   page: 'story',
   live: () => analyse(engine.run),
   /** Run shown on analysis pages: the live run once started, otherwise the instant reference run. */
   focus() {
-    const liveStarted = engine.run.status !== 'idle';
+    const liveStarted = engine.run.status !== 'idle' && engine.requestKey === 'R-17';
     if (liveStarted) return { ...analyse(engine.run), source: 'live' };
     return { ...analyse(reference.run), source: 'reference' };
   },
   /** Completed run for economics: live if completed, else reference. */
   completed() {
-    if (engine.run.status === 'completed') return { ...analyse(engine.run), source: 'live' };
+    if (engine.run.status === 'completed' && engine.requestKey === 'R-17') return { ...analyse(engine.run), source: 'live' };
     return { ...analyse(reference.run), source: 'reference', liveStatus: engine.run.status };
   },
   go(page, { focus = false } = {}) { setPage(page, focus); },
@@ -52,6 +59,7 @@ const app = {
 };
 
 await reference.runInstant();
+await referenceSimple.runInstant();
 
 const views = {
   learn: mountLearn($('#page-learn'), app),
@@ -99,7 +107,7 @@ window.addEventListener('hashchange', () => setPage(location.hash.slice(1)));
 $('#inspector-close').addEventListener('click', () => $('#inspector').close());
 $('#inspector').addEventListener('click', e => { if (e.target === $('#inspector')) $('#inspector').close(); });
 
-const STATE_LABEL = { IDLE: 'Idle', INGESTING: 'Ingesting', GROOMING: 'Grooming', ORCHESTRATING: 'Orchestrating', ANALYZING: 'Analyzing', DECIDING: 'Deciding', COMPLETED: 'Completed' };
+const STATE_LABEL = { IDLE: 'Idle', INGESTING: 'Observing', GROOMING: 'Grooming', SYSTEM1: 'Deciding · S1', ACTING: 'Acting', ORCHESTRATING: 'Orchestrating', ANALYZING: 'Analyzing', DECIDING: 'Deciding', COMPLETED: 'Completed' };
 function updatePill(run) {
   const pill = $('#run-pill');
   const status = run.status === 'paused' ? 'Paused' : run.status === 'error' ? 'Error' : run.status === 'idle' ? 'Ready' : run.status === 'completed' ? 'Decision ready' : 'Running';
@@ -125,3 +133,5 @@ window.addEventListener('keydown', e => {
 
 updatePill(engine.run);
 setPage(location.hash.slice(1) || 'story');
+// Preload the System 1 runtime in the background so the live run does not wait for it.
+setTimeout(() => initSystem1().then(() => views[app.page].update?.()), 700);

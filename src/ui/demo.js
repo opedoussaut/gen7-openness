@@ -7,10 +7,11 @@ import { explainGrooming } from '../scenarios/ai-factory/explain.js';
 import { COMPANIONS, skillName } from '../domain/positioning.js';
 
 const STATES = [
-  { id: 'INGESTING', label: 'Ingest', c: '#7e95a8' }, { id: 'GROOMING', label: 'Groom', c: 'var(--lean)' }, { id: 'ORCHESTRATING', label: 'Orchestrate', c: 'var(--a2a)' },
-  { id: 'ANALYZING', label: 'Analyze', c: 'var(--mcp)' }, { id: 'DECIDING', label: 'Decide', c: 'var(--model)' }, { id: 'COMPLETED', label: 'Measure', c: 'var(--ok)' }
+  { id: 'INGESTING', label: 'Observe', c: '#7e95a8' }, { id: 'GROOMING', label: 'Groom', c: 'var(--lean)' }, { id: 'SYSTEM1', label: 'Decide · System 1', c: 'var(--s1)' },
+  { id: 'ORCHESTRATING', label: 'Reason · System 2', c: 'var(--a2a)' }, { id: 'ANALYZING', label: 'Reason & act', c: 'var(--mcp)' }, { id: 'ACTING', label: 'Act · bounded', c: 'var(--mcp)' },
+  { id: 'DECIDING', label: 'Approve', c: 'var(--model)' }, { id: 'COMPLETED', label: 'Measure', c: 'var(--ok)' }
 ];
-const KIND_TAG = { human: ['human', 'PEOPLE'], mcp: ['mcp', 'MCP'], a2a: ['a2a', 'A2A'], model: ['model', 'MODEL'], groom: ['lean', 'LEAN'], ingest: ['neutral', 'DATA'], discover: ['mcp', 'MCP'], incident: ['bad', 'INCIDENT'], decision: ['ok', 'DECISION'] };
+const KIND_TAG = { decide: ['s1', 'SYSTEM 1'], human: ['human', 'PEOPLE'], mcp: ['mcp', 'MCP'], a2a: ['a2a', 'A2A'], model: ['model', 'MODEL'], groom: ['lean', 'LEAN'], ingest: ['neutral', 'DATA'], discover: ['mcp', 'MCP'], incident: ['bad', 'INCIDENT'], decision: ['ok', 'DECISION'] };
 
 // ---------- Canvas geometry (viewBox 800 × 450) ----------
 const AG_Y = 196, AG_H = 84, AG_W = 176, SV_Y = 382, SV_H = 54;
@@ -85,30 +86,30 @@ function canvasSvg(sc) {
 
 /** Loop A capacity gauge. Values appear only once they have been computed by the run. */
 function gaugeMarkup(inc, run) {
-  const lo = 700, hi = 1060, x = v => ((Math.min(hi, Math.max(lo, v)) - lo) / (hi - lo)) * 100;
   const target = inc.itKw * (1 + inc.allowancePct / 100);
   const summary = run.grooming.evidenceList.find(e => e.type === 'LOOP_SUMMARY');
   const p95 = summary?.v.p95Kw ?? null;
+  const lo = inc.loop === 'A' ? 700 : 300, hi = 1060, x = v => ((Math.min(hi, Math.max(lo, v)) - lo) / (hi - lo)) * 100;
   const releasedKw = run.a2aMessages.find(m => m.from === 'workload')?.data.releasedKw ?? 0;
   const confirmed = run.a2aMessages.some(m => m.from === 'cooling' && m.data.condition);
   const load = p95 == null ? null : p95 - (confirmed ? releasedKw : 0);
   const headroom = load == null ? null : inc.loopCapacityKw - load - target;
   const head = p95 == null ? `<span class="muted">measured load not yet computed</span>` : `<b style="color:${headroom >= 0 ? 'var(--ok)' : 'var(--bad)'}">${headroom >= 0 ? '+' : '−'}${Math.abs(headroom).toFixed(1)} kW</b>`;
   const seg = (a, b, cls, title) => `<div class="cap-seg ${cls}" style="left:${x(a)}%;width:${Math.max(0, x(b) - x(a))}%" title="${esc(title)}"></div>`;
-  return `<div class="gauge"><div class="gauge-head"><span>Loop A · normal peak load (p95) + new rack vs ${int(inc.loopCapacityKw)} kW usable</span>${head}</div>
-    <div class="cap-track" role="img" aria-label="Loop A capacity gauge">
+  return `<div class="gauge"><div class="gauge-head"><span>Loop ${inc.loop} · normal peak load (p95) + new rack vs ${int(inc.loopCapacityKw)} kW usable</span>${head}</div>
+    <div class="cap-track" role="img" aria-label="Loop ${inc.loop} capacity gauge">
       ${load == null ? seg(lo, hi, 'unknown', 'Measured during grooming') : seg(lo, load, 'load', `p95 ${load.toFixed(1)} kW`)}
       ${confirmed ? seg(load, p95, 'freed', `released ${releasedKw} kW`) : ''}
-      ${load == null ? '' : seg(load, load + target, headroom >= 0 ? 'rack ok' : 'rack over', `R-17 target ${target} kW`)}
+      ${load == null ? '' : seg(load, load + target, headroom >= 0 ? 'rack ok' : 'rack over', `${inc.rack} target ${target} kW`)}
       <div class="cap-limit" style="left:${x(inc.loopCapacityKw)}%"></div>
     </div>
-    <div class="gauge-scale">${[700, 800, 900, 1000].map(v => `<span style="left:${x(v)}%">${v}</span>`).join('')}<span style="left:${x(1052)}%">kW</span></div>
-    <div class="cap-legend"><span><i class="load"></i>measured normal peak (p95)</span><span><i class="rack"></i>R-17 + 20 % (${target} kW)</span>${confirmed ? '<span><i class="freed"></i>released</span>' : ''}<span><i class="limit"></i>usable capacity</span></div></div>`;
+    <div class="gauge-scale">${(inc.loop === 'A' ? [700, 800, 900, 1000] : [300, 500, 700, 900]).map(v => `<span style="left:${x(v)}%">${v}</span>`).join('')}<span style="left:${x(1052)}%">kW</span></div>
+    <div class="cap-legend"><span><i class="load"></i>measured normal peak (p95)</span><span><i class="rack"></i>${inc.rack} + 20 % (${target} kW)</span>${confirmed ? '<span><i class="freed"></i>released</span>' : ''}<span><i class="limit"></i>usable capacity</span></div></div>`;
 }
 
 export function mountDemo(el, app) {
   const { scenario: sc, engine } = app;
-  const inc = sc.incident;
+  let inc = engine.run.incident ?? sc.incident;
   let lastActiveKey = '', lastLogCount = 0;
   layout(sc);
 
@@ -117,8 +118,8 @@ export function mountDemo(el, app) {
     <div><span class="eyebrow"><i class="pip"></i>Live demo · AI factory · simulated scenario</span><h1 class="h2">One rack. One loop. <span>Four specialists.</span></h1></div>
   </div>
   <div class="glass incident-bar">
-    <div><div class="incident-id"><span class="tag mcp">${icon('rack', 13)} ${esc(inc.id)}</span><span class="small muted">${esc(inc.site)} · received ${new Date(inc.detectedAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' })}</span></div>
-      <div class="incident-title">${esc(inc.title)}</div><div class="incident-sub">${esc(inc.rack)} · ${esc(inc.model)} · ${inc.itKw} kW design IT · ${esc(inc.position)} · ${esc(inc.plannedForLabel)}</div></div>
+    <div><div class="req-switch seg" role="group" aria-label="Request">${Object.values(sc.requests).map(r => `<button type="button" data-req="${r.key}" aria-pressed="${r.key === engine.requestKey}" title="${esc(r.label)}"><b>${esc(r.key)}</b> ${esc(r.short)}</button>`).join('')}</div>
+      <div id="incident-head"></div></div>
     <div id="gauge"></div>
     <div class="controls">
       <button class="btn primary" id="btn-run"></button>
@@ -132,6 +133,7 @@ export function mountDemo(el, app) {
     <div class="narration"><span class="count" id="story-count"></span><p id="narration"></p></div>
     <div class="progress"><i id="progress"></i></div>
   </div>
+  <section class="s1-band" id="s1" aria-labelledby="s1-title"></section>
   <div class="stage">
     <section class="panel" aria-labelledby="pipe-title">
       <div class="panel-title"><span class="eyebrow" id="pipe-title">${icon('funnel', 14)} Lean context pipeline</span><span class="tag lean">deterministic</span></div>
@@ -158,6 +160,12 @@ export function mountDemo(el, app) {
 
   // ---------- Controls ----------
   $('#btn-run', el).addEventListener('click', () => engine.toggle());
+  el.querySelectorAll('[data-req]').forEach(b => b.addEventListener('click', () => {
+    if (engine.run.status === 'running' || engine.run.status === 'paused') return;
+    engine.setRequest(b.dataset.req); lastActiveKey = ''; lastLogCount = 0;
+    el.querySelectorAll('[data-req]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  }));
+  $('#s1', el).addEventListener('click', e => { if (e.target.closest('[data-s1-inspect]')) inspectSystem1(app, engine.run); });
   $('#btn-step', el).addEventListener('click', () => engine.step());
   $('#btn-reset', el).addEventListener('click', () => { engine.reset(); lastActiveKey = ''; lastLogCount = 0; });
   el.querySelectorAll('[data-speed]').forEach(b => b.addEventListener('click', () => { engine.setSpeed(Number(b.dataset.speed)); el.querySelectorAll('[data-speed]').forEach(x => x.setAttribute('aria-pressed', String(x === b))); }));
@@ -171,8 +179,13 @@ export function mountDemo(el, app) {
 
   function update() {
     const { run, metrics } = app.live();
+    inc = run.incident ?? sc.incident;
     renderControls(run);
+    $('#incident-head', el).innerHTML = `<div class="incident-id"><span class="tag mcp">${icon('rack', 13)} ${esc(inc.id)}</span><span class="small muted">${esc(inc.site)} · received ${new Date(inc.detectedAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' })}</span></div>
+      <div class="incident-title">${esc(inc.title)}</div><div class="incident-sub">${esc(inc.rack)} · ${esc(inc.model)} · ${inc.itKw} kW design IT · ${esc(inc.position)} · ${esc(inc.plannedForLabel)}</div>`;
+    el.querySelectorAll('[data-req]').forEach(x => { x.disabled = run.status === 'running' || run.status === 'paused'; x.setAttribute('aria-pressed', String(x.dataset.req === engine.requestKey)); });
     $('#gauge', el).innerHTML = gaugeMarkup(inc, run);
+    $('#s1', el).innerHTML = system1Markup(run, app);
     renderRail(run);
     renderPipeline(run, metrics);
     renderCanvas(run, metrics);
@@ -193,8 +206,8 @@ export function mountDemo(el, app) {
   }
 
   function renderRail(run) {
-    const idx = STATES.findIndex(s => s.id === run.state);
-    el.querySelectorAll('.state-chip').forEach((c, i) => { c.classList.toggle('on', i === idx); c.classList.toggle('done', idx > i); });
+    const idx = STATES.findIndex(s => s.id === run.state), seen = new Set(run.events.map(e => e.state));
+    el.querySelectorAll('.state-chip').forEach((c, i) => { const visited = seen.has(STATES[i].id); c.classList.toggle('on', i === idx); c.classList.toggle('done', idx > i && visited); c.classList.toggle('skipped', idx > i && !visited && run.status !== 'idle'); });
     const story = sc.story.find(s => s.n === run.story);
     $('#story-count', el).textContent = run.story ? `${String(run.story).padStart(2, '0')} / 10` : '00 / 10';
     const lead = run.status === 'completed' ? 'We compare AI cost with generated industrial value.' : story?.line;
@@ -301,6 +314,9 @@ export function mountDemo(el, app) {
       const x = run.humanActions.find(h => h.id === ev.ref.human);
       const TYPE = { assign: 'assigns', 'approval-request': 'asks for approval', coordinate: 'coordinates', approve: 'approves', 'sign-off': 'signs off' };
       body = head(`<span class="tag human">${esc(TYPE[x.type] ?? x.type)}</span>`) + `<p class="now-message">“${esc(x.text)}”</p><div class="now-grid"><div><small>Between</small><span>${esc(kindOf(sc, x.from))} → ${esc(kindOf(sc, x.to))}</span></div><div><small>Human time</small><span>${x.minutes ? `${x.minutes} min` : 'request'}</span></div><div class="wide"><small>Why a person</small><span>${x.type === 'coordinate' ? 'People keep coordinating with people.' : x.type === 'approval-request' ? 'Agents recommend; accountable people approve.' : 'Accountability stays with people.'}</span></div></div>`;
+    } else if (ev.kind === 'decide') {
+      const s1 = run.system1, d = s1.decisions;
+      body = head(`<span class="tag ${s1.gate.escalate ? 'a2a' : 'ok'}">${s1.gate.path === 'BOUNDED_ACTION' ? 'bounded action' : s1.gate.path === 'HUMAN_REVIEW' ? 'to a person' : 'escalate · System 2'}</span>`) + `<div class="now-grid"><div><small>Capacity risk</small><span class="mono">${d.capacity_risk.label} · ${pct(d.capacity_risk.confidence)}</span></div><div><small>Reasoning required</small><span class="mono">${d.reasoning_required.label} · ${pct(d.reasoning_required.confidence)}</span></div><div><small>Route</small><span class="mono">${d.preferred_route.label} · ${pct(d.preferred_route.confidence)}</span></div><div><small>Runtime · inference</small><span>${esc(s1.runtime?.backend ?? '')} · ${s1.inferenceMs.toFixed(2)} ms · no network call</span></div></div>`;
     } else if (ev.kind === 'decision') {
       body = head() + `<p class="now-message">${esc(run.recommendation?.decision ?? '')}</p><div class="now-grid"><div><small>Simulated time</small><span>${ms(run.simTimeMs)}</span></div><div><small>AI execution cost</small><span>${eur(metrics.totals.totalCost, { precise: true })}</span></div><div class="wide"><small>Next</small><span><button class="btn sm" data-go="economics">Was it worth it? ${icon('arrow', 13)}</button></span></div></div>`;
     } else {
@@ -319,7 +335,8 @@ export function mountDemo(el, app) {
         <div class="kpi"><small>Input tokens</small><b>${int(t.inputTokens)}</b></div>
         <div class="kpi"><small>Cached tokens</small><b>${int(t.cachedTokens)}</b></div>
         <div class="kpi"><small>Output tokens</small><b>${int(t.outputTokens)}</b></div>
-        <div class="kpi"><small>Model calls</small><b>${t.modelCalls}</b></div>
+        <div class="kpi s1"><small>System 1 decisions</small><b>${metrics.system1 ? `${metrics.system1.decisions} · ${metrics.system1.inferenceMs.toFixed(1)} ms` : '—'}</b></div>
+        <div class="kpi"><small>System 2 · model calls</small><b>${t.modelCalls}</b></div>
         <div class="kpi mcp"><small>MCP calls</small><b>${t.mcpCalls}</b></div>
         <div class="kpi a2a"><small>A2A messages</small><b>${t.a2aMessages}</b></div>
         <div class="kpi"><small>Simulated latency</small><b>${ms(t.latencyMs)}</b></div>
@@ -335,6 +352,7 @@ export function mountDemo(el, app) {
   function renderLoop(run) {
     const box = $('#loop', el), L = sc.loop;
     if (!L) { box.innerHTML = ''; return; }
+    if (run.requestKind === 'simple') { box.innerHTML = run.system1 ? `<section class="panel loop-panel"><div class="panel-title"><span class="eyebrow">${icon('loop', 14)} Loop engineering</span><span class="tag ok">not needed</span></div><p class="loop-note">System 1 handled this bounded decision with enough confidence. No reasoning loop, no agent collaboration, no model call — one governed skill executed the reservation and the accountable person was informed.</p></section>` : ''; return; }
     // Split the run into loop iterations: each iteration ends when the agent evaluating the verification tool has reasoned on its result.
     const iters = [];
     let cur = null, pendingVerify = null, started = false;
@@ -452,5 +470,40 @@ export function inspectEvent(app, run, evId) {
   }
   if (ev.kind === 'human') { const x = run.humanActions.find(h => h.id === ev.ref.human); return app.inspect('People in the loop', ev.title, `${time}<p>“${esc(x.text)}”</p>${app.json(x)}`); }
   if (ev.kind === 'decision') return app.inspect('Decision', 'Recommendation', `${time}${app.json(run.recommendation)}`);
+  if (ev.kind === 'decide') return inspectSystem1(app, run);
   return app.inspect('Event', ev.title, `${time}${app.json(ev)}`);
+}
+
+
+// ---------- SYSTEM 1 band: compact, parallel, typed ----------
+const DEC_LABEL = { capacity_risk: 'CAPACITY RISK', reasoning_required: 'REASONING REQUIRED', preferred_route: 'ROUTE', agents_required: 'AGENTS REQUIRED' };
+const tone = (id, v) => id === 'capacity_risk' ? ({ LOW: 'ok', MEDIUM: 'warn', HIGH: 'bad' })[v] : id === 'reasoning_required' ? (v === 'YES' ? 'a2a' : 'ok') : id === 'preferred_route' ? ({ DIRECT: 'ok', ORCHESTRATE: 'a2a', HUMAN_REVIEW: 'human' })[v] : 'mcp';
+export function system1Markup(run, app) {
+  const s1 = run.system1, rt = s1?.runtime ?? app.system1Info?.();
+  const pending = !s1;
+  const rtLine = rt ? `<span class="s1-rt ${rt.fallback ? 'fb' : ''}"><i></i>${esc(rt.runtime ?? rt.backend)}${rt.fallback ? ' · labelled fallback' : ''}</span>` : '<span class="s1-rt"><i></i>runtime loading…</span>';
+  const tile = id => {
+    const d = s1?.decisions[id];
+    if (!d) return `<div class="s1-tile pending"><small>${DEC_LABEL[id]}</small><b>—</b><div class="s1-bars"></div></div>`;
+    const bars = Object.entries(d.probabilities).map(([k, p]) => `<div class="s1-bar ${d.type === 'multi' ? (p >= 0.5 ? 'sel' : '') : (k === d.label ? 'sel' : '')}"><span>${esc(k.replace('_', ' '))}</span><i style="width:${Math.max(1, p * 100)}%"></i><em>${Math.round(p * 100)}</em></div>`).join('');
+    const value = d.type === 'multi' ? (d.selected.length ? `${d.selected.length} of 4` : 'NONE') : d.label.replace('_', ' ');
+    return `<div class="s1-tile ${tone(id, d.type === 'multi' ? '' : d.label)}"><small>${DEC_LABEL[id]}</small><b>${esc(value)}</b><div class="s1-bars">${bars}</div></div>`;
+  };
+  const g = s1?.gate;
+  const gateTile = !g ? `<div class="s1-gate pending"><small>CONFIDENCE GATE</small><b>—</b><p>Waits for the typed decisions.</p></div>`
+    : `<div class="s1-gate ${g.escalate ? 'esc' : 'ok'}"><small>CONFIDENCE GATE · ≥ ${Math.round(g.threshold * 100)} %</small><b>${g.path === 'BOUNDED_ACTION' ? 'ACT · bounded' : g.path === 'HUMAN_REVIEW' ? 'ESCALATE · person' : 'ESCALATE · System 2'}</b><p>${g.escalate ? `Why: ${esc(g.reasons.join(' · '))}` : `Route DIRECT, no reasoning required, weakest decision ${Math.round(g.weakest.confidence * 100)} %.`}</p></div>`;
+  return `<div class="s1-head"><span class="eyebrow" id="s1-title"><b class="s1-mark">S1</b> DECIDE · System 1 · a small decision model running in this browser</span>${rtLine}${s1 ? `<span class="s1-ms">${s1.inferenceMs.toFixed(2)} ms · €0 · no network call</span><button class="btn sm ghost" data-s1-inspect>Inspect ${icon('eye', 13)}</button>` : ''}</div>
+    <div class="s1-row ${pending ? 'is-pending' : ''}">${['capacity_risk', 'reasoning_required', 'preferred_route', 'agents_required'].map(tile).join('')}<span class="s1-arrow">→</span>${gateTile}</div>`;
+}
+export function inspectSystem1(app, run) {
+  const s1 = run.system1; if (!s1) return;
+  const { FEATURES } = app.system1Features;
+  const rows = FEATURES.map(f => `<tr><td>${esc(f.label)}</td><td class="mono">${s1.features.named[f.id]}</td><td class="small muted">${esc(f.formula)}</td></tr>`).join('');
+  return app.inspect('SYSTEM 1 · decision model', `${run.incident.rack} · ${s1.gate.path.replace('_', ' ').toLowerCase()}`,
+    `<p>Nine features, computed deterministically from the groomed evidence, are fed to a ${app.modelCard.parameters.toLocaleString('en-US')}-parameter model (${(app.modelCard.onnx.bytes / 1024).toFixed(1)} KB ONNX). It returns four typed decisions with probabilities; the confidence gate decides whether System 1 may act or must escalate.</p>
+    <h4>Runtime</h4>${app.json(s1.runtime)}
+    <h4>Features (from ${run.grooming.evidence?.records ?? '—'} groomed records)</h4><div class="table-wrap"><table class="data"><thead><tr><th>Feature</th><th>Value</th><th>Definition</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <h4>Typed decisions</h4>${app.json(s1.decisions)}
+    <h4>Gate</h4>${app.json(s1.gate)}
+    <h4>Training (model card)</h4>${app.json({ architecture: app.modelCard.architecture, training: app.modelCard.training, holdout: app.modelCard.holdout })}`);
 }

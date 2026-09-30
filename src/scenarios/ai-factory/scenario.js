@@ -2,7 +2,7 @@
 import { AGENTS, REASONERS } from './agents.js';
 import { SERVERS } from './tools.js';
 import { SOURCE_META, generateDataset, T0, REQUEST } from './dataset.js';
-import { STAGES, flatten, runStage } from './pipeline.js';
+import { STAGES, flatten, runStage, anchorFor } from './pipeline.js';
 
 export const INCIDENT = {
   id: REQUEST.id,
@@ -35,10 +35,24 @@ export function valueComponents(outcome, v) {
     { id: 'engineering', label: 'Engineering study time saved', value: (v.manualStudyHours - v.reviewHours) * v.engineeringRateEur, formula: `(${v.manualStudyHours} h across three teams − ${v.reviewHours} h review) × €${v.engineeringRateEur}/h` }
   ];
 }
-export const outcomeLine = o => (o.approved ? `rack approved with one condition; ${o.releasedKw} kW released on Loop A` : 'rack not approved');
+export const outcomeLine = o => (o.bounded ? 'rack slot reserved by System 1 within delegated authority' : o.approved ? `rack approved with one condition; ${o.releasedKw} kW released on Loop A` : 'rack not approved');
 
 /** Without grooming, each specialist would receive the raw records of its domain. */
 export const NAIVE_ROUTING = { deployment: ['dcim'], workload: ['power', 'gpu', 'jobs'], cooling: ['cooling', 'maintenance'], sustainability: ['carbon'] };
+
+/** A second, routine request: same site, same data — a bounded decision that System 1 can take alone. */
+export const REQUEST_R22 = { id: 'DR-0932', rack: 'R-22', model: 'DGX H100 ×4', position: 'Hall 2 · Row 5 · slot 22', loop: 'B', row: '5', plannedFor: '2026-10-01', itKw: 34, ratedKw: 41, allowancePct: 20, gpus: 32 };
+export const INCIDENT_R22 = {
+  id: REQUEST_R22.id, title: 'Can Cooling Loop B take a 34 kW inference node on Thursday?', detectedAt: new Date(T0).toISOString(),
+  site: 'AI factory · Hall 2', rack: REQUEST_R22.rack, model: REQUEST_R22.model, position: REQUEST_R22.position, loop: 'B', row: '5', plannedFor: REQUEST_R22.plannedFor, plannedForLabel: 'Thursday 1 October',
+  itKw: REQUEST_R22.itKw, allowancePct: 20, loopCapacityKw: 1000, questions: INCIDENT.questions
+};
+/** Requests the demonstrator can run. R-17 needs deliberate reasoning; R-22 is a routine, bounded decision. */
+export const REQUESTS = {
+  'R-17': { key: 'R-17', kind: 'complex', label: 'R-17 · 120 kW AI rack on Loop A', short: 'Complex decision', request: { ...REQUEST, ratedKw: 132, gpus: 72 }, incident: INCIDENT, value: VALUE_ASSUMPTIONS },
+  'R-22': { key: 'R-22', kind: 'simple', label: 'R-22 · 34 kW inference node on Loop B', short: 'Simple decision', request: REQUEST_R22, incident: INCIDENT_R22,
+    value: { daysEarlier: 1, gpuHourEur: 2.1, manualStudyHours: 2, reviewHours: 0.25, engineeringRateEur: 110, baseline: 'Without System 1, even a routine request waits in the same review queue: about one working day and two hours of checks.' } }
+};
 
 export const STORY = [
   'A capacity decision is needed in the physical world.',
@@ -58,18 +72,27 @@ const proposal = run => run.agents.workload.outputs.at(-1)?.output.proposal ?? {
 const burnIn = run => run.agents.sustainability.outputs.at(-1)?.output.window ?? '01:00–07:00';
 const released = run => run.a2aMessages.filter(m => m.from === 'workload').at(-1)?.data.releasedKw ?? 0;
 
-export function buildScript() {
+export function buildScript(key = 'R-17') {
   let beat = 0;
   const steps = [];
   const add = (step, same = false) => { if (!same) beat++; steps.push({ beat, ...step }); };
-  const I = INCIDENT;
-  add({ kind: 'incident', state: 'INGESTING', story: 1, narration: `Request ${I.id}: install ${I.rack} (${I.model}, ${I.itKw} kW) on Loop A, ${I.plannedForLabel}.` });
+  const cfg = REQUESTS[key] ?? REQUESTS['R-17'];
+  const I = cfg.incident;
+  add({ kind: 'incident', state: 'INGESTING', story: 1, narration: `Request ${I.id}: install ${I.rack} (${I.model}, ${I.itKw} kW) on Loop ${I.loop}, ${I.plannedForLabel}.` });
   add({ kind: 'human', from: 'owner', to: 'orchestrator', type: 'assign', minutes: 5, state: 'INGESTING', story: 1, text: () => `Can we bring ${I.rack} online on Loop ${I.loop} on ${I.plannedForLabel}? Recommend, with evidence.`, narration: 'A person starts it: the Program Owner hands the question to the orchestrator.' });
   SOURCE_META.forEach((s, i) => add({ kind: 'ingest', source: s.id, state: 'INGESTING', story: 2, narration: `Extracting ${s.label.toLowerCase()} from ${s.system}.` }, i > 0));
   add({ kind: 'raw-summary', state: 'INGESTING', story: 3, narration: 'Sending all of this to a model would cost the most and bury the signal.' });
-  STAGES.forEach(st => add({ kind: 'groom', stage: st.id, state: 'GROOMING', story: 4, narration: `${st.label}: ${st.operation}` }));
+  STAGES.forEach(st => add({ kind: 'groom', stage: st.id, state: 'GROOMING', story: 4, narration: `${st.label}: ${cfg.kind === 'simple' ? st.operation.replaceAll('Loop A', `Loop ${I.loop}`).replaceAll('R-17', I.rack) : st.operation}` }));
+  add({ kind: 'decide', state: 'SYSTEM1', story: 4, narration: 'DECIDE · System 1: a small decision model, running in this browser, answers four typed questions from the groomed state — then the confidence gate chooses the path.' });
+  if (cfg.kind === 'simple') {
+    add({ kind: 'discover', server: 'dcim', state: 'ACTING', story: 6, narration: 'Bounded action: no reasoning agents. One governed skill of the Deployment competence is reached through MCP.' });
+    add({ kind: 'mcp', agent: 'deployment', server: 'dcim', tool: 'reserveRackSlot', args: () => ({ rackId: I.rack, loopId: I.loop, row: I.row, designItKw: I.itKw, plannedFor: I.plannedFor }), state: 'ACTING', story: 6, narration: 'ACT: the slot is reserved in DCIM — a bounded, reversible action within delegated authority.' });
+    add({ kind: 'human', from: 'deployment', to: 'owner', type: 'notify', minutes: 1, state: 'ACTING', story: 8, text: () => `${I.rack} reserved on Loop ${I.loop} · Row ${I.row} for ${I.plannedForLabel}, within delegated authority. No action needed — reply to reverse.`, narration: 'Accountability: the Program Owner is informed and can reverse the action.' });
+    add({ kind: 'decision', state: 'COMPLETED', story: 8, narration: 'Decided by System 1 within delegated authority. No reasoning model was called.' });
+    return steps;
+  }
   SERVERS.forEach((s, i) => add({ kind: 'discover', server: s.id, state: 'ORCHESTRATING', story: 5, narration: 'Inside each agent: its own tools are discovered through MCP — private to the agent, not the open interface.' }, i > 0));
-  add({ kind: 'model', agent: 'orchestrator', purpose: 'plan', state: 'ORCHESTRATING', story: 5, narration: 'The orchestrator decides which specialists this decision needs.' });
+  add({ kind: 'model', agent: 'orchestrator', purpose: 'plan', state: 'ORCHESTRATING', story: 5, narration: 'REASON · System 2: escalated by the gate, the orchestrator plans which specialists this decision needs.' });
   add({ kind: 'a2a', from: 'orchestrator', to: 'deployment', state: 'ORCHESTRATING', story: 7, narration: 'A2A: a bounded task to the Rack Deployment Agent.' });
   add({ kind: 'a2a', from: 'orchestrator', to: 'sustainability', state: 'ORCHESTRATING', story: 7, narration: 'A2A, in parallel: a bounded task to the Sustainability Agent.' }, true);
   add({ kind: 'mcp', agent: 'deployment', server: 'dcim', tool: 'getRackSpec', args: () => ({ rackId: I.rack }), state: 'ANALYZING', story: 6, narration: 'MCP: the Deployment Agent reads the rack specification from DCIM.' });
@@ -121,10 +144,32 @@ export const LOOP = {
   stopRule: 'stop when accepted; after 3 iterations, escalate to the Facility Manager'
 };
 
+const r1 = v => Math.round(v * 10) / 10;
+/** Recommendation for a bounded System 1 decision (no reasoning agents involved). */
+export function boundedRecommendation(run, cfg) {
+  const s1 = run.system1, b = s1.features.basis, I = cfg.incident, d = s1.decisions;
+  const res = run.mcpCalls.find(c => c.tool === 'reserveRackSlot')?.data;
+  const marginKw = r1(b.capacityKw - b.p95Kw - b.needKw);
+  return {
+    decision: `Install ${I.rack} on Loop ${I.loop} · Row ${I.row} on Thursday — reserved within delegated authority`,
+    summary: 'System 1 judged the request routine and was confident on every decision, so the gate allowed a bounded action. No reasoning model and no agent collaboration were needed.',
+    items: [
+      { label: 'System 1 · typed decisions', text: `Capacity risk ${d.capacity_risk.label} · reasoning required ${d.reasoning_required.label} · route ${d.preferred_route.label} · agents ${d.agents_required.selected.length ? d.agents_required.selected.join(', ') : 'none'}.` },
+      { label: 'Cooling · measured', text: `Loop ${I.loop}: ${b.capacityKw} kW usable − p95 ${b.p95Kw} kW − ${b.needKw} kW (request + ${b.allowancePct} %) = ${marginKw > 0 ? '+' : ''}${marginKw} kW.` },
+      { label: 'Power', text: b.busway ? `Busway BW-${I.row}: ${b.busway.capacityKw - b.busway.allocatedKw} kW free vs ${cfg.request.ratedKw} kW rated.` : '—' },
+      { label: 'Action executed', text: res ? `${res.reservation}: ${res.position}, ${res.plannedFor} · ${res.status}.` : '—' }
+    ],
+    actions: [`Install ${I.rack} (${I.model}) at ${I.position} on ${I.plannedForLabel}.`, 'Standard commissioning checklist; no load migration and no special burn-in window needed.'],
+    disagreements: [],
+    confidence: `System 1 · weakest decision ${Math.round(s1.gate.weakest.confidence * 100)} % (gate ${Math.round(s1.gate.threshold * 100)} %)`,
+    outcome: { approved: true, bounded: true, headroomBeforeKw: marginKw, headroomAfterKw: marginKw, releasedKw: 0, co2SavedKg: 0, gpus: cfg.request.gpus }
+  };
+}
+
 export const scenario = {
   id: 'ai-factory', title: 'AI factory', domain: 'Rack deployment · liquid cooling', status: 'ready', icon: 'rack',
   incident: INCIDENT, agents: AGENTS, humans: HUMANS, loop: LOOP, scienceTools: ['getLoopHeatLoad', 'calculateCoolingHeadroom'], reasoners: REASONERS, servers: SERVERS, sources: SOURCE_META,
   models: MODELS, infra: INFRA, energy: ENERGY, value: VALUE_ASSUMPTIONS, valueComponents, outcomeLine, naiveRouting: NAIVE_ROUTING,
   story: STORY, stages: STAGES, pipeline: { flatten, runStage },
-  generateDataset, buildScript
+  generateDataset, buildScript, requests: REQUESTS, anchorFor, boundedRecommendation
 };

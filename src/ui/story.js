@@ -24,6 +24,7 @@ export function mountStory(el, app) {
     ];
     const cast = [
       ['person', 'Three people', 'The Program Owner who asks the question; the Cluster Ops Lead who runs the computing jobs; the Facility Manager who runs the building.'],
+      ['tool', 'A small decision model (System 1)', 'Runs in the browser. Reads the cleaned data and decides in milliseconds whether the question is routine or needs the specialists.'],
       ['agent', 'A coordinator (AI)', 'Splits the question, passes it to the right specialists and gathers their answers.'],
       ['agent', 'Four specialist AI assistants', 'Installation, workload, cooling and sustainability — each only looks at its own systems.'],
       ['tool', 'Ordinary software', 'Sorts and cleans the raw measurements before any AI sees them, and does all the physics calculations.']
@@ -46,10 +47,16 @@ export function mountStory(el, app) {
     </section>
     <div class="cta-band"><div><p>Keep these five questions in mind. We come back to this tab at the end to answer them, with the numbers from the run.</p></div><button class="btn" data-go="demo">Start the live demo ${icon('arrow', 16)}</button></div>`;
   }
+  el.addEventListener('click', e => {
+    const b = e.target.closest('[data-cine]'); if (!b) return;
+    const f = CINE.find(c => c.id === b.dataset.cine), v = el.querySelector('#cine-video');
+    el.querySelectorAll('[data-cine]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    v.src = f.src; v.poster = f.poster; el.querySelector('#cine-note').textContent = f.note; v.play?.().catch(() => {});
+  });
   function render() {
     const cur = view ?? autoView();
-    if (cur === 'before') { el.innerHTML = head(cur) + renderBefore(); return; }
-    el.innerHTML = head(cur) + renderAfter();
+    if (cur === 'before') { el.innerHTML = head(cur) + cinemaMarkup() + renderBefore(); return; }
+    el.innerHTML = head(cur) + cinemaMarkup() + renderAfter();
   }
   function head(cur) {
     const v = app.completed();
@@ -143,4 +150,19 @@ export function mountStory(el, app) {
     const v = app.completed(); const k = `${v.run.id}:${v.source}:${view ?? autoView()}`;
     if (k !== key || !el.innerHTML) { key = k; render(); }
   } };
+}
+
+
+// Cinematic introductions: both are kept and selectable.
+export const CINE = [
+  { id: 'system', label: 'GEN7 · Decision Intelligence', dur: '≈50 s', src: './media/GEN7-cinematic-intro-system1-system2.mp4', poster: './media/GEN7-cinematic-intro-system1-system2.jpg', note: 'Groom → Decide → Reason → Act → Measure: System 1 and System 2, the confidence gate, people accountable.' },
+  { id: 'original', label: 'Original GEN7 intro', dur: '37 s', src: './media/GEN7-cinematic-intro-37s.mp4', poster: './media/GEN7-cinematic-intro-37s.jpg', note: 'The original GEN7 story: open at the agent layer, lean context, measured.' }
+];
+function cinemaMarkup() {
+  const f = CINE[0];
+  return `<section class="st-block cine">
+    <div class="cine-head"><small>Cinematic introduction</small><div class="seg" role="group" aria-label="Cinematic">${CINE.map((c, i) => `<button type="button" data-cine="${c.id}" aria-pressed="${i === 0}">${c.label} · ${c.dur}</button>`).join('')}</div></div>
+    <video id="cine-video" controls preload="none" playsinline src="${f.src}" poster="${f.poster}"></video>
+    <p class="small muted" id="cine-note">${f.note}</p>
+  </section>`;
 }

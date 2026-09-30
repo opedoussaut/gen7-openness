@@ -8,12 +8,17 @@ import { jsonBytes, estimateTokens, uid, now } from '../lib/util.js';
 import { createMcpClient, inProcessMcpTransport } from '../adapters/mcp.js';
 import { createA2AClient, inProcessA2ATransport } from '../adapters/a2a.js';
 import { createScriptedModel } from '../adapters/model.js';
+import { featurize } from '../system1/features.js';
+import { decode, gate, createJsSystem1 } from '../system1/model.js';
 
 /** Playback dwell per step kind at 1× (milliseconds of presentation time, not simulated time). */
-const DWELL = { incident: 2600, ingest: 420, 'raw-summary': 2400, groom: 1250, discover: 260, model: 1500, a2a: 1350, mcp: 1150, decision: 1600, human: 2200 };
+const DWELL = { decide: 3200, incident: 2600, ingest: 420, 'raw-summary': 2400, groom: 1250, discover: 260, model: 1500, a2a: 1350, mcp: 1150, decision: 1600, human: 2200 };
 
-export function createRun(scenario, steps) {
+export function createRun(scenario, steps, requestKey = 'R-17') {
+  const cfg = scenario.requests?.[requestKey];
   return {
+    requestKey, requestKind: cfg?.kind ?? 'complex', incident: cfg?.incident ?? scenario.incident,
+    system1: null,
     id: `RUN-${uid('').slice(1, 7).toUpperCase()}`,
     scenarioId: scenario.id,
     state: 'IDLE', status: 'idle', error: null,
@@ -34,9 +39,11 @@ export function createRun(scenario, steps) {
 }
 
 export class DemoEngine {
-  constructor(scenario, { mcpTransport, a2aTransport, model } = {}) {
+  constructor(scenario, { mcpTransport, a2aTransport, model, system1, request = 'R-17' } = {}) {
     this.scenario = scenario;
-    this.steps = scenario.buildScript();
+    this.requestKey = request;
+    this.steps = scenario.buildScript(request);
+    this.system1 = system1 ?? createJsSystem1();
     this.listeners = new Set();
     this.speed = 1;
     this.token = 0;
@@ -49,8 +56,12 @@ export class DemoEngine {
     this.a2a = createA2AClient({ transportMs: scenario.infra.a2aTransportMs, transport: a2aTransport ?? inProcessA2ATransport((to, message) => this.deliver(to, message)) });
     this.model = model ?? createScriptedModel({ models: scenario.models });
     this.adapterInfo = { mcp: mcpTransport ? 'custom transport' : 'simulated · in-process JSON-RPC', a2a: a2aTransport ? 'custom transport' : 'simulated · in-process message/send', model: this.model.kind === 'scripted' ? 'scripted reasoner · usage estimated from context size' : 'external model' };
-    this.run = createRun(scenario, this.steps);
+    this.run = createRun(scenario, this.steps, this.requestKey);
   }
+
+  get requestCfg() { return this.scenario.requests?.[this.requestKey]; }
+  /** Switch request (R-17 complex · R-22 simple). Resets the run. */
+  setRequest(key) { if (!this.scenario.requests?.[key]) return; this.requestKey = key; this.steps = this.scenario.buildScript(key); this.reset(); }
 
   subscribe(fn) { this.listeners.add(fn); return () => this.listeners.delete(fn); }
   emit() { for (const fn of this.listeners) fn(this.run); }
@@ -61,7 +72,7 @@ export class DemoEngine {
     this.token++;
     this.paused = false; this.stepRequested = false;
     this.dataset = null; this.groomState = null; this.evidence = [];
-    this.run = createRun(this.scenario, this.steps);
+    this.run = createRun(this.scenario, this.steps, this.requestKey);
     this.emit();
   }
 
@@ -166,7 +177,7 @@ export class DemoEngine {
     switch (step.kind) {
       case 'incident':
         this.setAgentStatus([]);
-        return { lane: 'plant', durationMs: 0, event: { kind: 'incident', title: `Request ${sc.incident.id} received`, detail: `${sc.incident.rack} · ${sc.incident.model} · ${sc.incident.itKw} kW on Loop ${sc.incident.loop}, ${sc.incident.plannedForLabel}` } };
+        { const inc = run.incident; return { lane: 'plant', durationMs: 0, event: { kind: 'incident', title: `Request ${inc.id} received`, detail: `${inc.rack} · ${inc.model} · ${inc.itKw} kW on Loop ${inc.loop}, ${inc.plannedForLabel}` } }; }
       case 'ingest': {
         if (!this.dataset) { const t = now(); this.dataset = sc.generateDataset(); run.raw.generationMs = now() - t; }
         const list = this.dataset[step.source], src = run.sources.find(s => s.id === step.source);
@@ -178,7 +189,7 @@ export class DemoEngine {
       case 'raw-summary':
         return { lane: 'plant', durationMs: 0, event: { kind: 'ingest', title: `${run.raw.records.toLocaleString('en-US')} raw records scanned`, detail: `${(run.raw.bytes / 1e6).toFixed(2)} MB · ≈${Math.round(run.raw.tokens / 1000).toLocaleString('en-US')}k tokens if sent as-is` } };
       case 'groom': {
-        if (!this.groomState) this.groomState = { list: sc.pipeline.flatten(this.dataset), links: null, bytes: run.raw.bytes };
+        if (!this.groomState) this.groomState = { list: sc.pipeline.flatten(this.dataset), links: null, bytes: run.raw.bytes, anchor: this.requestCfg ? sc.anchorFor(this.requestCfg.request) : undefined };
         const { stage, state } = sc.pipeline.runStage(step.stage, this.groomState);
         this.groomState = state;
         run.grooming.stages.push(stage);
@@ -190,6 +201,16 @@ export class DemoEngine {
           run.grooming.done = true;
         }
         return { lane: 'groom', durationMs: Math.max(1, Math.round(stage.cpuMs)), event: { kind: 'groom', title: `${stage.label}`, detail: `${stage.recordsIn.toLocaleString('en-US')} → ${stage.recordsOut.toLocaleString('en-US')} records`, ref: { stage: stage.id } } };
+      }
+      case 'decide': {
+        // SYSTEM 1: nine deterministic features from the groomed evidence → small decision model → typed decisions → gate.
+        const cfg = this.requestCfg;
+        const features = featurize(this.evidence, cfg.request);
+        const r = await this.system1.decide(features.vector);
+        const decisions = decode(r.probs), g = gate(decisions);
+        run.system1 = { features, decisions, gate: g, inferenceMs: r.inferenceMs, runtime: r.info, requestKey: this.requestKey };
+        const where = g.path === 'BOUNDED_ACTION' ? 'bounded action' : g.path === 'HUMAN_REVIEW' ? 'escalate to a person' : 'escalate to System 2';
+        return { lane: 'system1', durationMs: Math.max(1, Math.round(r.inferenceMs)), event: { kind: 'decide', title: `System 1 → ${where}`, detail: `risk ${decisions.capacity_risk.label} · reasoning ${decisions.reasoning_required.label} · route ${decisions.preferred_route.label} · ${r.info.backend} · ${r.inferenceMs.toFixed(2)} ms`, ref: { system1: true } } };
       }
       case 'discover': {
         const d = await this.mcp.discover(step.server);
@@ -245,7 +266,7 @@ export class DemoEngine {
         return { lane: `human:${step.from}`, durationMs: 0, event: { kind: 'human', title: `${label(sc, step.from)} → ${label(sc, step.to)}`, detail: text, ref: { human: action.id } } };
       }
       case 'decision': {
-        run.recommendation = run.agents.orchestrator.outputs.at(-1)?.output ?? null;
+        run.recommendation = this.requestCfg?.kind === 'simple' ? sc.boundedRecommendation(run, this.requestCfg) : run.agents.orchestrator.outputs.at(-1)?.output ?? null;
         return { lane: 'orchestrator', durationMs: 0, event: { kind: 'decision', title: 'Recommendation generated', detail: run.recommendation?.decision ?? '' } };
       }
     }

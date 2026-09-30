@@ -54,6 +54,7 @@ export function mountLearn(el, app) {
   const arch = [
     { k: 'DATA', ic: 'database', c: '#7e95a8', p: 'Heterogeneous facility data: CDU telemetry, PDUs, GPUs, scheduler, DCIM, grid.', page: 'demo' },
     { k: 'GROOM', ic: 'funnel', c: 'var(--lean)', p: 'Deterministic filter, normalise, deduplicate, correlate, aggregate, rank.', page: 'demo' },
+    { k: 'DECIDE · SYSTEM 1', ic: 'target', c: '#0f1b2a', p: 'A small decision model in the browser: typed, bounded decisions and a confidence gate. Escalates only when needed.', page: 'demo' },
     { k: 'SPECIALISED AGENTS', ic: 'plug', c: 'var(--mcp)', p: 'Governed domain agents. Each reaches its own systems through MCP, behind the agent.', page: 'demo' },
     { k: 'HYBRID TEAM · LOOP', ic: 'team', c: 'var(--a2a)', p: 'People and agents at the open A2A layer, in an engineered loop that runs until its acceptance test passes.', page: 'demo' },
     { k: 'ACTION / DECISION', ic: 'target', c: 'var(--ok)', p: 'People approve and sign off, on evidence prepared and verified by agents.', page: 'demo' },
@@ -69,6 +70,8 @@ export function mountLearn(el, app) {
     <p class="lede">See people and AI agents work as one team: agents open at the agent layer, a lean evidence pack, an engineered loop, every euro measured — and whether it was worth it. Read the ideas here in a few minutes, then watch them run on a simulated AI-factory decision.</p>
     <div class="pillars">${PILLARS.map((p, i) => `<div class="pillar" style="--c:${PILLAR_COLOR[p.id]}"><i>0${i + 1}</i><b>${p.word}</b><p>${esc(p.line)}</p></div>`).join('')}</div>
   </div>
+
+  ${intelligencePath(app)}
 
   <section class="attr-section" aria-labelledby="attr-title">
     <span class="eyebrow"><i class="pip"></i>Dassault Systèmes Industrial AI</span>
@@ -227,7 +230,41 @@ export function mountLearn(el, app) {
     const jump = e.target.closest('[data-gx-jump]');
     if (jump) { host.innerHTML = explainerMarkup(gx, jump.dataset.gxJump); el.querySelector('#gx-section').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   });
+  el.querySelector('[data-go-demo]')?.addEventListener('click', () => app.go('demo'));
   return { update() {} };
 }
 
 const label = (sc, id) => sc.agents.find(a => a.id === id)?.name ?? id;
+
+
+// ---------- The intelligence path: GROOM → DECIDE → REASON → ACT → MEASURE ----------
+function intelligencePath(app) {
+  const sc = app.scenario;
+  const c = computeMetrics(app.reference.run, sc), s = computeMetrics(app.referenceSimple.run, sc);
+  const r17 = app.reference.run, r22 = app.referenceSimple.run;
+  const steps = [
+    ['OBSERVE', 'Industrial signals', '#7e95a8'], ['GROOM', 'Deterministic · reduce, normalise, correlate', 'var(--lean)'], ['DECIDE', 'System 1 · small model · typed, bounded', '#0f1b2a'],
+    ['REASON', 'System 2 · specialised agents · A2A', 'var(--a2a)'], ['ACT', 'Skills · MCP · enterprise capabilities', 'var(--mcp)'], ['MEASURE', 'Tokens · latency · compute · value', 'var(--ok)']];
+  const qa = [
+    ['What information matters?', 'GROOM', 'var(--lean)'], ['What should happen next?', 'DECIDE · SYSTEM 1', '#0f1b2a'], ['Does this require deeper intelligence?', 'CONFIDENCE GATE', '#0e8a6d'],
+    ['Who needs to collaborate?', 'A2A', 'var(--a2a)'], ['How do they reason?', 'SYSTEM 2 · AGENTS', 'var(--model)'], ['How do they access capabilities?', 'MCP · SKILLS', 'var(--mcp)'], ['Did using AI make sense?', 'TELEMETRY', 'var(--ok)']];
+  const flow = (items, cls) => `<ol class="ip-flow ${cls}">${items.map(([t, d]) => `<li><b>${t}</b>${d ? `<span>${d}</span>` : ''}</li>`).join('')}</ol>`;
+  const d17 = r17.system1.decisions, d22 = r22.system1.decisions;
+  return `<section class="ip-section" aria-labelledby="ip-title">
+    <span class="eyebrow"><i class="pip"></i>Engineering the intelligence path</span>
+    <h2 class="h2" id="ip-title">Not every problem needs generative reasoning. <span>GEN7 routes each one.</span></h2>
+    <div class="ip-backbone">${steps.map(([k, d, col], i) => `${i ? '<span class="ip-arrow">→</span>' : ''}<div class="ip-step" style="--c:${col}"><b>${k}</b><span>${d}</span></div>`).join('')}</div>
+    <div class="ip-grid">
+      <div class="ip-qa"><small>The mental model · seven questions</small>${qa.map(([q, a, col]) => `<div class="ip-q"><span>${q}</span><b style="--c:${col}">→ ${a}</b></div>`).join('')}</div>
+      <div class="ip-cases">
+        <div class="ip-case simple"><small>SIMPLE DECISION · ${esc(r22.incident.rack)} · ${esc(r22.incident.itKw)} kW on Loop ${esc(r22.incident.loop)}</small>
+          ${flow([['Groom', `${int(r22.raw.records)} → ${int(r22.grooming.evidence.records)} records`], ['System 1', `risk ${d22.capacity_risk.label} · route ${d22.preferred_route.label}`], ['Decision', 'confident → bounded action'], ['Action', 'one governed skill · owner informed']], 's')}
+          <p><b>${s.totals.modelCalls}</b> reasoning calls · <b>${int(s.totals.totalTokens)}</b> model tokens · <b>${eur(s.totals.totalCost, { precise: true })}</b> total</p></div>
+        <div class="ip-case complex"><small>COMPLEX DECISION · ${esc(r17.incident.rack)} · ${esc(r17.incident.itKw)} kW on Loop ${esc(r17.incident.loop)}</small>
+          ${flow([['Groom', `${int(r17.raw.records)} → ${int(r17.grooming.evidence.records)} records`], ['System 1', `risk ${d17.capacity_risk.label} · “more reasoning required”`], ['System 2', 'four specialised agents collaborate over A2A'], ['Human-approved recommendation', 'three accountable people']], 'c')}
+          <p><b>${c.totals.modelCalls}</b> reasoning calls · <b>${int(c.totals.totalTokens)}</b> model tokens · <b>${eur(c.totals.totalCost, { precise: true })}</b> total</p></div>
+      </div>
+    </div>
+    <p class="ip-foot">Both cases start the same way and run on the same data. The confidence gate is what separates them: System 1 acts only on routine decisions it is sure about; everything else goes to System 2 and to the accountable people. <button class="btn sm" data-go-demo>Try both in the live demo ${icon('arrow', 13)}</button></p>
+  </section>`;
+}

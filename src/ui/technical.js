@@ -3,7 +3,7 @@ import { icon } from './icons.js';
 import { esc, $, int, eur, bytes, ms, pct, clock } from './format.js';
 import { inspectEvent } from './demo.js';
 
-const KIND = { incident: ['var(--bad)', 'Incident'], ingest: ['#8aa0b2', 'Data'], groom: ['var(--lean)', 'Grooming'], discover: ['var(--mcp-2)', 'Discovery'], model: ['var(--model)', 'Model'], mcp: ['var(--mcp)', 'MCP'], a2a: ['var(--a2a)', 'A2A'], human: ['var(--human)', 'People'], decision: ['var(--ok)', 'Decision'] };
+const KIND = { decide: ['#0f1b2a', 'System 1'], incident: ['var(--bad)', 'Incident'], ingest: ['#8aa0b2', 'Data'], groom: ['var(--lean)', 'Grooming'], discover: ['var(--mcp-2)', 'Discovery'], model: ['var(--model)', 'Model'], mcp: ['var(--mcp)', 'MCP'], a2a: ['var(--a2a)', 'A2A'], human: ['var(--human)', 'People'], decision: ['var(--ok)', 'Decision'] };
 const FILTERS = [['all', 'All'], ['mcp', 'MCP'], ['a2a', 'A2A'], ['human', 'People'], ['model', 'Model'], ['data', 'Data']];
 const match = (f, k) => f === 'all' || f === k || (f === 'data' && ['ingest', 'groom', 'discover', 'incident'].includes(k)) || (f === 'model' && k === 'decision');
 
@@ -60,6 +60,7 @@ export function mountTechnical(el, app) {
       <span class="chip"><span class="tag a2a">A2A</span> ${esc(info.a2a)}</span>
       <span class="chip"><span class="tag model">MODEL</span> ${esc(info.model)}</span>
     </div>
+    ${system1Panel(app)}
     <div class="tech-grid">
       <section class="panel" aria-labelledby="tl-h">
         <div class="panel-title"><span class="eyebrow" id="tl-h">${icon('clock', 14)} Run timeline</span><div class="filters seg">${FILTERS.map(([id, l]) => `<button data-filter="${id}" aria-pressed="${filter === id}">${l}</button>`).join('')}</div></div>
@@ -128,3 +129,33 @@ function fmtCheck(c) {
 }
 const compactArgs = a => Object.entries(a).map(([k, v]) => `${k}=${Array.isArray(v) ? `[${v.length}]` : v}`).join(' ');
 const short = (sc, id) => (sc.agents.find(a => a.id === id)?.name ?? id).replace(' Agent', '');
+
+
+// ---------- SYSTEM 1 DECISION: what actually executed, where ----------
+function system1Panel(app) {
+  const rt = app.system1Info?.(), live = app.engine.run.system1, card = app.modelCard;
+  const row = (k, v) => `<div class="s1t-row"><span>${k}</span><b>${v}</b></div>`;
+  const fmt = v => (v == null ? '—' : `${v.toFixed(2)} ms`);
+  const runtime = rt ? esc(rt.runtime) : 'loading…';
+  const d = live?.decisions;
+  return `<section class="panel s1-tech" aria-labelledby="s1t-h">
+    <div class="panel-title"><span class="eyebrow" id="s1t-h"><span class="tag s1">SYSTEM 1</span> Decision · what actually executed</span>${rt?.fallback ? '<span class="tag warn">labelled fallback</span>' : rt ? '<span class="tag ok">browser inference</span>' : ''}</div>
+    <div class="s1t-grid">
+      <div class="s1t-col">
+        ${row('runtime', runtime)}${row('execution', 'Client-side')}${row('network call', 'None')}${row('API cost', '€0')}
+        ${row('model', `${esc(card.name)} · ${card.parameters.toLocaleString('en-US')} parameters · ${(card.onnx.bytes / 1024).toFixed(1)} KB ONNX (opset ${card.onnx.opset})`)}
+        ${row('engine', rt?.fallback ? 'JavaScript evaluator of the same weights' : `ONNX Runtime Web ${esc(rt?.ortVersion ?? '1.22.0')} · vendored in the repository`)}
+        ${rt?.adapter ? row('GPU adapter', esc([rt.adapter.vendor, rt.adapter.architecture, rt.adapter.description].filter(Boolean).join(' · ') || 'unnamed')) : ''}
+      </div>
+      <div class="s1t-col">
+        ${row('runtime load', fmt(rt?.loadMs))}${row('first inference (cold)', fmt(rt?.coldMs))}${row('inference, median of 20 (warm)', fmt(rt?.warmMs))}
+        ${row('last live decision', live ? `${esc(live.runtime?.backend ?? '')} · ${live.inferenceMs.toFixed(2)} ms` : 'run the live demo')}
+        ${row('parity vs JS evaluator', rt?.parityMaxAbsDiff != null ? `max |Δp| ${rt.parityMaxAbsDiff.toExponential(1)}` : '—')}
+        ${row('fallback chain', 'WebGPU → WASM (CPU) → JavaScript evaluator')}
+      </div>
+    </div>
+    ${d ? `<p class="small" style="margin-top:10px"><b>Live decisions:</b> <span class="mono">capacity_risk=${d.capacity_risk.label} · reasoning_required=${d.reasoning_required.label} · preferred_route=${d.preferred_route.label} · agents=[${d.agents_required.selected.join(', ')}] → ${live.gate.path}</span></p>` : ''}
+    ${rt?.notes?.length ? `<p class="small muted">Runtime notes: ${esc(rt.notes.join(' · '))}</p>` : ''}
+    <p class="small muted">For a model this small, WASM on the CPU is often as fast as or faster than WebGPU: GPU dispatch and read-back cost more than the arithmetic. WebGPU matters as the decision models grow. Timings are measured in this browser, on this machine.</p>
+  </section>`;
+}

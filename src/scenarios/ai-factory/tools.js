@@ -27,6 +27,12 @@ export const SERVERS = [
           const policy = one(evidence, 'POLICY');
           const data = { loopId, cdus: cdus.map(c => ({ id: c.id, usableKw: c.v.usable_capacity_kw })), usableCapacityKw: cdus.reduce((a, c) => a + c.v.usable_capacity_kw, 0), racksInService: racks.map(r => r.id), allowancePct: policy.v.allowance_pct, policy: policy.v.statement };
           return { data, records: cdus.length + racks.length + 1, summary: `Loop ${loopId} · ${cdus.length} CDUs · ${kw(data.usableCapacityKw)} usable · ${racks.length} racks` };
+        } },
+      { name: 'reserveRackSlot', description: 'Reserve a rack position within delegated authority (bounded, reversible action).', latencyMs: 58, inputSchema: schema({ rackId: { type: 'string' }, loopId: { type: 'string' }, row: { type: 'string' }, designItKw: { type: 'number' }, plannedFor: { type: 'string' } }),
+        run: ({ rackId, loopId, row, designItKw, plannedFor }, { evidence }) => {
+          const b = one(evidence, 'BUSWAY', x => x.keys.row === row);
+          const data = { reservation: `RSV-${rackId}-${plannedFor}`, rackId, loopId, row, position: `Hall 2 · Row ${row} · slot ${rackId.split('-')[1]}`, plannedFor, designItKw, buswayFreeKw: b ? b.v.capacity_kw - b.v.allocated_kw : null, status: 'RESERVED', authority: 'Delegated · routine capacity request (System 1 route DIRECT)', reversible: true };
+          return { data, records: 1, summary: `${data.reservation} · ${data.position} · ${plannedFor} · reserved` };
         } }
     ]
   },

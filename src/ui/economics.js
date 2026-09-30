@@ -1,7 +1,7 @@
 // AI ECONOMICS — was using AI economically justified?
 import { icon } from './icons.js';
 import { esc, int, compact, eur, ms, times, pct } from './format.js';
-import { receipt, pages, TOKENS_PER_PAGE } from '../engine/telemetry.js';
+import { receipt, pages, TOKENS_PER_PAGE, computeMetrics, computeAvoided } from '../engine/telemetry.js';
 import { PRESETS, perDecisionOf, decisionsPerYear, bigEur, bigNum } from './scale.js';
 import { valueDetailMarkup, bindValueDetail } from './value.js';
 
@@ -27,6 +27,8 @@ export function mountEconomics(el, app) {
       <p class="lede">The point is not a cheaper task: it is a decision that can now be taken on evidence every time, not only when it justifies an expert’s day. Here the recorded execution cost of one run is set against the industrial outcome it enabled — with recorded run telemetry and estimated value kept strictly apart.</p></div>
       <div class="run-banner">${banner}</div>
     </div>
+
+    ${twoMechanisms(app)}
 
     <nav class="journey" aria-label="How to read this page">
       <a href="#part-cost"><i>1</i><span><b>What did it cost?</b><small>measured by telemetry</small></span></a>
@@ -211,5 +213,44 @@ function savingsSection(view, sc) {
       <div class="cmp-row"><b>Business decision</b><div class="small muted">Assumed identical for this comparison. In practice, burying the relevant evidence among ${int(m.context.rawRecords)} raw records also raises the risk of a worse decision; that effect is not quantified here.</div><span class="fx" style="color:var(--muted)">=</span></div>
       <p class="cmp-note">${n.totals.windowOverflows.map(o => `The brute-force ${esc(label(sc, o.agent))} context (${compact(o.tokens)} tokens) exceeds the model's ${compact(sc.models[n.calls.find(c => c.agent === o.agent).model].contextWindow)}-token window, so it must be split into ${o.chunks} calls.`).join(' ')} Bars are linear. Energy uses indicative per-token factors (${sc.energy.whPer1kInputTokens} Wh / 1k tokens read, ${sc.energy.whPer1kOutputTokens} Wh / 1k written) — order of magnitude only.</p>
     </div>
+  </section>`;
+}
+
+
+// ---------- Two efficiency mechanisms: reduce input (GROOM) and reduce reasoning (DECIDE) ----------
+function twoMechanisms(app) {
+  const sc = app.scenario;
+  const c = computeMetrics(app.reference.run, sc), s = computeMetrics(app.referenceSimple.run, sc), av = computeAvoided(s, c);
+  const rt = app.system1Info?.();
+  const r17 = app.reference.run, r22 = app.referenceSimple.run;
+  const s1ms = rt?.warmMs != null ? `${rt.warmMs.toFixed(2)} ms` : `${r22.system1.inferenceMs.toFixed(2)} ms`;
+  const s1rt = rt ? rt.runtime : 'Browser · JavaScript (reference evaluator)';
+  const row = (label, a, b, note = '') => `<tr><td>${label}${note}</td><td class="num">${a}</td><td class="num">${b}</td></tr>`;
+  return `<section class="mech" aria-labelledby="mech-h">
+    <span class="eyebrow"><i class="pip"></i>Two efficiency mechanisms</span>
+    <h2 class="h2" id="mech-h">Reduce the input. <span>Then reduce the reasoning.</span></h2>
+    <div class="mech-grid">
+      <div class="mech-card"><small>1 · REDUCE INPUT · GROOM</small><div class="mech-flow"><b>${int(r17.raw.records)}</b><span>records</span><i>→ groom →</i><b>${int(r17.grooming.evidence.records)}</b><span>relevant records</span></div>
+        <p>Deterministic, measured: ${(c.context.reduction * 100).toFixed(1)} % fewer tokens reach any model (≈${compact(c.context.rawTokens)} → ${compact(c.context.evidenceTokens)}). Grooming took ${ms(c.totals.groomCpuMs)} of CPU in this browser.</p></div>
+      <div class="mech-card"><small>2 · REDUCE REASONING · DECIDE</small><div class="mech-flow"><b>${int(r17.grooming.evidence.records)}</b><span>relevant records</span><i>→ System 1 →</i><b>?</b><span>is System 2 required?</span></div>
+        <p>A ${app.modelCard.parameters.toLocaleString('en-US')}-parameter model (${(app.modelCard.onnx.bytes / 1024).toFixed(1)} KB) answers in ${s1ms} on ${esc(s1rt)}, with no network call and no API cost. Only when the gate escalates are reasoning agents called.</p></div>
+    </div>
+    <div class="mech-compare">
+      <div class="mech-approach"><small>Traditional approach</small><div class="mech-line"><b>Everything</b><i>→</i><b class="big">Large reasoning model</b></div></div>
+      <div class="mech-approach lean"><small>GEN7 lean approach</small><div class="mech-line"><b>Everything</b><i>→</i><b>GROOM</b><i>→</i><b>DECIDE</b><i>→</i><b>REASON only when necessary</b></div></div>
+    </div>
+    <div class="table-wrap"><table class="data mech-table">
+      <thead><tr><th>Telemetry, per decision</th><th>${esc(r17.incident.rack)} · complex</th><th>${esc(r22.incident.rack)} · simple</th></tr></thead>
+      <tbody>
+        ${row('Grooming time', ms(c.totals.groomCpuMs), ms(s.totals.groomCpuMs), ' <span class="tag lean">measured</span>')}
+        ${row('System 1 inference', `${r17.system1.inferenceMs.toFixed(2)} ms`, `${r22.system1.inferenceMs.toFixed(2)} ms`, ' <span class="tag s1">measured · reference evaluator</span>')}
+        ${row('System 1 route', `${r17.system1.decisions.preferred_route.label} → System 2`, `${r22.system1.decisions.preferred_route.label} → bounded action`)}
+        ${row('System 2 reasoning calls', c.totals.modelCalls, s.totals.modelCalls)}
+        ${row('A2A messages', c.totals.a2aMessages, s.totals.a2aMessages)}
+        ${row('Model tokens', int(c.totals.totalTokens), int(s.totals.totalTokens))}
+        ${row('AI execution cost', eur(c.totals.totalCost, { precise: true }), eur(s.totals.totalCost, { precise: true }), ' <span class="tag warn">illustrative prices</span>')}
+      </tbody>
+    </table></div>
+    <div class="mech-avoided"><span class="tag warn">ESTIMATE</span> On ${esc(r22.incident.rack)}, System 1 avoided <b>${av.reasoningCallsAvoided}</b> reasoning calls, <b>${int(av.tokensAvoided)}</b> model tokens and <b>${eur(av.costAvoidedEur, { precise: true })}</b> of model cost — ${esc(av.basis)}. On ${esc(r17.incident.rack)} nothing is avoided: the gate correctly sent it to System 2.</div>
   </section>`;
 }

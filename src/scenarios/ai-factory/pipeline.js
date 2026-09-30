@@ -13,15 +13,18 @@ const pctl = (l, p) => { const s = [...l].sort((a, b) => a - b); return s[Math.m
 const loopOfRack = id => id?.[0];
 
 export const ANCHOR = { rack: REQUEST.rack, loop: REQUEST.loop, row: REQUEST.row, day: REQUEST.plannedFor };
+/** The request the grooming is anchored on (R-17 by default; another request re-anchors every rule). */
+let CUR = ANCHOR;
+export const anchorFor = req => ({ rack: req.rack, loop: req.loop, row: req.row, day: req.plannedFor });
 export const flatten = dataset => Object.entries(dataset).flatMap(([src, list]) => list.map(r => ({ src, r })));
 
 const FILTERS = {
-  cooling: r => r.loop === ANCHOR.loop,
-  power: r => loopOfRack(r.rack) === ANCHOR.loop,
-  gpu: r => loopOfRack(r.rack) === ANCHOR.loop,
+  cooling: r => r.loop === CUR.loop,
+  power: r => loopOfRack(r.rack) === CUR.loop,
+  gpu: r => loopOfRack(r.rack) === CUR.loop,
   jobs: r => ['JOB_RUNNING', 'CHECKPOINT'].includes(r.event) && ['hall2-a', 'hall2-b'].includes(r.partition),
   dcim: r => r.hall === 'Hall 2' || r.type === 'POLICY',
-  maintenance: r => r.asset.startsWith('CDU-A') || loopOfRack(r.asset) === ANCHOR.loop && r.asset.includes('-'),
+  maintenance: r => r.asset.startsWith(`CDU-${CUR.loop}`) || loopOfRack(r.asset) === CUR.loop && r.asset.includes('-'),
   carbon: r => r.type === 'forecast'
 };
 
@@ -45,20 +48,20 @@ function normalizeOne({ src, r }) {
 
 /** Correlation: planned rack → loop → CDUs, racks, jobs, busway, policy, planned-day carbon. */
 function correlate(items) {
-  const loopRacks = new Set(items.filter(x => x.src === 'dcim' && x.type === 'RACK' && x.keys.loop === ANCHOR.loop).map(x => x.id));
-  const dayStart = Date.parse(`${ANCHOR.day}T00:00:00+02:00`), dayEnd = dayStart + 24 * HOUR;
+  const loopRacks = new Set(items.filter(x => x.src === 'dcim' && x.type === 'RACK' && x.keys.loop === CUR.loop).map(x => x.id));
+  const dayStart = Date.parse(`${CUR.day}T00:00:00+02:00`), dayEnd = dayStart + 24 * HOUR;
   const keep = x => {
     switch (x.src) {
       case 'cooling': return true;
       case 'power': case 'gpu': return loopRacks.has(x.keys.rack);
       case 'jobs': return x.type === 'JOB_RUNNING' || x.v.racks.some(r => loopRacks.has(r));
-      case 'dcim': return x.type === 'POLICY' || x.type === 'CDU' || (x.type === 'BUSWAY' && x.keys.row === ANCHOR.row) || x.type === 'RACK';
-      case 'maintenance': return x.keys.asset.startsWith('CDU-A') || loopRacks.has(x.keys.asset);
+      case 'dcim': return x.type === 'POLICY' || x.type === 'CDU' || (x.type === 'BUSWAY' && x.keys.row === CUR.row) || x.type === 'RACK';
+      case 'maintenance': return x.keys.asset.startsWith(`CDU-${CUR.loop}`) || loopRacks.has(x.keys.asset);
       case 'carbon': { const t = Date.parse(x.ts); return t >= dayStart && t < dayEnd; }
     }
     return false;
   };
-  return { list: items.filter(keep), links: { loop: ANCHOR.loop, racks: loopRacks.size, rack: ANCHOR.rack } };
+  return { list: items.filter(keep), links: { loop: CUR.loop, racks: loopRacks.size, rack: CUR.rack } };
 }
 
 /** Aggregation: 15-min loop heat windows + p95 summary, per-rack power, per-rack GPU health, per-job state, carbon day profile. */
@@ -72,9 +75,9 @@ function aggregate(items) {
     (m.get(s.keys.cdu) || m.set(s.keys.cdu, []).get(s.keys.cdu)).push(s.v.heatKw);
   }
   const windows = [...win.entries()].filter(([, m]) => m.size === 2).map(([w, m]) => ({ w, heat: r1([...m.values()].reduce((a, l) => a + mean(l), 0)) })).sort((a, b) => a.w - b.w);
-  for (const x of windows) out.push({ src: 'cooling', id: `LOOP-A@${iso(x.w)}`, type: 'LOOP_WINDOW', ts: iso(x.w), keys: { loop: ANCHOR.loop }, v: { heatKw: x.heat } });
+  for (const x of windows) out.push({ src: 'cooling', id: `LOOP-${CUR.loop}@${iso(x.w)}`, type: 'LOOP_WINDOW', ts: iso(x.w), keys: { loop: CUR.loop }, v: { heatKw: x.heat } });
   const heats = windows.map(x => x.heat);
-  out.push({ src: 'cooling', id: 'LOOP-A-24H', type: 'LOOP_SUMMARY', keys: { loop: ANCHOR.loop }, v: { windows: windows.length, windowMinutes: 15, p95Kw: pctl(heats, 0.95), maxKw: Math.max(...heats), meanKw: r1(mean(heats)), method: `heat = flow × ${COOLANT.densityKgPerL} kg/L × ${COOLANT.cpKJPerKgK} kJ/kg·K × (return − supply), summed over CDU-A1 + CDU-A2` } });
+  out.push({ src: 'cooling', id: `LOOP-${CUR.loop}-24H`, type: 'LOOP_SUMMARY', keys: { loop: CUR.loop }, v: { windows: windows.length, windowMinutes: 15, p95Kw: pctl(heats, 0.95), maxKw: Math.max(...heats), meanKw: r1(mean(heats)), method: `heat = flow × ${COOLANT.densityKgPerL} kg/L × ${COOLANT.cpKJPerKgK} kJ/kg·K × (return − supply), summed over CDU-${CUR.loop}1 + CDU-${CUR.loop}2` } });
   const byRack = (type, f) => { const m = new Map(); for (const x of items.filter(i => i.type === type)) (m.get(x.keys.rack) || m.set(x.keys.rack, []).get(x.keys.rack)).push(f(x)); return m; };
   for (const [rack, kws] of byRack('PDU_SAMPLE', x => x.v.kw)) out.push({ src: 'power', id: `PWR-${rack}`, type: 'RACK_POWER', keys: { rack }, v: { samples: kws.length, meanKw: r1(mean(kws)), p95Kw: r1(pctl(kws, 0.95)), maxKw: r1(Math.max(...kws)) } });
   for (const [rack, list] of byRack('GPU_SAMPLE', x => x.v)) out.push({ src: 'gpu', id: `GPU-${rack}`, type: 'GPU_SUMMARY', keys: { rack }, v: { meanUtilPct: Math.round(mean(list.map(l => l.utilPct))), maxGpuTempC: Math.max(...list.map(l => l.gpuTempMaxC)), xidErrors: list.reduce((a, l) => a + l.xid, 0) } });
@@ -87,7 +90,7 @@ function aggregate(items) {
   if (hours.length >= 6) {
     const blocks = hours.slice(0, hours.length - 5).map((h, i) => ({ from: h.ts, to: iso(Date.parse(hours[i + 5].ts) + HOUR), avg: r1(mean(hours.slice(i, i + 6).map(x => x.v.gPerKWh))) }));
     const best = blocks.reduce((a, b) => (b.avg < a.avg ? b : a)), worst = blocks.reduce((a, b) => (b.avg > a.avg ? b : a));
-    out.push({ src: 'carbon', id: `CARBON-${ANCHOR.day}`, type: 'CARBON_DAY', keys: { zone: 'FR' }, v: { day: ANCHOR.day, hours: hours.length, minG: Math.min(...hours.map(h => h.v.gPerKWh)), maxG: Math.max(...hours.map(h => h.v.gPerKWh)), best6h: best, worst6h: worst } });
+    out.push({ src: 'carbon', id: `CARBON-${CUR.day}`, type: 'CARBON_DAY', keys: { zone: 'FR' }, v: { day: CUR.day, hours: hours.length, minG: Math.min(...hours.map(h => h.v.gPerKWh)), maxG: Math.max(...hours.map(h => h.v.gPerKWh)), best6h: best, worst6h: worst } });
   }
   for (const x of items) if (['dcim', 'maintenance'].includes(x.src)) out.push(x);
   return out;
@@ -101,13 +104,13 @@ function score(x, ctx) {
     case 'LOOP_WINDOW': return x.v.heatKw >= ctx.p90 ? 0.7 : 0.3;
     case 'RACK_POWER': return 0.9;
     case 'GPU_SUMMARY': return x.v.maxGpuTempC >= 80 || x.v.xidErrors > 0 ? 0.6 : 0.35;
-    case 'JOB': return x.keys.loop === ANCHOR.loop ? 0.95 : 0.65;
-    case 'RACK': return x.id === ANCHOR.rack ? 1 : x.keys.loop === ANCHOR.loop ? 0.8 : x.keys.loop === 'B' ? 0.65 : 0.2;
-    case 'CDU': return x.keys.loop === ANCHOR.loop ? 0.95 : 0.3;
+    case 'JOB': return x.keys.loop === CUR.loop ? 0.95 : 0.65;
+    case 'RACK': return x.id === CUR.rack ? 1 : x.keys.loop === CUR.loop ? 0.8 : x.keys.loop === 'B' ? 0.65 : 0.2;
+    case 'CDU': return x.keys.loop === CUR.loop ? 0.95 : 0.3;
     case 'BUSWAY': return 0.9;
     case 'POLICY': return 0.95;
     case 'CARBON_DAY': return 0.9;
-    case 'ALARM': return x.keys.asset.startsWith('CDU-A') ? 0.7 : 0.2;
+    case 'ALARM': return x.keys.asset.startsWith(`CDU-${CUR.loop}`) ? 0.7 : 0.2;
     case 'FILTER_CHANGE': return 0.6;
   }
   return 0.1;
@@ -132,6 +135,7 @@ export const STAGES = [
 ];
 
 export function runStage(stageId, state) {
+  CUR = state.anchor ?? ANCHOR;
   const t = now();
   const before = state.list;
   let list, links = state.links;
@@ -147,11 +151,11 @@ export function runStage(stageId, state) {
   const cpuMs = now() - t;
   const size = l => jsonBytes(l.map(x => x.r ?? x));
   const stage = { ...STAGES.find(s => s.id === stageId), recordsIn: before.length, recordsOut: list.length, bytesIn: state.bytes ?? size(before), bytesOut: size(list), cpuMs };
-  return { stage, state: { list, links, bytes: stage.bytesOut } };
+  return { stage, state: { list, links, bytes: stage.bytesOut, anchor: state.anchor } };
 }
 
-export function groomAll(dataset) {
-  let state = { list: flatten(dataset), links: null };
+export function groomAll(dataset, anchor = ANCHOR) {
+  let state = { list: flatten(dataset), links: null, anchor };
   const stages = [];
   for (const s of STAGES) { const r = runStage(s.id, state); stages.push(r.stage); state = r.state; }
   return { stages, evidence: state.list, links: state.links };

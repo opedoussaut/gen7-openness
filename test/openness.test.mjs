@@ -35,7 +35,7 @@ test('run completes through all states with the expected recommendation', async 
   assert.equal(run.status, 'completed');
   assert.equal(run.state, 'COMPLETED');
   const order = [...new Set(run.events.map(e => e.state))];
-  assert.deepEqual(order, ['INGESTING', 'GROOMING', 'ORCHESTRATING', 'ANALYZING', 'DECIDING', 'COMPLETED']);
+  assert.deepEqual(order, ['INGESTING', 'GROOMING', 'SYSTEM1', 'ORCHESTRATING', 'ANALYZING', 'DECIDING', 'COMPLETED']);
   const firstAgentWork = run.events.findIndex(e => e.kind === 'model');
   assert.ok(run.events.findLastIndex(e => e.kind === 'groom') < firstAgentWork, 'grooming precedes reasoning');
   const o = run.recommendation.outcome;
