@@ -155,7 +155,7 @@ export function mountStory(el, app) {
 
 // Cinematic introductions: both are kept and selectable.
 export const CINE = [
-  { id: 'system', label: 'GEN7 · Decision Intelligence', dur: '≈50 s', src: './media/GEN7-cinematic-intro-system1-system2.mp4', poster: './media/GEN7-cinematic-intro-system1-system2.jpg', note: 'Groom → Decide → Reason → Act → Measure: System 1 and System 2, the confidence gate, people accountable.' },
+  { id: 'system', label: 'GEN7 · Decision Intelligence', dur: '58 s', src: './media/GEN7-cinematic-intro-system1-system2.mp4', poster: './media/GEN7-cinematic-intro-system1-system2.jpg', note: 'R-17 arrives; groom → triage (System 1) → confidence gate → System 2 agents → the system-level decision on the Loop A overload → people accountable → measured.' },
   { id: 'original', label: 'Original GEN7 intro', dur: '37 s', src: './media/GEN7-cinematic-intro-37s.mp4', poster: './media/GEN7-cinematic-intro-37s.jpg', note: 'The original GEN7 story: open at the agent layer, lean context, measured.' }
 ];
 function cinemaMarkup() {

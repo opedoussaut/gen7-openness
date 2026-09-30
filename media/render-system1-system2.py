@@ -24,5 +24,5 @@ if __name__ == '__main__':
     wav = os.path.join(HERE, 'sound-system1-system2.wav')
     subprocess.run(['python3', os.path.join(HERE, 'sound-system1-system2.py'), wav], check=True)
     subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', SILENT, '-i', wav, '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-shortest', '-movflags', '+faststart', OUT], check=True)
-    subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-ss', '50.8', '-i', OUT, '-frames:v', '1', '-q:v', '3', OUT.replace('.mp4', '.jpg')], check=True)
+    subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-ss', '56.3', '-i', OUT, '-frames:v', '1', '-q:v', '3', OUT.replace('.mp4', '.jpg')], check=True)
     os.remove(SILENT); os.remove(wav); print('done', OUT)

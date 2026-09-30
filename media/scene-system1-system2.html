@@ -13,10 +13,12 @@ canvas { display: block; }
 <body><canvas id="c" width="1920" height="1080"></canvas>
 <script>
 // GEN7 Decision Intelligence — cinematic intro (System 1 / System 2). Deterministic: render(t) draws the frame at t seconds.
-// Storyline: COMPLEXITY → GROOM → DECIDE → CONFIDENCE GATE → REASON → ACT → HUMAN ACCOUNTABILITY → MEASURE → ENDING.
+// Storyline: THE QUESTION (R-17 arrives) → COMPLEXITY → GROOM → DECIDE → CONFIDENCE GATE → REASON → ACT →
+// THE DECISION (Loop A would overload; the system rebalances) → HUMAN ACCOUNTABILITY → MEASURE → ENDING.
+// All story figures (869.1 kW, −13.1 kW, 38.7 kW, +25.6 kW, burn-in window) come from the demo's R-17 reference run.
 // Figures in MEASURE come from the simulated R-17 reference run of the demo (System 1 confidences are the real model outputs).
 const W = 1920, H = 1080, cv = document.getElementById('c'), g = cv.getContext('2d');
-const DURATION = 52.5;
+const DURATION = 58.0;
 // ---------- helpers ----------
 const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
 const lerp = (a, b, k) => a + (b - a) * k;
@@ -304,11 +306,14 @@ function act(t) {
 const PEOPLE = [['PROGRAM OWNER', 560], ['CLUSTER OPS LEAD', 960], ['FACILITY MANAGER', 1360]];
 function human(t) {
   const a = fade(t, 38.1, 38.9, 41.9, 42.7); if (a <= 0) return;
-  const rise = eout(seg(t, 38.2, 39.2)), cy = lerp(540, 470, rise), cw = 560, ch = 160;
+  const rise = eout(seg(t, 38.2, 39.2)), cy = lerp(540, 470, rise), cw = 700, ch = 180;
   add(); glow(W / 2, cy, 220, 'violet', a * .12); norm();
   rrect(W / 2 - cw / 2, cy - ch / 2, cw, ch, 22, `rgba(22,32,56,${.9 * a})`, rgba([200, 190, 245], .45 * a), 1.4);
-  text('RECOMMENDATION', W / 2 - cw / 2 + 34, cy - ch / 2 + 36, { size: 13, weight: 700, color: [200, 190, 245], a, align: 'left', track: 6 });
-  [.82, .64, .72].forEach((w, i) => { g.fillStyle = rgba([200, 215, 235], .2 * a * seg(t, 38.6 + i * .1, 39.0 + i * .1)); g.beginPath(); g.roundRect(W / 2 - cw / 2 + 34, cy - 12 + i * 26, (cw - 68) * w, 8, 4); g.fill(); });
+  text('RECOMMENDATION', W / 2 - cw / 2 + 34, cy - ch / 2 + 32, { size: 13, weight: 700, color: [200, 190, 245], a, align: 'left', track: 6 });
+  const tk = a * seg(t, 38.6, 39.2);
+  text('Deploy R-17 on Loop A on Thursday', W / 2 - cw / 2 + 34, cy - 10, { size: 27, weight: 600, color: [235, 242, 252], a: tk, align: 'left' });
+  text('after moving ft-sweep-17 to Loop B', W / 2 - cw / 2 + 34, cy + 26, { size: 22, weight: 300, color: [200, 215, 235], a: tk, align: 'left' });
+  text('COOLING RE-CHECKED +25.6 kW  ·  BURN-IN 01:00–07:00', W / 2 - cw / 2 + 34, cy + 62, { size: 12, weight: 700, color: [140, 200, 170], a: tk, align: 'left', track: 3 });
   const PY = 780;
   PEOPLE.forEach(([n, x], i) => {
     const k = a * seg(t, 39.0 + i * .12, 39.6 + i * .12), lk = eio(seg(t, 39.4 + i * .1, 40.1 + i * .1));
@@ -369,6 +374,63 @@ function footer(t) {
   text('SIMULATED AI-FACTORY SCENARIO · ILLUSTRATIVE FIGURES', W / 2, 1022, { size: 13, weight: 600, color: [90, 120, 150], a: k * .9, track: 4 });
 }
 
+// 0 · THE QUESTION — R-17 arrives (global time)
+function intro(T) {
+  const a = fade(T, .6, 1.6, 3.6, 4.5); if (a <= 0) return;
+  const k = eout(seg(T, .6, 2.4)), cx = W / 2, cy = 600, w = 150, h = 330, x0 = cx - w / 2, y0 = cy - h / 2, dx = 30, dy = -20, rv = seg(T, .6, 2.0);
+  add();
+  const dr = (x1, y1, x2, y2) => { line(x1, y1, x2, y2, COL.cyan, .85 * a, 2); line(x1, y1, x2, y2, COL.cyan, .14 * a, 8); };
+  dr(x0, y0, x0 + w * rv, y0); dr(x0, y0 + h, x0 + w * rv, y0 + h); dr(x0, y0, x0, y0 + h * rv); dr(x0 + w, y0, x0 + w, y0 + h * rv);
+  dr(x0, y0, x0 + dx * rv, y0 + dy * rv); dr(x0 + w, y0, x0 + w + dx * rv, y0 + dy * rv); dr(x0 + dx, y0 + dy, x0 + w + dx, y0 + dy); dr(x0 + w + dx, y0 + dy, x0 + w + dx, y0 + h + dy);
+  for (let i = 1; i < 12; i++) { const yy = y0 + h * i / 12; line(x0 + 10, yy, x0 + w - 10, yy, COL.cyan, .25 * a * seg(T, 1.2 + i * .06, 1.8 + i * .06), 1.1); glow(x0 + w - 20, yy - h / 24, 6, (i * 7 + Math.floor(T * 3)) % 5 ? 'green' : 'cyan', a * k * (.5 + .5 * Math.sin(T * 5 + i))); }
+  for (let i = 0; i < 20; i++) { const ph = (T * .45 + i / 20) % 1; glow(x0 + w * ((i * 37) % 20) / 20, y0 - ph * 140, 14 * (1 - ph), 'amber', a * .35 * (1 - ph) * seg(T, 1.6, 2.6)); }
+  norm();
+  text('R-17  ·  120 kW  ·  72 GPUs', cx + dx / 2, y0 + h + 48, { size: 22, weight: 600, color: COL.amber, a: a * seg(T, 1.8, 2.6), track: 4 });
+  const hk = fade(T, .9, 1.8, 3.6, 4.3), rise = (1 - eout(seg(T, .9, 1.8))) * 14;
+  text('Thursday. A new AI rack arrives.', W / 2, 150 + rise, { size: 50, weight: 600, a: hk, track: -1 });
+  text('Can Cooling Loop A take it — safely?', W / 2, 214 + rise, { size: 32, weight: 300, color: [170, 212, 240], a: hk * seg(T, 1.4, 2.2) });
+}
+
+// 7b · THE DECISION — Loop A would overload; the decision is taken at system level (local time 0 … 7.5)
+function decision(d) {
+  const a = fade(d, -.1, .7, 6.8, 7.6); if (a <= 0) return;
+  const X0 = 360, GW = 1200, Y = 520, BH = 60, x = v => X0 + (v - 700) / 350 * GW;
+  const fillM = eio(seg(d, .4, 1.3)), fillR = eio(seg(d, 1.3, 2.0)), rel = eio(seg(d, 3.4, 4.3)), ok = d > 4.3;
+  const measured = 869.1, released = 38.7, target = 144;
+  const mEnd = lerp(700, measured, fillM) - released * rel, rEnd = mEnd + target * fillR;
+  g.fillStyle = `rgba(20,50,80,${.55 * a})`; g.fillRect(x(700), Y - BH / 2, GW, BH);
+  const gm = g.createLinearGradient(x(700), 0, x(mEnd), 0); gm.addColorStop(0, `rgba(30,90,150,${.9 * a})`); gm.addColorStop(1, `rgba(70,150,235,${.95 * a})`);
+  g.fillStyle = gm; g.fillRect(x(700), Y - BH / 2, x(mEnd) - x(700), BH);
+  if (rel > 0 && rel < 1) { const bx = x(measured - released) + rel * 360, by = Y - BH / 2 + rel * 190; g.fillStyle = `rgba(70,150,235,${.8 * a * (1 - rel)})`; g.fillRect(bx, by, x(measured) - x(measured - released), BH); }
+  const col = ok ? COL.green : rEnd > 1000 ? [255, 92, 92] : COL.amber;
+  g.fillStyle = rgba(col, .85 * a); g.fillRect(x(mEnd), Y - BH / 2, x(rEnd) - x(mEnd), BH);
+  add(); if (fillR > .9) glow(x(rEnd), Y, 80, ok ? 'green' : 'amber', a * .6); norm();
+  g.fillStyle = rgba(COL.white, .95 * a); g.fillRect(x(1000) - 2, Y - BH / 2 - 24, 4, BH + 48);
+  text('LOOP A · USABLE COOLING 1,000 kW', x(1000), Y - BH / 2 - 44, { size: 14, weight: 700, color: [220, 235, 250], a, track: 3 });
+  text('MEASURED HEAT (p95) 869.1 kW', x(700), Y + BH / 2 + 30, { size: 14, weight: 700, color: COL.blue, a: a * fillM * (1 - seg(d, 3.6, 3.9)), align: 'left', track: 2 });
+  text('LOOP A HEAT AFTER THE MOVE 830.4 kW', x(700), Y + BH / 2 + 30, { size: 14, weight: 700, color: COL.blue, a: a * seg(d, 4.1, 4.5), align: 'left', track: 2 });
+  text('+ R-17 WITH 20 % MARGIN 144 kW', x(mEnd) + 6, Y - BH / 2 - 18, { size: 14, weight: 700, color: col, a: a * fillR * (1 - seg(d, 3.3, 3.6)), align: 'left', track: 2 });
+  // the verdict, then the system-level trade-off
+  const v1 = a * seg(d, 2.0, 2.4) * (1 - seg(d, 3.9, 4.2)), v2 = a * seg(d, 4.3, 4.7);
+  text('−13.1 kW', W / 2, 700, { size: 84, weight: 200, color: [255, 110, 110], a: v1, track: 2 });
+  text('LOOP A WOULD OVERLOAD AS-IS', W / 2, 766, { size: 16, weight: 700, color: [255, 120, 120], a: v1, track: 6 });
+  text('+25.6 kW', W / 2, 700, { size: 84, weight: 200, color: COL.green, a: v2, track: 2 });
+  text('IT FITS — COOLING RE-CHECKED THE LOOP', W / 2, 766, { size: 16, weight: 700, color: COL.green, a: v2, track: 6 });
+  // positions: two agents disagree, a third resolves it
+  const pos = [
+    [2.4, 'DEPLOYMENT', 'Proceed — space and power are free', COL.violet, 520],
+    [2.7, 'COOLING', 'Not as-is — 13.1 kW short', COL.violet, 1400],
+    [3.4, 'WORKLOAD', 'Move low-priority ft-sweep-17 to Loop B · −38.7 kW', COL.violet, 960],
+    [5.0, 'SUSTAINABILITY', 'Burn-in 01:00–07:00 · lowest grid carbon', COL.green, 960]
+  ];
+  pos.forEach(([t0, who, what, c, px], i) => {
+    const k = a * seg(d, t0, t0 + .4) * (i < 2 ? 1 - seg(d, 3.2, 3.5) : i === 2 ? 1 - seg(d, 4.8, 5.1) : 1), y = 860;
+    text(who, px, y, { size: 13, weight: 700, color: c, a: k, track: 6 });
+    text(what, px, y + 34, { size: 22, weight: 400, color: [220, 232, 248], a: k });
+  });
+  text('LOOP B', x(measured) + 360 + 60, Y + 190, { size: 13, weight: 700, color: [140, 180, 225], a: a * seg(d, 3.8, 4.2) * (1 - seg(d, 5.0, 5.4)), align: 'left', track: 6 });
+}
+
 function headlines(t) {
   const k = fade(t, 1.0, 2.0, 5.8, 6.6), rise = (1 - eout(seg(t, 1.0, 2.0))) * 14;
   text('INDUSTRIAL AI STARTS WITH COMPLEXITY', W / 2, 130 + rise, { size: 34, weight: 600, a: k, track: 10 });
@@ -377,16 +439,28 @@ function headlines(t) {
   headline(t, 20.2, 20.9, 24.3, 24.9, 'CONFIDENCE GATE', 'Continue when confident. Escalate when not.', COL.mint);
   headline(t, 25.6, 26.5, 31.9, 32.6, 'REASON · SYSTEM 2', 'Specialized intelligence collaborates only when needed.', COL.violet);
   headline(t, 33.9, 34.7, 37.4, 38.0, 'ACT', 'Agents access governed capabilities.', COL.blue);
+}
+function lateHeadlines(t) {
   headline(t, 38.5, 39.3, 41.8, 42.4, 'HUMAN ACCOUNTABILITY', 'AI proposes. People remain accountable.', COL.amber);
   headline(t, 42.9, 43.7, 46.5, 47.0, 'MEASURE', 'Know the cost. Know the value.', COL.green);
 }
 
-window.render = t => {
-  background(t);
-  domains(t); filterRings(t); field(t); s1module(t); readouts(t); gateScene(t); reason(t); act(t); human(t); measure(t); ending(t);
+// Global time T → local scene time. The original storyline runs on local time; the opening (THE QUESTION) and
+// THE DECISION are inserted, and the early scenes play slightly faster so the film stays under one minute.
+const T_STORY = 4.4, T_REASON = T_STORY + 24.4 / 1.25, T_DECIDE = T_REASON + 13.4 / 1.1, T_LATE = T_DECIDE + 7.5, LATE_SHIFT = T_LATE - 38.1;
+function early(T) { if (T < T_STORY) return T - (T_STORY - .6); if (T < T_REASON) return .6 + (T - T_STORY) * 1.25; if (T < T_DECIDE) return 25 + (T - T_REASON) * 1.1; return 38.4 + (T - T_DECIDE); }
+window.render = T => {
+  background(T);
+  const t = early(T), tl = T - LATE_SHIFT;
+  intro(T);
+  if (T < T_DECIDE + .1) { domains(t); filterRings(t); field(t); s1module(t); readouts(t); gateScene(t); reason(t); act(t); }
+  decision(T - T_DECIDE);
+  if (tl > 37.5) { human(tl); measure(tl); ending(tl); }
   vignette();
-  headlines(t); recordCounter(t); footer(t);
-  const fi = 1 - seg(t, 0, .9), fo = seg(t, DURATION - .6, DURATION);
+  if (T < T_DECIDE + .1) { headlines(t); recordCounter(t); }
+  headline(T - T_DECIDE, .2, 1.0, 6.7, 7.4, 'THE DECISION · SYSTEM LEVEL', 'Loop A would overload. The system rebalances.', COL.violet);
+  if (tl > 37.5) { lateHeadlines(tl); footer(tl); }
+  const fi = 1 - seg(T, 0, .9), fo = seg(T, DURATION - .6, DURATION);
   if (fi > 0 || fo > 0) { g.fillStyle = `rgba(0,0,0,${Math.max(fi, fo)})`; g.fillRect(0, 0, W, H); }
 };
 window.DURATION = DURATION;
