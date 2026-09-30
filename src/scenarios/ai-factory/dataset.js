@@ -30,7 +30,7 @@ export const RACKS = [
   { id: 'A-07', loop: 'A', model: 'DGX H100 ×4', base: 37.2, job: 'ft-sweep-17' },
   { id: 'A-08', loop: 'A', model: 'GB200 NVL72', base: 108.0, job: 'inference-pool-eu', diurnal: 9 },
   { id: 'A-09', loop: 'A', model: 'Network & storage', base: 21.5, job: null },
-  ...['B-01', 'B-02', 'B-03', 'B-04', 'B-06', 'B-07'].map((id, i) => ({ id, loop: 'B', model: i < 4 ? 'GB200 NVL72' : 'DGX H100 ×4', base: i < 4 ? 98 + i * 3 : 34, job: i < 4 ? 'pretrain-orion-13b' : 'batch-eval' })),
+  ...['B-01', 'B-02', 'B-03', 'B-04', 'B-06', 'B-07'].map((id, i) => ({ id, loop: 'B', model: i < 4 ? 'GB200 NVL72' : 'DGX H100 ×4', base: i < 4 ? 98 + i * 3 : 34, job: i < 4 ? 'pretrain-polar-13b' : 'batch-eval' })),
   { id: 'B-05', loop: 'B', model: 'DGX H100 ×4', base: 3.1, job: null },
   ...['C-01', 'C-02', 'C-03', 'C-04', 'C-05', 'C-06'].map(id => ({ id, loop: 'C', model: 'Air-cooled CPU', base: 22, job: 'hpc-legacy' }))
 ];
@@ -39,7 +39,7 @@ export const JOBS = [
   { id: 'rl-post-train', priority: 'high', checkpointable: true, racks: ['A-05', 'A-06'], owner: 'Alignment', gpus: 144 },
   { id: 'ft-sweep-17', priority: 'low', checkpointable: true, racks: ['A-07'], owner: 'Applied research', gpus: 32, etaHours: 30 },
   { id: 'inference-pool-eu', priority: 'critical', checkpointable: false, racks: ['A-08'], owner: 'Platform', gpus: 72 },
-  { id: 'pretrain-orion-13b', priority: 'high', checkpointable: true, racks: ['B-01', 'B-02', 'B-03', 'B-04'], owner: 'Foundation models', gpus: 288 },
+  { id: 'pretrain-polar-13b', priority: 'high', checkpointable: true, racks: ['B-01', 'B-02', 'B-03', 'B-04'], owner: 'Foundation models', gpus: 288 },
   { id: 'batch-eval', priority: 'normal', checkpointable: true, racks: ['B-06', 'B-07'], owner: 'Evaluation', gpus: 64 },
   { id: 'hpc-legacy', priority: 'normal', checkpointable: false, racks: ['C-01', 'C-02', 'C-03', 'C-04', 'C-05', 'C-06'], owner: 'Engineering sim', gpus: 0 }
 ];
