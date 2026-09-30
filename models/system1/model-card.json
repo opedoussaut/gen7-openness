@@ -1,0 +1,67 @@
+{
+  "name": "GEN7 System 1 \u00b7 capacity decision model",
+  "version": "1.0.0",
+  "architecture": "MLP 9 \u2192 32 \u2192 32 \u2192 12 (ReLU), four heads",
+  "parameters": 1772,
+  "onnx": {
+    "file": "decision-mlp.onnx",
+    "bytes": 8502,
+    "sha256": "ca01ef92d4af115ce1479f8c3508963371538a046fa6f5ef420bb6b34c23aed9",
+    "opset": 17
+  },
+  "inputs": [
+    "request_load",
+    "loop_utilisation",
+    "cooling_margin",
+    "row_power",
+    "flexible_load",
+    "critical_load",
+    "recent_alarms",
+    "carbon",
+    "evidence_complete"
+  ],
+  "outputs": {
+    "capacity_risk": [
+      "LOW",
+      "MEDIUM",
+      "HIGH"
+    ],
+    "reasoning_required": [
+      "NO",
+      "YES"
+    ],
+    "preferred_route": [
+      "DIRECT",
+      "ORCHESTRATE",
+      "HUMAN_REVIEW"
+    ],
+    "agents_required": [
+      "WORKLOAD",
+      "COOLING",
+      "SUSTAINABILITY",
+      "DEPLOYMENT"
+    ]
+  },
+  "training": {
+    "samples": 9000,
+    "generator": "synthetic situations over plausible ranges, labelled by the planning rules below",
+    "label_noise": 0.02,
+    "rules": [
+      "capacity_risk = HIGH if cooling_margin < 0.02 or row_power > 1.0; MEDIUM if cooling_margin < 0.12 or row_power > 0.92 or recent_alarms >= 0.66; else LOW",
+      "reasoning_required = YES if capacity_risk != LOW or evidence_complete < 0.9 or (recent_alarms >= 0.33 and cooling_margin < 0.2); else NO",
+      "preferred_route = HUMAN_REVIEW if evidence_complete < 0.75 or cooling_margin + flexible_load < 0 (moving flexible load cannot restore headroom); ORCHESTRATE if reasoning_required; else DIRECT",
+      "agents_required (only when ORCHESTRATE): COOLING if cooling_margin < 0.12 or recent_alarms >= 0.33; WORKLOAD if cooling_margin < 0.02 and flexible_load > 0.005; DEPLOYMENT if row_power > 0.85 or request_load > 0.08; SUSTAINABILITY if request_load > 0.08 or carbon > 0.4"
+    ],
+    "seed": 7,
+    "optimizer": "Adam, 160 epochs, batch 256"
+  },
+  "holdout": {
+    "holdout_samples": 2000,
+    "capacity_risk_accuracy": 0.977,
+    "reasoning_required_accuracy": 0.997,
+    "preferred_route_accuracy": 0.993,
+    "agents_required_exact_match": 0.963
+  },
+  "onnx_vs_numpy_max_abs_diff": 5.960464477539063e-08,
+  "scope": "Bounded capacity decisions for the GEN7 AI-factory demonstrator. Not a general model; illustrative rules, not a site standard."
+}
