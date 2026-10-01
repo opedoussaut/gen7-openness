@@ -1,0 +1,335 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face { font-family: Inter; font-weight: 200; src: url(inter-latin-200-normal.woff2); }
+@font-face { font-family: Inter; font-weight: 300; src: url(inter-latin-300-normal.woff2); }
+@font-face { font-family: Inter; font-weight: 400; src: url(inter-latin-400-normal.woff2); }
+@font-face { font-family: Inter; font-weight: 600; src: url(inter-latin-600-normal.woff2); }
+@font-face { font-family: Inter; font-weight: 700; src: url(inter-latin-700-normal.woff2); }
+@font-face { font-family: Inter; font-weight: 800; src: url(inter-latin-800-normal.woff2); }
+html, body { margin: 0; background: #02070e; }
+canvas { display: block; }
+</style></head>
+<body><canvas id="c" width="1920" height="1080"></canvas>
+<script type="module">
+// GEN7 — Cooling Loop A MBSE cinematic. Deterministic: render(t) draws the frame at t seconds.
+// Every figure comes from src/engineering (the model) and every diagram is a native CATIA Magic export from evidence/cameo/.
+import { study } from '../src/engineering/evaluate.js';
+const W = 1920, H = 1080, cv = document.getElementById('c'), g = cv.getContext('2d');
+// ---------- helpers ----------
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, k) => a + (b - a) * k;
+const seg = (t, a, b) => clamp((t - a) / (b - a));
+const eio = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+const eout = k => 1 - Math.pow(1 - k, 3);
+const fade = (t, a, b, c, d) => Math.min(eio(seg(t, a, b)), 1 - eio(seg(t, c, d)));
+function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let x = Math.imul(seed ^ seed >>> 15, 1 | seed); x = x + Math.imul(x ^ x >>> 7, 61 | x) ^ x; return ((x ^ x >>> 14) >>> 0) / 4294967296; }; }
+const COL = { cyan: [61, 192, 255], blue: [70, 150, 235], violet: [156, 124, 244], amber: [236, 168, 74], green: [60, 214, 150], mint: [31, 209, 165], white: [235, 245, 255], grey: [120, 150, 178] };
+const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+const sprites = {};
+function sprite(name) {
+  if (sprites[name]) return sprites[name];
+  const s = document.createElement('canvas'); s.width = s.height = 64; const x = s.getContext('2d'), c = COL[name];
+  const gr = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+  gr.addColorStop(0, rgba([255, 255, 255], 1)); gr.addColorStop(.12, rgba(c, .95)); gr.addColorStop(.4, rgba(c, .28)); gr.addColorStop(1, rgba(c, 0));
+  x.fillStyle = gr; x.fillRect(0, 0, 64, 64); return (sprites[name] = s);
+}
+function glow(x, y, r, name, a) { if (a <= 0.003) return; g.globalAlpha = Math.min(1, a); g.drawImage(sprite(name), x - r, y - r, 2 * r, 2 * r); g.globalAlpha = 1; }
+function text(str, x, y, { size = 48, weight = 600, color = COL.white, a = 1, align = 'center', track = 0 } = {}) {
+  if (a <= 0.003) return;
+  g.font = `${weight} ${size}px Inter`; g.textAlign = align; g.textBaseline = 'middle'; g.letterSpacing = `${track}px`;
+  g.fillStyle = rgba(color, Math.min(1, a)); g.fillText(str, x, y); g.letterSpacing = '0px';
+}
+function tw(str, size, weight, track = 0) { g.font = `${weight} ${size}px Inter`; g.letterSpacing = `${track}px`; const w = g.measureText(str).width; g.letterSpacing = '0px'; return w; }
+function line(x1, y1, x2, y2, c, a, w = 1.5, dash = null) {
+  if (a <= 0.003) return; g.strokeStyle = rgba(c, a); g.lineWidth = w; g.setLineDash(dash ?? []); g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke(); g.setLineDash([]);
+}
+function curve(p0, p1, p2, p3, c, a, w = 1.5, dash = null, upto = 1) {
+  if (a <= 0.003 || upto <= 0) return; g.strokeStyle = rgba(c, a); g.lineWidth = w; g.setLineDash(dash ?? []); g.beginPath(); g.moveTo(p0[0], p0[1]);
+  const n = 40; for (let i = 1; i <= n * upto; i++) { const q = bez(p0, p1, p2, p3, i / n); g.lineTo(q[0], q[1]); } g.stroke(); g.setLineDash([]);
+}
+function rrect(x, y, w, h, r, fill, stroke, lw = 1.5, dash = null) {
+  g.beginPath(); g.roundRect(x, y, w, h, r);
+  if (fill) { g.fillStyle = fill; g.fill(); }
+  if (stroke) { g.strokeStyle = stroke; g.lineWidth = lw; g.setLineDash(dash ?? []); g.stroke(); g.setLineDash([]); }
+}
+function ring(x, y, r, c, a, w = 2, from = 0, to = 1) { if (a <= 0.003 || to <= from) return; g.strokeStyle = rgba(c, a); g.lineWidth = w; g.beginPath(); g.arc(x, y, r, -Math.PI / 2 + from * 6.2832, -Math.PI / 2 + to * 6.2832); g.stroke(); }
+const bez = (p0, p1, p2, p3, k) => { const u = 1 - k; return [u*u*u*p0[0] + 3*u*u*k*p1[0] + 3*u*k*k*p2[0] + k*k*k*p3[0], u*u*u*p0[1] + 3*u*u*k*p1[1] + 3*u*k*k*p2[1] + k*k*k*p3[1]]; };
+const add = () => { g.globalCompositeOperation = 'lighter'; }, norm = () => { g.globalCompositeOperation = 'source-over'; };
+function background(t) {
+  norm(); g.fillStyle = '#02070e'; g.fillRect(0, 0, W, H);
+  const rg = g.createRadialGradient(W / 2, H * .55, 50, W / 2, H * .55, 1100);
+  rg.addColorStop(0, 'rgba(16,52,90,.5)'); rg.addColorStop(.5, 'rgba(8,26,48,.32)'); rg.addColorStop(1, 'rgba(2,7,14,0)');
+  g.fillStyle = rg; g.fillRect(0, 0, W, H);
+  const on = eio(seg(t, .2, 2.4)) * .8;
+  const hz = 660, vx = W / 2 + Math.sin(t * .1) * 50;
+  add();
+  for (let i = -24; i <= 24; i++) { const bx = W / 2 + i * 140; line(vx, hz, bx + (bx - vx) * 1.8, H + 40, COL.cyan, .05 * on, 1); }
+  const drift = (t * .25) % 1;
+  for (let k = 0; k < 16; k++) { const z = (k + 1 - drift) / 16; const y = hz + Math.pow(z, 2.6) * (H - hz + 60); line(0, y, W, y, COL.cyan, .075 * on * z, 1); }
+  for (const s of stars) { const a = (.25 + .35 * Math.sin(t * 1.1 * s.z + s.p)) * s.z * clamp(t / 1.5); const x = (s.x - t * 6 * s.z + W) % W; glow(x, s.y, 3 + 5 * s.z, 'cyan', a * .4); }
+  norm();
+}
+function vignette() {
+  const v = g.createRadialGradient(W / 2, H / 2, 480, W / 2, H / 2, 1250); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,.72)');
+  g.fillStyle = v; g.fillRect(0, 0, W, H);
+}
+
+// ---------- data: engineering model + recorded Cameo evidence (nothing typed in) ----------
+const R = rng(23);
+const stars = Array.from({ length: 200 }, () => ({ x: R() * W, y: R() * H, z: .2 + R() * .8, p: R() * 6.28 }));
+const ST = study(), IX = await (await fetch('../evidence/cameo/index.json')).json();
+const IMG = {};
+await Promise.all(Object.keys(IX.diagrams).map(k => new Promise(res => { const im = new Image(); im.onload = res; im.src = `../evidence/cameo/${IX.diagrams[k].file}`; IMG[k] = im; })));
+const S = ST.scenarios, V1 = ST.v1, V2 = ST.v2, OPT = ST.options;
+const kw = v => `${Math.round(v).toLocaleString('en-US')} kW`, pc = v => `${v > 0 ? '+' : ''}${(Math.round(v * 10) / 10).toFixed(1)} %`;
+const WF = IX.workflow.steps;
+
+// ---------- building blocks ----------
+function caption(t, a, b, c, d, who, why, shows, y = 958) {
+  const k = fade(t, a, b, c, d); if (k <= 0) return;
+  rrect(150, y - 64, W - 300, 150, 18, `rgba(6,16,28,${.86 * k})`, rgba(COL.cyan, .25 * k));
+  text('WHO', 196, y - 30, { size: 14, weight: 700, color: COL.cyan, a: k, align: 'left', track: 3 });
+  text(who, 270, y - 30, { size: 21, weight: 400, color: COL.white, a: k * .92, align: 'left' });
+  text('WHY', 196, y + 8, { size: 14, weight: 700, color: COL.amber, a: k, align: 'left', track: 3 });
+  text(why, 270, y + 8, { size: 21, weight: 400, color: COL.white, a: k * .92, align: 'left' });
+  text('SHOWS', 186, y + 46, { size: 14, weight: 700, color: COL.green, a: k, align: 'left', track: 3 });
+  text(shows, 270, y + 46, { size: 21, weight: 400, color: COL.white, a: k * .92, align: 'left' });
+}
+// A Cameo "window" holding a native export; zoom = [cx, cy, scale] in image fractions, animated by the caller.
+function cameoWin(key, x, y, w, h, a, zoom = [.5, .5, 1], label = true) {
+  if (a <= 0.003) return; const im = IMG[key]; const m = IX.diagrams[key];
+  g.globalAlpha = a;
+  rrect(x, y, w, h, 14, '#f7f9fb', 'rgba(150,190,230,.5)', 1.5);
+  rrect(x, y, w, 40, 14, '#e8eef5', null); g.fillStyle = '#e8eef5'; g.fillRect(x, y + 20, w, 20);
+  ['#ff6058', '#ffbd2e', '#28c940'].forEach((c, i) => { g.fillStyle = c; g.beginPath(); g.arc(x + 22 + i * 20, y + 20, 6, 0, 6.283); g.fill(); });
+  g.globalAlpha = 1;
+  text(`CATIA Magic · GEN7 DEMO · ${m.name}`, x + 90, y + 21, { size: 16, weight: 600, color: [40, 60, 80], a, align: 'left' });
+  if (label) text('ENGINEERING EVIDENCE — CAMEO MBSE', x + w - 18, y + 21, { size: 13, weight: 700, color: [10, 90, 143], a, align: 'right', track: 1.5 });
+  const ix = x + 10, iy = y + 48, iw = w - 20, ih = h - 58;
+  const [zx, zy, zs] = zoom; const sw = im.width / zs, sh = im.height / zs;
+  const fit = Math.min(iw / sw, ih / sh); const dw = sw * fit, dh = sh * fit;
+  const sx = clamp(zx * im.width - sw / 2, 0, im.width - sw), sy = clamp(zy * im.height - sh / 2, 0, im.height - sh);
+  g.save(); g.beginPath(); g.rect(ix, iy, iw, ih); g.clip(); g.globalAlpha = a; g.imageSmoothingQuality = 'high';
+  g.drawImage(im, sx, sy, sw, sh, ix + (iw - dw) / 2, iy + (ih - dh) / 2, dw, dh); g.restore(); g.globalAlpha = 1;
+}
+function chip(x, y, label, status, a) {
+  const c = status === 'PASS' ? COL.green : status === 'FAIL' ? [240, 96, 96] : COL.amber;
+  rrect(x - 160, y - 26, 320, 52, 26, rgba(c, .14 * a), rgba(c, .7 * a), 1.5);
+  text(label, x - 140, y, { size: 18, weight: 700, color: COL.white, a, align: 'left' });
+  text(status, x + 140, y, { size: 16, weight: 800, color: c, a, align: 'right', track: 1 });
+}
+function stepFlow(t, a, b, active) {
+  const k = fade(t, a, b, DURATION - 1, DURATION); const L = ['OBSERVE', 'REASON', 'PROPOSE', 'MODEL', 'SIMULATE', 'VERIFY', 'COMPARE', 'DECIDE'];
+  let x = W / 2 - 600; L.forEach((s, i) => { const on = i === active; text(s, x, 52, { size: 14, weight: on ? 800 : 600, color: on ? COL.cyan : COL.grey, a: k * (on ? 1 : .6), align: 'left', track: 3 }); x += tw(s, 14, 600, 3) + 46; if (i < L.length - 1) text('→', x - 26, 52, { size: 14, weight: 400, color: COL.grey, a: k * .5 }); });
+}
+
+// ---------- scenes ----------
+const SC = { title: 0, recap: 6, future: 15, reason: 23, ask: 33, who: 41, base: 48, sim: 56, trace: 63.5, eng: 70.5, cmp: 78.5, ver: 86.5, decide: 92.5, end: 97.5 };
+const DURATION = 104;
+function sceneTitle(t) {
+  const k = fade(t, .4, 1.8, 4.8, 5.8);
+  add(); glow(W / 2, 470, 520, 'cyan', .18 * k); norm();
+  text('GEN7 · DECISION INTELLIGENCE', W / 2, 400, { size: 20, weight: 700, color: COL.cyan, a: k, track: 8 });
+  text('What happens next?', W / 2, 480, { size: 92, weight: 200, color: COL.white, a: k, track: -2 });
+  text('When an operational problem becomes an engineering problem', W / 2, 570, { size: 30, weight: 300, color: COL.grey, a: k * eio(seg(t, 1.6, 2.8)) });
+}
+function sceneRecap(t) {
+  const T = t - SC.recap, k = fade(T, 0, .8, 8.2, 9);
+  headline(T, 0, .8, 8.2, 9, 'EARLIER · THE DECISION INTELLIGENCE RUN', 'R-17 was approved on Loop A — with one condition.');
+  const x0 = 360, x1 = 1560, y = 560, cap = IX.workflow && 1000, sc = v => x0 + (x1 - x0) * v / 1100;
+  rrect(x0, y - 34, x1 - x0, 68, 34, `rgba(255,255,255,${.05 * k})`, rgba(COL.grey, .3 * k));
+  const v1 = S[0].loadKw, v3 = S[2].loadKw, grow = eio(seg(T, 1.2, 2.6)), grow2 = eio(seg(T, 3.4, 4.8));
+  rrect(x0, y - 34, (sc(v1) - x0) * grow, 68, 34, rgba(COL.blue, .55 * k));
+  if (grow2 > 0) rrect(sc(v1), y - 34, (sc(v3) - sc(v1)) * grow2, 68, 6, rgba(COL.amber, .7 * k));
+  line(sc(1000), y - 70, sc(1000), y + 70, [240, 96, 96], k, 3);
+  text('Loop A usable capacity · 1,000 kW', sc(1000), y - 92, { size: 20, weight: 600, color: [240, 120, 120], a: k });
+  text(`Measured today · ${kw(v1)}`, sc(v1) - 20, y + 110, { size: 24, weight: 600, color: COL.white, a: k * grow, align: 'right' });
+  text(`+ R-17 · ${kw(v3)}`, sc(v3) + 16, y + 110, { size: 24, weight: 600, color: COL.amber, a: k * grow2, align: 'left' });
+  text(`Margin left on Loop A v1: ${pc(V1.scenarios[2].marginPct)}`, W / 2, 780, { size: 40, weight: 300, color: COL.white, a: k * eio(seg(T, 5.4, 6.4)) });
+}
+function sceneFuture(t) {
+  const T = t - SC.future, k = fade(T, 0, .8, 7.2, 8);
+  headline(T, 0, .8, 7.2, 8, 'ANTICIPATE · DETECT', 'And the next AI cluster is already planned on the same loop.');
+  const base = 820, top = 300, sc = v => base - (base - top) * v / 1800, bw = 190;
+  S.forEach((s, i) => {
+    const x = 520 + i * 260, gr = eio(seg(T, .8 + i * .5, 1.8 + i * .5)), st = V1.scenarios[i].status;
+    const c = st === 'FAIL' ? [240, 96, 96] : st === 'LOW MARGIN' ? COL.amber : COL.blue;
+    rrect(x - bw / 2, sc(s.loadKw * gr), bw, base - sc(s.loadKw * gr), 10, rgba(c, .75 * k));
+    text(kw(s.loadKw), x, sc(s.loadKw) - 24, { size: 24, weight: 700, color: COL.white, a: k * gr });
+    text(s.id, x, base + 30, { size: 20, weight: 700, color: COL.cyan, a: k });
+    text(s.name, x, base + 60, { size: 18, weight: 400, color: COL.grey, a: k });
+  });
+  const lk = k * eio(seg(T, 2.8, 3.6));
+  line(360, sc(V1.capacityKw), 1560, sc(V1.capacityKw), [240, 96, 96], lk, 3, [12, 8]);
+  text(`Loop A v1 validated capacity · ${kw(V1.capacityKw)}`, 360, sc(V1.capacityKw) - 22, { size: 20, weight: 600, color: [240, 120, 120], a: lk, align: 'left' });
+  text(`Projected load exceeds the validated envelope by ${Math.round((S[3].loadKw / V1.capacityKw - 1) * 100)} %.`, W / 2, 970, { size: 34, weight: 300, color: COL.white, a: k * eio(seg(T, 4.2, 5.2)) });
+}
+function sceneReason(t) {
+  const T = t - SC.reason, k = fade(T, 0, .8, 9.2, 10);
+  headline(T, 0, .8, 9.2, 10, 'REASON · DECISION INTELLIGENCE', 'First, the operational answers — each one computed with the model.');
+  OPT.list.forEach((o, i) => {
+    const x = 210 + i * 390, y = 330, a = k * eio(seg(T, .8 + i * .9, 1.6 + i * .9));
+    const d = o.id === 'D', c = d ? COL.cyan : [240, 96, 96];
+    rrect(x, y, 350, 400, 18, `rgba(10,24,40,${.9 * a})`, rgba(c, .6 * a), 2);
+    text(`OPTION ${o.id}`, x + 26, y + 40, { size: 15, weight: 700, color: COL.grey, a, align: 'left', track: 3 });
+    wrap(o.name, x + 26, y + 84, 300, 30, 600, COL.white, a, 36);
+    wrap(o.result, x + 26, y + 170, 300, 20, 400, [200, 215, 230], a, 28);
+    const v = d ? 'ENGINEERING STUDY' : 'INSUFFICIENT';
+    const sa = a * eio(seg(T, 1.9 + i * .9, 2.4 + i * .9));
+    rrect(x + 26, y + 340, tw(v, 15, 800, 2) + 28, 36, 8, rgba(c, .18 * sa), rgba(c, .8 * sa));
+    text(v, x + 40, y + 358, { size: 15, weight: 800, color: c, a: sa, align: 'left', track: 2 });
+  });
+  text(OPT.conclusion, W / 2, 830, { size: 34, weight: 600, color: COL.white, a: k * eio(seg(T, 5.6, 6.6)) });
+  text('This is no longer a scheduling decision.', W / 2, 885, { size: 28, weight: 300, color: COL.grey, a: k * eio(seg(T, 6.4, 7.4)) });
+}
+function wrap(s, x, y, maxw, size, weight, color, a, lh) {
+  const words = s.split(' '); let line = '', yy = y;
+  for (const w of words) { const t2 = line ? line + ' ' + w : w; if (tw(t2, size, weight) > maxw && line) { text(line, x, yy, { size, weight, color, a, align: 'left' }); line = w; yy += lh; } else line = t2; }
+  if (line) text(line, x, yy, { size, weight, color, a, align: 'left' });
+}
+function sceneAsk(t) {
+  const T = t - SC.ask, k = fade(T, 0, .8, 7.2, 8);
+  text('THE ORCHESTRATOR ASKS AN ENGINEERING QUESTION', W / 2, 150, { size: 18, weight: 700, color: COL.cyan, a: k, track: 6 });
+  text('“Evaluate an evolution of Cooling Loop A', W / 2, 230, { size: 50, weight: 300, color: COL.white, a: k });
+  text('against the authoritative system model.”', W / 2, 296, { size: 50, weight: 300, color: COL.white, a: k });
+  const nodes = ['GEN7 orchestrator', 'Cameo MBSE agent', 'Cameo MCP Bridge', 'CATIA Magic / Cameo'];
+  nodes.forEach((n, i) => {
+    const x = 330 + i * 420, a = k * eio(seg(T, 1.2 + i * .45, 1.8 + i * .45));
+    rrect(x - 170, 400, 340, 84, 16, `rgba(10,24,40,${.9 * a})`, rgba(i === 3 ? COL.amber : COL.cyan, .7 * a), 2);
+    text(n, x, 442, { size: 24, weight: 600, color: COL.white, a });
+    if (i < 3) { const fa = a * eio(seg(T, 1.6 + i * .45, 2.1 + i * .45)); line(x + 175, 442, x + 245, 442, COL.cyan, fa, 3); text('MCP', x + 210, 422, { size: 13, weight: 700, color: COL.cyan, a: i === 1 ? fa : 0, track: 2 }); }
+  });
+  const logA = k * eio(seg(T, 2.8, 3.4));
+  rrect(330, 540, 1260, 360, 16, `rgba(4,12,22,${.95 * logA})`, rgba(COL.cyan, .25 * logA));
+  WF.slice(0, 9).forEach((s, i) => {
+    const a = logA * eio(seg(T, 3.0 + i * .42, 3.3 + i * .42)), y = 580 + i * 36, ext = s.boundary === 'external';
+    text(`${s.title}…`, 370, y, { size: 19, weight: 400, color: [214, 227, 239], a, align: 'left' });
+    text(ext ? 'outside Cameo' : `${s.ms} ms · ${(s.calls[0] || {}).tool || ''}`, 1170, y, { size: 15, weight: 400, color: [127, 151, 173], a, align: 'right' });
+    text(s.result, 1560, y, { size: 18, weight: 700, color: ext ? COL.amber : COL.green, a, align: 'right' });
+  });
+  text('Recorded run against CATIA Magic · real tool calls, results and durations', W / 2, 950, { size: 18, weight: 400, color: COL.grey, a: logA });
+}
+function sceneWho(t) {
+  const T = t - SC.who, k = fade(T, 0, .8, 6.2, 7);
+  text('WHO CREATES THE DIAGRAMS — AND WHY', W / 2, 110, { size: 18, weight: 700, color: COL.cyan, a: k, track: 6 });
+  text('GEN7 does not draw the engineering. It asks Cameo to build the model and its views.', W / 2, 168, { size: 32, weight: 300, color: COL.white, a: k });
+  cameoWin('context', 150, 230, 1620, 560, k * eio(seg(T, .8, 1.8)), [.5, .5, 1 + .12 * eio(seg(T, 1, 7))]);
+  caption(T, 1.6, 2.4, 6.2, 7, 'The GEN7 Cameo MBSE agent, through MCP — the diagram lives in CATIA Magic; GEN7 shows Cameo’s export.',
+    'A change to one loop must be read against the whole thermal chain, from GPU heat to heat rejection.', 'Where Loop A sits in the AI factory, and which interfaces an evolution would touch.');
+}
+function sceneBase(t) {
+  const T = t - SC.base, k = fade(T, 0, .8, 7.2, 8);
+  stepFlow(t, SC.base, SC.base + .8, 3);
+  text('BASELINE · LOOP A v1 IN THE AUTHORITATIVE MODEL', W / 2, 110, { size: 18, weight: 700, color: COL.cyan, a: k, track: 6 });
+  const z = eio(seg(T, 2.2, 4.6));
+  cameoWin('system_v1', 150, 150, 1620, 640, k * eio(seg(T, .4, 1.2)), [lerp(.5, .27, z), lerp(.5, .3, z), lerp(1, 2.1, z)]);
+  caption(T, 1.2, 2, 7.2, 8, 'Created in CATIA Magic by the GEN7 Cameo MBSE agent (SysML v1 internal block diagram).',
+    'The baseline under question: the complete cooling system with today’s Loop A inside it.', 'One pump per CDU, two heat exchangers, DN150 manifolds — validated for ≈1,000 kW.');
+}
+function sceneSim(t) {
+  const T = t - SC.sim, k = fade(T, 0, .8, 6.7, 7.5);
+  stepFlow(t, SC.sim, SC.sim + .8, 4);
+  headline(T, 0, .8, 6.7, 7.5, 'SIMULATE · SAME FOUR SCENARIOS, SAME BOUNDARY CONDITIONS', 'Normal → design → high AI load → projected future load.');
+  V1.scenarios.forEach((s, i) => chip(375 + i * 390, 420, `${s.id} · ${kw(s.loadKw)}`, s.status, k * eio(seg(T, 1 + i * .6, 1.5 + i * .6))));
+  const s4 = V1.scenarios[3], a = k * eio(seg(T, 3.6, 4.4));
+  text(`Loop A v1 at S4: return ${s4.state.returnC.toFixed(1)} °C · supply ${s4.state.supplyC.toFixed(1)} °C · pumps at full speed · margin ${pc(s4.marginPct)}`, W / 2, 540, { size: 28, weight: 400, color: [255, 150, 150], a });
+  const b = k * eio(seg(T, 4.4, 5.2));
+  rrect(330, 640, 1260, 170, 16, rgba(COL.amber, .1 * b), rgba(COL.amber, .6 * b));
+  text('EXECUTION BOUNDARY', W / 2, 682, { size: 16, weight: 800, color: COL.amber, a: b, track: 4 });
+  text('Calculated by GEN7 outside Cameo — the Simulation Toolkit is not installed.', W / 2, 726, { size: 26, weight: 400, color: COL.white, a: b });
+  text('Results are written back into the model as test cases that say so.', W / 2, 770, { size: 26, weight: 300, color: COL.grey, a: b });
+}
+function sceneTrace(t) {
+  const T = t - SC.trace, k = fade(T, 0, .8, 6.2, 7);
+  stepFlow(t, SC.trace, SC.trace + .8, 5);
+  text('TRACE · WHY THE FAILURE MATTERS', W / 2, 110, { size: 18, weight: 700, color: COL.cyan, a: k, track: 6 });
+  cameoWin('traceability', 330, 150, 1260, 640, k * eio(seg(T, .4, 1.2)), [.45, .5, 1 + .2 * eio(seg(T, 1.5, 6))]);
+  caption(T, 1.2, 2, 6.2, 7, 'Created in CATIA Magic by the GEN7 Cameo MBSE agent (requirement diagram).',
+    'A verdict is only trustworthy if it traces back to a need.', 'Future compute need → REQ-FUTURE-001 → function → Loop A → the tests: v1 FAIL, v2 PASS.');
+}
+function sceneEng(t) {
+  const T = t - SC.eng, k = fade(T, 0, .8, 7.2, 8);
+  stepFlow(t, SC.eng, SC.eng + .8, 3);
+  text('ENGINEER · LOOP A v2 — AN EVOLUTION, NOT BIGGER NUMBERS', W / 2, 110, { size: 18, weight: 700, color: COL.cyan, a: k, track: 6 });
+  cameoWin('internal_v2', 150, 150, 1120, 640, k * eio(seg(T, .4, 1.2)), [.4, .45, 1 + .25 * eio(seg(T, 1.5, 7))]);
+  const L = [['Dual parallel variable-speed pumps', COL.green], ['Larger heat exchangers · UA 172 → 650 kW/K', COL.amber], ['DN200 reverse-return manifolds', COL.amber], ['+ flow, temperature, ΔP instrumentation', COL.green], ['Adaptive control (feed-forward)', COL.amber]];
+  L.forEach(([s, c], i) => { const a = k * eio(seg(T, 1.4 + i * .5, 1.9 + i * .5)); rrect(1310, 220 + i * 96, 460, 76, 14, rgba(c, .1 * a), rgba(c, .6 * a)); wrap(s, 1336, 258 + i * 96 - (tw(s, 22, 500) > 410 ? 14 : 0), 410, 22, 500, COL.white, a, 28); });
+  caption(T, 1.2, 2, 7.2, 8, 'Created in CATIA Magic by the GEN7 Cameo MBSE agent — same layout as v1.',
+    'Show exactly what changes: grey unchanged, amber modified, green added.', 'Everything outside Loop A stays where it is. This is one subsystem evolving inside the same AI factory.');
+}
+function sceneCmp(t) {
+  const T = t - SC.cmp, k = fade(T, 0, .8, 7.2, 8);
+  stepFlow(t, SC.cmp, SC.cmp + .8, 6);
+  text('COMPARE · IDENTICAL SCENARIOS AND BOUNDARY CONDITIONS', W / 2, 110, { size: 18, weight: 700, color: COL.cyan, a: k, track: 6 });
+  cameoWin('internal_v1', 110, 160, 820, 560, k * eio(seg(T, .3, 1)), [.5, .5, 1], false);
+  cameoWin('internal_v2', 990, 160, 820, 560, k * eio(seg(T, .7, 1.4)), [.5, .5, 1], false);
+  const a = k * eio(seg(T, 1.6, 2.4)), s1 = V1.scenarios[3], s2 = V2.scenarios[3];
+  rrect(110, 740, 820, 120, 16, rgba([240, 96, 96], .14 * a), rgba([240, 96, 96], .7 * a));
+  text('LOOP A v1 · CURRENT BASELINE', 520, 775, { size: 17, weight: 800, color: [255, 140, 140], a, track: 3 });
+  text(`Capacity ${kw(V1.capacityKw)} · future load FAIL · margin ${pc(s1.marginPct)}`, 520, 822, { size: 26, weight: 400, color: COL.white, a });
+  const b = k * eio(seg(T, 2.4, 3.2));
+  rrect(990, 740, 820, 120, 16, rgba(COL.green, .14 * b), rgba(COL.green, .7 * b));
+  text('LOOP A v2 · PROPOSED EVOLUTION', 1400, 775, { size: 17, weight: 800, color: COL.green, a: b, track: 3 });
+  text(`Capacity ${kw(V2.capacityKw)} · future load PASS · margin ${pc(s2.marginPct)}`, 1400, 822, { size: 26, weight: 400, color: COL.white, a: b });
+  text('Both views are native exports from the same Cameo model.', W / 2, 930, { size: 22, weight: 300, color: COL.grey, a: k * eio(seg(T, 3.4, 4.2)) });
+}
+function sceneVer(t) {
+  const T = t - SC.ver, k = fade(T, 0, .8, 5.2, 6);
+  stepFlow(t, SC.ver, SC.ver + .8, 5);
+  text('VERIFY · EVIDENCE · ENGINEERING CHANGE PROPOSAL', W / 2, 110, { size: 18, weight: 700, color: COL.cyan, a: k, track: 6 });
+  cameoWin('verification_v2', 110, 150, 1100, 380, k * eio(seg(T, .3, 1)), [.5, .5, 1], false);
+  const pass = id => ST.verification[id].filter(r => r.verdict === 'PASS').length, n = ST.verification.v1.length;
+  const a = k * eio(seg(T, 1, 1.6));
+  text('REQUIREMENTS VERIFIED', 1500, 200, { size: 16, weight: 800, color: COL.grey, a, track: 3 });
+  text(`v1  ${pass('v1')}/${n}`, 1500, 270, { size: 54, weight: 300, color: [255, 140, 140], a });
+  text(`v2  ${pass('v2')}/${n}`, 1500, 350, { size: 54, weight: 300, color: COL.green, a: k * eio(seg(T, 1.6, 2.2)) });
+  text('Derived from the calculation — none written by hand', 1500, 420, { size: 17, weight: 400, color: COL.grey, a });
+  const tr = [['Trade-off · pumping', `installed max ${V1.maxPumpKw.toFixed(1)} → ${V2.maxPumpKw.toFixed(1)} kW`], ['Trade-off · equipment', '2 → 4 pumps · +7 sensors · larger HX'], ['Trade-off · CAPEX', 'higher — not estimated (no cost data)'], ['Interface · facility water', `${kw(S[3].loadKw)} to the plant at S4`]];
+  tr.forEach(([h, v], i) => { const b = k * eio(seg(T, 2 + i * .4, 2.5 + i * .4)); rrect(110 + i * 430, 600, 400, 150, 14, `rgba(10,24,40,${.9 * b})`, rgba(COL.amber, .5 * b)); text(h.toUpperCase(), 136 + i * 430, 640, { size: 14, weight: 800, color: COL.amber, a: b, align: 'left', track: 2 }); wrap(v, 136 + i * 430, 690, 350, 24, 400, COL.white, b, 32); });
+}
+function sceneDecide(t) {
+  const T = t - SC.decide, k = fade(T, 0, .8, 4.2, 5);
+  stepFlow(t, SC.decide, SC.decide + .8, 7);
+  text('HUMAN ENGINEERING DECISION REQUIRED', W / 2, 300, { size: 22, weight: 800, color: COL.amber, a: k, track: 6 });
+  ['Approve for detailed engineering', 'Request additional study', 'Reject proposal'].forEach((s, i) => {
+    const a = k * eio(seg(T, .6 + i * .3, 1.1 + i * .3)), x = 420 + i * 540;
+    rrect(x - 240, 420, 480, 90, 18, `rgba(10,24,40,${.9 * a})`, rgba(COL.white, .45 * a), 2); text(s, x, 465, { size: 26, weight: 600, color: COL.white, a });
+  });
+  text('The AI assembles the evidence. The engineer owns the decision.', W / 2, 640, { size: 38, weight: 300, color: COL.white, a: k * eio(seg(T, 1.8, 2.6)) });
+}
+function sceneEnd(t) {
+  const T = t - SC.end, k = eio(seg(T, 0, 1.2)) * (1 - eio(seg(t, DURATION - 1.2, DURATION)));
+  add(); glow(W / 2, 470, 600, 'cyan', .16 * k); norm();
+  text('FROM DECISION INTELLIGENCE', W / 2, 330, { size: 52, weight: 200, color: COL.white, a: k, track: 4 });
+  text('TO ENGINEERING INTELLIGENCE', W / 2, 410, { size: 52, weight: 700, color: COL.cyan, a: k * eio(seg(T, .6, 1.6)), track: 4 });
+  text('OBSERVE → REASON → PROPOSE → MODEL → SIMULATE → VERIFY → DECIDE', W / 2, 500, { size: 20, weight: 600, color: COL.grey, a: k * eio(seg(T, 1.2, 2)), track: 3 });
+  ['AI proposes and orchestrates.', 'MBSE provides engineering evidence.', 'Humans make the engineering decision.'].forEach((s, i) => text(s, W / 2, 620 + i * 56, { size: 32, weight: i === 2 ? 600 : 300, color: COL.white, a: k * eio(seg(T, 2 + i * .6, 2.8 + i * .6)) }));
+  text('GEN7 · cameo-mcp-bridge · CATIA Magic · demonstration case', W / 2, 1000, { size: 16, weight: 400, color: COL.grey, a: k * eio(seg(T, 3.6, 4.4)), track: 2 });
+}
+function headline(t, a, b, c, d, kicker, l1, y = 128) {
+  const k = fade(t, a, b, c, d), rise = (1 - eout(seg(t, a, b))) * 16;
+  text(kicker, W / 2, y + rise, { size: 18, weight: 700, color: COL.cyan, a: k, track: 7 });
+  text(l1, W / 2, y + 56 + rise, { size: 42, weight: 300, color: COL.white, a: k * .97, track: -.5 });
+}
+function render(T) {
+  background(T);
+  if (T < SC.recap) sceneTitle(T);
+  else if (T < SC.future) sceneRecap(T);
+  else if (T < SC.reason) sceneFuture(T);
+  else if (T < SC.ask) sceneReason(T);
+  else if (T < SC.who) sceneAsk(T);
+  else if (T < SC.base) sceneWho(T);
+  else if (T < SC.sim) sceneBase(T);
+  else if (T < SC.trace) sceneSim(T);
+  else if (T < SC.eng) sceneTrace(T);
+  else if (T < SC.cmp) sceneEng(T);
+  else if (T < SC.ver) sceneCmp(T);
+  else if (T < SC.decide) sceneVer(T);
+  else if (T < SC.end) sceneDecide(T);
+  else sceneEnd(T);
+  vignette();
+}
+window.render = render; window.DURATION = DURATION; window.SCENES = SC;
+window.ready = document.fonts.load('800 20px Inter').then(() => Promise.all([200, 300, 400, 600, 700].map(w => document.fonts.load(`${w} 20px Inter`)))).then(() => true);
+</script></body></html>

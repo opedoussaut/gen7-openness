@@ -156,6 +156,7 @@ export function mountStory(el, app) {
 // Cinematic introductions: both are kept and selectable.
 export const CINE = [
   { id: 'system', label: 'GEN7 · Decision Intelligence', dur: '58 s', src: './media/GEN7-cinematic-intro-system1-system2.mp4', poster: './media/GEN7-cinematic-intro-system1-system2.jpg', note: 'R-17 arrives; groom → triage (System 1) → confidence gate → System 2 agents → the system-level decision on the Loop A overload → people accountable → measured.' },
+  { id: 'mbse', label: 'GEN7 · Engineering Intelligence', dur: '104 s', src: './media/GEN7-cinematic-cooling-loop-mbse.mp4', poster: './media/GEN7-cinematic-cooling-loop-mbse.jpg', note: 'After R-17: the future load exceeds Loop A. Operational options fail, so GEN7 asks CATIA Magic (through cameo-mcp-bridge) to model v1 and v2; native Cameo diagrams, identical scenarios, derived verification, a human decision.' },
   { id: 'original', label: 'Original GEN7 intro', dur: '37 s', src: './media/GEN7-cinematic-intro-37s.mp4', poster: './media/GEN7-cinematic-intro-37s.jpg', note: 'The original GEN7 story: open at the agent layer, lean context, measured.' }
 ];
 function cinemaMarkup() {
