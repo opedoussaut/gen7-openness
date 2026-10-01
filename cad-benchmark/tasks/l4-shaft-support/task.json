@@ -1,0 +1,308 @@
+{
+ "level": 4,
+ "title": "Shaft support assembly",
+ "family": "Assembly",
+ "tests": [
+  "positioning",
+  "interfaces",
+  "clearances",
+  "interference"
+ ],
+ "prompt": "Model a shaft support assembly of four positioned parts (all dimensions in mm, one common coordinate system).\nbuild() must return a dict with exactly these keys: \"base_plate\", \"housing_left\", \"housing_right\", \"shaft\" \u2014 each value a cadquery Workplane holding one solid, already in its assembled position.\n- base_plate: 160 along X, 60 along Y, 10 thick, centred on the origin in X and Y, Z from 0 to 10.\n- housing_left / housing_right: blocks 20 along X, 56 along Y, 45 tall, sitting on the plate top (Z 10 to 55), centred at X = -50 and X = +50, Y = 0.\n- Each housing has a horizontal bore along X at (Y = 0, Z = 40) with 0.2 mm radial clearance around the shaft (bore diameter 20.4).\n- shaft: diameter 20, length 140, axis along X at (Y = 0, Z = 40), centred on X = 0.\n- Bolted interface: vertical \u00d89 holes through each housing and through the plate, coaxial, at (X = \u00b150, Y = \u00b120).\n- Parts must touch where they are seated but must not interfere.\nRequired PARAMS keys: plate_length, plate_width, plate_thickness, housing_x, housing_width, housing_depth, housing_height, axis_z, shaft_d, shaft_length, clearance, bolt_d, bolt_dy.",
+ "checks": [
+  {
+   "id": "parts",
+   "desc": "Four named parts returned",
+   "type": "parts",
+   "names": [
+    "base_plate",
+    "housing_left",
+    "housing_right",
+    "shaft"
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "no_interference",
+   "desc": "No interference between any two parts",
+   "type": "no_interference",
+   "max_volume": 1.0,
+   "critical": true,
+   "dim": "manufacturability"
+  },
+  {
+   "id": "plate_size",
+   "desc": "Base plate 160 x 60 x 10",
+   "type": "bbox",
+   "part": "base_plate",
+   "min": [
+    -80,
+    -30,
+    0
+   ],
+   "max": [
+    80,
+    30,
+    10
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "housing_left_pos",
+   "desc": "Left housing seated at X=-50 on the plate",
+   "type": "bbox",
+   "part": "housing_left",
+   "min": [
+    -60,
+    -28,
+    10
+   ],
+   "max": [
+    -40,
+    28,
+    55
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "housing_right_pos",
+   "desc": "Right housing seated at X=+50 on the plate",
+   "type": "bbox",
+   "part": "housing_right",
+   "min": [
+    40,
+    -28,
+    10
+   ],
+   "max": [
+    60,
+    28,
+    55
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "shaft_pos",
+   "desc": "Shaft \u00d820 x 140 on the bore axis",
+   "type": "bbox",
+   "part": "shaft",
+   "min": [
+    -70,
+    -10,
+    30
+   ],
+   "max": [
+    70,
+    10,
+    50
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "shaft_through",
+   "desc": "Shaft passes through both housings",
+   "type": "points_in",
+   "part": "shaft",
+   "points": [
+    [
+     -50,
+     0,
+     40
+    ],
+    [
+     50,
+     0,
+     40
+    ],
+    [
+     0,
+     0,
+     49.5
+    ]
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "clearance",
+   "desc": "0.2 mm radial clearance in both bores",
+   "type": "points_out",
+   "part": "all",
+   "points": [
+    [
+     50,
+     0,
+     50.1
+    ],
+    [
+     -50,
+     0,
+     50.1
+    ],
+    [
+     50,
+     10.1,
+     40
+    ],
+    [
+     -50,
+     10.1,
+     40
+    ]
+   ],
+   "critical": true,
+   "dim": "manufacturability"
+  },
+  {
+   "id": "bore_not_oversized",
+   "desc": "Bore not oversized (\u2264 \u00d821)",
+   "type": "points_in",
+   "part": "housing_right",
+   "points": [
+    [
+     50,
+     0,
+     50.6
+    ],
+    [
+     50,
+     0,
+     29.4
+    ]
+   ],
+   "critical": false,
+   "dim": "engineering"
+  },
+  {
+   "id": "bolt_interface",
+   "desc": "Coaxial \u00d89 bolt holes through housings and plate",
+   "type": "points_out",
+   "part": "all",
+   "points": [
+    [
+     50,
+     20,
+     5
+    ],
+    [
+     50,
+     20,
+     30
+    ],
+    [
+     50,
+     -20,
+     5
+    ],
+    [
+     50,
+     -20,
+     30
+    ],
+    [
+     -50,
+     20,
+     5
+    ],
+    [
+     -50,
+     20,
+     30
+    ],
+    [
+     -50,
+     -20,
+     5
+    ],
+    [
+     -50,
+     -20,
+     30
+    ]
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "bolt_size",
+   "desc": "Bolt holes \u00d89 (not oversized)",
+   "type": "points_in",
+   "part": "base_plate",
+   "points": [
+    [
+     55.2,
+     20,
+     5
+    ],
+    [
+     -55.2,
+     -20,
+     5
+    ]
+   ],
+   "critical": false,
+   "dim": "engineering"
+  },
+  {
+   "id": "seated",
+   "desc": "Housings seated on the plate (contact at Z=10)",
+   "type": "points_in",
+   "part": "housing_left",
+   "points": [
+    [
+     -50,
+     -10,
+     10.3
+    ]
+   ],
+   "critical": false,
+   "dim": "manufacturability"
+  }
+ ],
+ "probes": [
+  {
+   "id": "shaft25",
+   "desc": "shaft_d 20 \u2192 25: bores follow with the same clearance",
+   "params": {
+    "shaft_d": 25
+   }
+  },
+  {
+   "id": "spread",
+   "desc": "housing_x 50 \u2192 60: plate bolt holes follow the housings",
+   "params": {
+    "housing_x": 60
+   }
+  }
+ ],
+ "lean": [
+  "std-units",
+  "std-frame",
+  "std-assembly",
+  "part-shaft-support",
+  "api-core",
+  "api-holes",
+  "api-assembly"
+ ],
+ "id": "l4-shaft-support",
+ "required_params": [
+  "plate_length",
+  "plate_width",
+  "plate_thickness",
+  "housing_x",
+  "housing_width",
+  "housing_depth",
+  "housing_height",
+  "axis_z",
+  "shaft_d",
+  "shaft_length",
+  "clearance",
+  "bolt_d",
+  "bolt_dy"
+ ]
+}

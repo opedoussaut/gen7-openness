@@ -1,0 +1,332 @@
+{
+ "level": 1,
+ "title": "Pipe flange",
+ "family": "Simple mechanical part",
+ "tests": [
+  "dimensions",
+  "bolt pattern",
+  "raised face",
+  "bore"
+ ],
+ "prompt": "Model a circular pipe flange.\n- Flange disc: outer diameter 160 mm, thickness 18 mm, from Z = 0 to Z = 18, centred on the Z axis.\n- Raised face on top: diameter 100 mm, height 3 mm (Z = 18 to Z = 21).\n- Central through bore, diameter 64 mm.\n- 8 through bolt holes, diameter 18 mm, equally spaced on a 125 mm pitch circle diameter; the first hole centre lies on the +X axis.\nRequired PARAMS keys: outer_d, thickness, bore_d, raised_face_d, raised_face_h, bolt_count, bolt_hole_d, pcd.",
+ "checks": [
+  {
+   "id": "size",
+   "desc": "Envelope \u00d8160 x 21 mm",
+   "type": "bbox",
+   "min": [
+    -80,
+    -80,
+    0
+   ],
+   "max": [
+    80,
+    80,
+    21
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "bore",
+   "desc": "\u00d864 through bore",
+   "type": "hole",
+   "center": [
+    0,
+    0,
+    0
+   ],
+   "axis": "Z",
+   "d": 64,
+   "span": [
+    0,
+    21
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "bolt_0",
+   "desc": "\u00d818 bolt hole 1 on PCD 125",
+   "type": "hole",
+   "center": [
+    62.5,
+    0.0,
+    0
+   ],
+   "axis": "Z",
+   "d": 18,
+   "span": [
+    0,
+    18
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "bolt_1",
+   "desc": "\u00d818 bolt hole 2 on PCD 125",
+   "type": "hole",
+   "center": [
+    44.1942,
+    44.1942,
+    0
+   ],
+   "axis": "Z",
+   "d": 18,
+   "span": [
+    0,
+    18
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "bolt_2",
+   "desc": "\u00d818 bolt hole 3 on PCD 125",
+   "type": "hole",
+   "center": [
+    0.0,
+    62.5,
+    0
+   ],
+   "axis": "Z",
+   "d": 18,
+   "span": [
+    0,
+    18
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "bolt_3",
+   "desc": "\u00d818 bolt hole 4 on PCD 125",
+   "type": "hole",
+   "center": [
+    -44.1942,
+    44.1942,
+    0
+   ],
+   "axis": "Z",
+   "d": 18,
+   "span": [
+    0,
+    18
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "bolt_4",
+   "desc": "\u00d818 bolt hole 5 on PCD 125",
+   "type": "hole",
+   "center": [
+    -62.5,
+    0.0,
+    0
+   ],
+   "axis": "Z",
+   "d": 18,
+   "span": [
+    0,
+    18
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "bolt_5",
+   "desc": "\u00d818 bolt hole 6 on PCD 125",
+   "type": "hole",
+   "center": [
+    -44.1942,
+    -44.1942,
+    0
+   ],
+   "axis": "Z",
+   "d": 18,
+   "span": [
+    0,
+    18
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "bolt_6",
+   "desc": "\u00d818 bolt hole 7 on PCD 125",
+   "type": "hole",
+   "center": [
+    -0.0,
+    -62.5,
+    0
+   ],
+   "axis": "Z",
+   "d": 18,
+   "span": [
+    0,
+    18
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "bolt_7",
+   "desc": "\u00d818 bolt hole 8 on PCD 125",
+   "type": "hole",
+   "center": [
+    44.1942,
+    -44.1942,
+    0
+   ],
+   "axis": "Z",
+   "d": 18,
+   "span": [
+    0,
+    18
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "no_extra_holes",
+   "desc": "No holes between the 8 bolt positions",
+   "type": "points_in",
+   "points": [
+    [
+     57.742,
+     23.918,
+     9
+    ],
+    [
+     23.918,
+     57.742,
+     9
+    ],
+    [
+     -23.918,
+     57.742,
+     9
+    ],
+    [
+     -57.742,
+     23.918,
+     9
+    ],
+    [
+     -57.742,
+     -23.918,
+     9
+    ],
+    [
+     -23.918,
+     -57.742,
+     9
+    ],
+    [
+     23.918,
+     -57.742,
+     9
+    ],
+    [
+     57.742,
+     -23.918,
+     9
+    ]
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "raised_face",
+   "desc": "Raised face \u00d8100 x 3 mm",
+   "type": "points_in",
+   "points": [
+    [
+     0,
+     45,
+     19.5
+    ],
+    [
+     45,
+     0,
+     19.5
+    ]
+   ],
+   "critical": false,
+   "dim": "engineering"
+  },
+  {
+   "id": "raised_face_extent",
+   "desc": "Raised face does not exceed \u00d8100",
+   "type": "points_out",
+   "points": [
+    [
+     0,
+     55,
+     19.5
+    ],
+    [
+     55,
+     0,
+     19.5
+    ]
+   ],
+   "critical": false,
+   "dim": "engineering"
+  },
+  {
+   "id": "volume",
+   "desc": "Volume matches the specification (\u00b11 %)",
+   "type": "volume",
+   "value": null,
+   "rel_tol": 0.01,
+   "critical": false,
+   "dim": "geometry"
+  },
+  {
+   "id": "single_solid",
+   "desc": "One valid solid",
+   "type": "solids",
+   "count": 1,
+   "critical": true,
+   "dim": "engineering"
+  }
+ ],
+ "probes": [
+  {
+   "id": "six_bolts",
+   "desc": "bolt_count 8 \u2192 6",
+   "params": {
+    "bolt_count": 6
+   }
+  },
+  {
+   "id": "pcd",
+   "desc": "pcd 125 \u2192 130",
+   "params": {
+    "pcd": 130
+   }
+  }
+ ],
+ "lean": [
+  "std-units",
+  "std-frame",
+  "part-flange",
+  "api-core",
+  "api-holes",
+  "api-patterns"
+ ],
+ "id": "l1-pipe-flange",
+ "required_params": [
+  "outer_d",
+  "thickness",
+  "bore_d",
+  "raised_face_d",
+  "raised_face_h",
+  "bolt_count",
+  "bolt_hole_d",
+  "pcd"
+ ]
+}

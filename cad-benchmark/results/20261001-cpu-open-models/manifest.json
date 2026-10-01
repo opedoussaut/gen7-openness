@@ -1,0 +1,314 @@
+{
+ "run_id": "20261001-cpu-open-models",
+ "name": "open-models-cpu",
+ "created": "2026-10-01T05:16:17Z",
+ "config": {
+  "name": "open-models-cpu",
+  "_comment": "Open-weight Qwen2.5-Coder size ladder (Apache-2.0), Q4_K_M GGUF, served by llama.cpp llama-server on a 2-vCPU CPU-only workspace. No API key. One task per difficulty level to keep the CPU run to about two hours; the same five tasks for every model.",
+  "tasks": [
+   "l1-mounting-plate",
+   "l2-heatsink",
+   "l3-cold-plate",
+   "l4-shaft-support",
+   "l5-flange-bore-change"
+  ],
+  "context": "groomed",
+  "lean_tasks": [
+   "l2-heatsink",
+   "l5-flange-bore-change"
+  ],
+  "lean_models": [
+   "qwen2.5-coder-3b"
+  ],
+  "max_iterations": 3,
+  "repeats": 1,
+  "strict_model_match": true,
+  "models": [
+   {
+    "id": "qwen2.5-coder-0.5b",
+    "label": "Qwen2.5-Coder 0.5B",
+    "kind": "openai_compatible",
+    "base_url": "http://127.0.0.1:8080/v1",
+    "model": "qwen2.5-coder-0.5b-instruct",
+    "inference_provider": "llama.cpp llama-server (built from the llama-cpp-python 0.3.35 vendored source), CPU, Q4_K_M",
+    "model_file": "/home/claude/models/qwen2.5-coder-0.5b-instruct-q4_k_m.gguf",
+    "params": {
+     "temperature": 0.0,
+     "max_tokens": 1024,
+     "seed": 42
+    },
+    "infrastructure": {
+     "type": "cpu",
+     "hardware": "2 vCPU / 7 GB cloud container (benchmark workspace)",
+     "rate_usd_per_hour": 0.0892,
+     "rate_source": "Reference rate: AWS EC2 c7i.large (2 vCPU, 4 GiB) Linux on-demand us-east-1 $0.0892/h, https://www.doit.com/compute/compute/aws/us-east-1/c7i.large, retrieved 2026-10-01. Comparable, not identical, hardware."
+    },
+    "_version": {
+     "model_file": "qwen2.5-coder-0.5b-instruct-q4_k_m.gguf",
+     "model_file_sha256": "1d9614638d18024d0fbb36575a15f1302a3adf044df10345688ec4f6e1c4ff32"
+    }
+   },
+   {
+    "id": "qwen2.5-coder-1.5b",
+    "label": "Qwen2.5-Coder 1.5B",
+    "kind": "openai_compatible",
+    "base_url": "http://127.0.0.1:8081/v1",
+    "model": "qwen2.5-coder-1.5b-instruct",
+    "inference_provider": "llama.cpp llama-server (built from the llama-cpp-python 0.3.35 vendored source), CPU, Q4_K_M",
+    "model_file": "/home/claude/models/qwen2.5-coder-1.5b-instruct-q4_k_m.gguf",
+    "params": {
+     "temperature": 0.0,
+     "max_tokens": 1024,
+     "seed": 42
+    },
+    "infrastructure": {
+     "type": "cpu",
+     "hardware": "2 vCPU / 7 GB cloud container (benchmark workspace)",
+     "rate_usd_per_hour": 0.0892,
+     "rate_source": "Reference rate: AWS EC2 c7i.large (2 vCPU, 4 GiB) Linux on-demand us-east-1 $0.0892/h, https://www.doit.com/compute/compute/aws/us-east-1/c7i.large, retrieved 2026-10-01. Comparable, not identical, hardware."
+    },
+    "_version": {
+     "model_file": "qwen2.5-coder-1.5b-instruct-q4_k_m.gguf",
+     "model_file_sha256": "cc324af070c2ecbfd324a30884d2f951a7ff756aba85cb811a6ec436933bb046"
+    }
+   },
+   {
+    "id": "qwen2.5-coder-3b",
+    "label": "Qwen2.5-Coder 3B",
+    "kind": "openai_compatible",
+    "base_url": "http://127.0.0.1:8082/v1",
+    "model": "qwen2.5-coder-3b-instruct",
+    "inference_provider": "llama.cpp llama-server (built from the llama-cpp-python 0.3.35 vendored source), CPU, Q4_K_M",
+    "model_file": "/home/claude/models/qwen2.5-coder-3b-instruct-q4_k_m.gguf",
+    "params": {
+     "temperature": 0.0,
+     "max_tokens": 1024,
+     "seed": 42
+    },
+    "infrastructure": {
+     "type": "cpu",
+     "hardware": "2 vCPU / 7 GB cloud container (benchmark workspace)",
+     "rate_usd_per_hour": 0.0892,
+     "rate_source": "Reference rate: AWS EC2 c7i.large (2 vCPU, 4 GiB) Linux on-demand us-east-1 $0.0892/h, https://www.doit.com/compute/compute/aws/us-east-1/c7i.large, retrieved 2026-10-01. Comparable, not identical, hardware."
+    },
+    "_version": {
+     "model_file": "qwen2.5-coder-3b-instruct-q4_k_m.gguf",
+     "model_file_sha256": "724fb256bec1ff062b2f65e4569e871ad2e95ab2a3989723d1769c54294730b7"
+    }
+   }
+  ]
+ },
+ "models": [
+  {
+   "id": "qwen2.5-coder-0.5b",
+   "label": "Qwen2.5-Coder 0.5B",
+   "kind": "openai_compatible",
+   "base_url": "http://127.0.0.1:8080/v1",
+   "model": "qwen2.5-coder-0.5b-instruct",
+   "inference_provider": "llama.cpp llama-server (built from the llama-cpp-python 0.3.35 vendored source), CPU, Q4_K_M",
+   "model_file": "/home/claude/models/qwen2.5-coder-0.5b-instruct-q4_k_m.gguf",
+   "params": {
+    "temperature": 0.0,
+    "max_tokens": 1024,
+    "seed": 42
+   },
+   "infrastructure": {
+    "type": "cpu",
+    "hardware": "2 vCPU / 7 GB cloud container (benchmark workspace)",
+    "rate_usd_per_hour": 0.0892,
+    "rate_source": "Reference rate: AWS EC2 c7i.large (2 vCPU, 4 GiB) Linux on-demand us-east-1 $0.0892/h, https://www.doit.com/compute/compute/aws/us-east-1/c7i.large, retrieved 2026-10-01. Comparable, not identical, hardware."
+   },
+   "_version": {
+    "model_file": "qwen2.5-coder-0.5b-instruct-q4_k_m.gguf",
+    "model_file_sha256": "1d9614638d18024d0fbb36575a15f1302a3adf044df10345688ec4f6e1c4ff32"
+   }
+  },
+  {
+   "id": "qwen2.5-coder-1.5b",
+   "label": "Qwen2.5-Coder 1.5B",
+   "kind": "openai_compatible",
+   "base_url": "http://127.0.0.1:8081/v1",
+   "model": "qwen2.5-coder-1.5b-instruct",
+   "inference_provider": "llama.cpp llama-server (built from the llama-cpp-python 0.3.35 vendored source), CPU, Q4_K_M",
+   "model_file": "/home/claude/models/qwen2.5-coder-1.5b-instruct-q4_k_m.gguf",
+   "params": {
+    "temperature": 0.0,
+    "max_tokens": 1024,
+    "seed": 42
+   },
+   "infrastructure": {
+    "type": "cpu",
+    "hardware": "2 vCPU / 7 GB cloud container (benchmark workspace)",
+    "rate_usd_per_hour": 0.0892,
+    "rate_source": "Reference rate: AWS EC2 c7i.large (2 vCPU, 4 GiB) Linux on-demand us-east-1 $0.0892/h, https://www.doit.com/compute/compute/aws/us-east-1/c7i.large, retrieved 2026-10-01. Comparable, not identical, hardware."
+   },
+   "_version": {
+    "model_file": "qwen2.5-coder-1.5b-instruct-q4_k_m.gguf",
+    "model_file_sha256": "cc324af070c2ecbfd324a30884d2f951a7ff756aba85cb811a6ec436933bb046"
+   }
+  },
+  {
+   "id": "qwen2.5-coder-3b",
+   "label": "Qwen2.5-Coder 3B",
+   "kind": "openai_compatible",
+   "base_url": "http://127.0.0.1:8082/v1",
+   "model": "qwen2.5-coder-3b-instruct",
+   "inference_provider": "llama.cpp llama-server (built from the llama-cpp-python 0.3.35 vendored source), CPU, Q4_K_M",
+   "model_file": "/home/claude/models/qwen2.5-coder-3b-instruct-q4_k_m.gguf",
+   "params": {
+    "temperature": 0.0,
+    "max_tokens": 1024,
+    "seed": 42
+   },
+   "infrastructure": {
+    "type": "cpu",
+    "hardware": "2 vCPU / 7 GB cloud container (benchmark workspace)",
+    "rate_usd_per_hour": 0.0892,
+    "rate_source": "Reference rate: AWS EC2 c7i.large (2 vCPU, 4 GiB) Linux on-demand us-east-1 $0.0892/h, https://www.doit.com/compute/compute/aws/us-east-1/c7i.large, retrieved 2026-10-01. Comparable, not identical, hardware."
+   },
+   "_version": {
+    "model_file": "qwen2.5-coder-3b-instruct-q4_k_m.gguf",
+    "model_file_sha256": "724fb256bec1ff062b2f65e4569e871ad2e95ab2a3989723d1769c54294730b7"
+   }
+  }
+ ],
+ "tasks": [
+  "l1-mounting-plate",
+  "l2-heatsink",
+  "l3-cold-plate",
+  "l4-shaft-support",
+  "l5-flange-bore-change"
+ ],
+ "max_iterations": 3,
+ "environment": {
+  "python": "3.11.15",
+  "platform": "Linux-6.18.44-fc-v50-x86_64-with-glibc2.39",
+  "machine": "x86_64",
+  "processor": "x86_64",
+  "cpu_count": 2,
+  "cadquery": "2.8.0",
+  "git_commit": "99d0a35e73af960d13e986fb50ba48d9684314b2",
+  "gpus": []
+ },
+ "pricing": {
+  "_comment": "Provider list prices per 1M tokens (USD, standard tier). Retrieved from the provider pages on the date shown. A model with no entry here gets cost = N/A \u2014 prices are never guessed. Reasoning/thinking tokens are billed as output tokens by all three providers.",
+  "retrieved": "2026-10-01",
+  "models": {
+   "anthropic:claude-opus-5-5": {
+    "input": 4.0,
+    "cached_input": 0.2,
+    "cache_write": 5.0,
+    "output": 20.0,
+    "source": "https://platform.claude.com/docs/en/about-claude/pricing"
+   },
+   "anthropic:claude-sonnet-5-5": {
+    "input": 2.0,
+    "cached_input": 0.2,
+    "cache_write": 2.5,
+    "output": 10.0,
+    "source": "https://platform.claude.com/docs/en/about-claude/pricing"
+   },
+   "anthropic:claude-haiku-4-5-20251001": {
+    "input": 1.0,
+    "cached_input": 0.1,
+    "cache_write": 1.25,
+    "output": 5.0,
+    "source": "https://platform.claude.com/docs/en/about-claude/pricing"
+   },
+   "gemini:gemini-3.1-pro-preview": {
+    "input": 2.0,
+    "cached_input": 0.2,
+    "cache_write": 0,
+    "output": 12.0,
+    "source": "https://ai.google.dev/gemini-api/docs/pricing",
+    "note": "<=200k-token prompts; >200k prompts are billed at $4 / $18"
+   },
+   "gemini:gemini-3.8-flash": {
+    "input": 0.75,
+    "cached_input": 0.075,
+    "cache_write": 0,
+    "output": 3.75,
+    "source": "https://ai.google.dev/gemini-api/docs/pricing",
+    "note": "Promotional price through 2026-12-31; $1.50 / $7.50 from 2027-01-01"
+   },
+   "gemini:gemini-3.5-flash": {
+    "input": 1.5,
+    "cached_input": 0.15,
+    "cache_write": 0,
+    "output": 9.0,
+    "source": "https://ai.google.dev/gemini-api/docs/pricing"
+   },
+   "openai:gpt-6-astra": {
+    "input": 5.0,
+    "cached_input": 0.5,
+    "cache_write": 0,
+    "output": 25.0,
+    "source": "https://developers.openai.com/api/docs/pricing",
+    "note": "API model identifier not verified from the pricing page; confirm before running"
+   },
+   "openai:gpt-6.1-sol": {
+    "input": 1.0,
+    "cached_input": 0.05,
+    "cache_write": 0,
+    "output": 5.0,
+    "source": "https://developers.openai.com/api/docs/pricing",
+    "note": "API model identifier not verified from the pricing page; confirm before running"
+   },
+   "openai:gpt-6-luna": {
+    "input": 0.05,
+    "cached_input": 0.005,
+    "cache_write": 0,
+    "output": 0.25,
+    "source": "https://developers.openai.com/api/docs/pricing",
+    "note": "API model identifier not verified from the pricing page; confirm before running"
+   }
+  }
+ },
+ "scoring": {
+  "_comment": "Scoring rules. Every sub-metric is stored with every result; the overall score is a documented weighted sum, never a replacement for the underlying metrics.",
+  "acceptance": {
+   "threshold": 0.9,
+   "require_all_critical_checks": true,
+   "rule": "A result is ACCEPTED when it executes, produces valid solids, passes every critical engineering check, and its overall quality is >= threshold. A high geometric similarity can never compensate for a failed critical check."
+  },
+  "overall_weights": {
+   "geometry": 0.3,
+   "engineering": 0.3,
+   "parametric": 0.15,
+   "manufacturability": 0.1,
+   "completion": 0.15
+  },
+  "geometry_weights": {
+   "iou": 0.35,
+   "chamfer": 0.25,
+   "bbox": 0.15,
+   "topology": 0.1,
+   "volume_check": 0.15
+  },
+  "geometry_scales": {
+   "chamfer_zero_at_fraction_of_diagonal": 0.01,
+   "bbox_zero_at_relative_error": 0.05,
+   "_comment": "Linear scores: 1 at perfect match, 0 at the stated error. Mean symmetric surface distance of 1 % of the reference bounding-box diagonal scores 0."
+  },
+  "parametric_weights": {
+   "params_keys": 0.2,
+   "probes": 0.6,
+   "literal_discipline": 0.2
+  },
+  "parametric_rules": {
+   "probe_iou_pass": 0.97,
+   "literals_full_score_at_most": 2,
+   "literals_zero_score_at": 12,
+   "_comment": "A probe re-runs the candidate's build() with one PARAMS value changed and compares the result with the reference built with the same change. It tests whether the parameters really drive the geometry with the specified design intent."
+  },
+  "check_weights": {
+   "critical": 2,
+   "non_critical": 1
+  },
+  "iteration_policy": {
+   "max_iterations": 4,
+   "feedback": "Reference-free only: execution errors, failed specification checks and failed design-intent probes, phrased from the task specification. Reference geometry, IoU and surface distances are never shown to the model."
+  }
+ },
+ "system_prompt": "You are a senior mechanical CAD engineer. You write CadQuery programs (Python, cadquery 2.x).\n\nOutput contract \u2014 follow it exactly:\n1. Reply with ONE complete Python program inside a single ```python code block. No other code blocks.\n2. The program must `import cadquery as cq`, define a module-level dict `PARAMS` holding every driving dimension\n   (use exactly the key names the task lists), and define `build(p=PARAMS)` that returns the model.\n   build() must derive all geometry from `p` so that changing a PARAMS value updates the model consistently.\n3. build() returns a cadquery Workplane containing ONE solid (or, for an assembly, a dict of named Workplanes).\n4. End the program with `result = build()`.\n5. Units are millimetres. Place the part exactly as specified.\n6. Do not read or write files, do not import anything other than cadquery and math, do not call show() or display()."
+}

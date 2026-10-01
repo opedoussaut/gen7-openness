@@ -1,0 +1,398 @@
+{
+ "level": 2,
+ "title": "Gusseted angle bracket",
+ "family": "Parametric component",
+ "tests": [
+  "sketches",
+  "fillets",
+  "slots",
+  "feature relationships"
+ ],
+ "prompt": "Model a gusseted L-shaped angle bracket (all dimensions in mm).\n- Base plate: X from 0 to 80, Y from 0 to 50, Z from 0 to 6.\n- Upright plate: X from 0 to 6, Y from 0 to 50, Z from 0 to 60.\n- Inside bend: fillet radius 5 on the concave edge where the base top meets the upright inner face (the edge along Y at X = 6, Z = 6).\n- One triangular gusset, 6 thick, centred at Y = 25 (Y from 22 to 28); in the XZ plane it is the triangle (6,6), (46,6), (6,46).\n- Two slots through the base, 9 wide and 29 long overall (rounded ends), long axis along X, centred at X = 55 and at Y = 12 and Y = 38.\n- Two through holes in the upright, diameter 11, axis along X, at (Y = 12, Z = 40) and (Y = 38, Z = 40).\n- Design intent: slots and holes are 12 mm from the Y edges; the gusset stays centred in Y.\nRequired PARAMS keys: length, width, height, thickness, bend_radius, gusset_thickness, gusset_leg, slot_width, slot_length, slot_center_x, hole_d, hole_z, edge_offset.",
+ "checks": [
+  {
+   "id": "size",
+   "desc": "Envelope X 0\u201380, Y 0\u201350, Z 0\u201360",
+   "type": "bbox",
+   "min": [
+    0,
+    0,
+    0
+   ],
+   "max": [
+    80,
+    50,
+    60
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "base",
+   "desc": "Base plate 6 mm thick",
+   "type": "points_in",
+   "points": [
+    [
+     70,
+     25,
+     3
+    ],
+    [
+     30,
+     5,
+     3
+    ]
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "base_top",
+   "desc": "Base top at Z=6",
+   "type": "points_out",
+   "points": [
+    [
+     70,
+     25,
+     6.5
+    ]
+   ],
+   "critical": false,
+   "dim": "engineering"
+  },
+  {
+   "id": "upright",
+   "desc": "Upright plate 6 mm thick",
+   "type": "points_in",
+   "points": [
+    [
+     3,
+     25,
+     55
+    ],
+    [
+     3,
+     5,
+     30
+    ]
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "upright_face",
+   "desc": "Upright inner face at X=6",
+   "type": "points_out",
+   "points": [
+    [
+     6.5,
+     5,
+     55
+    ]
+   ],
+   "critical": false,
+   "dim": "engineering"
+  },
+  {
+   "id": "bend_fillet",
+   "desc": "Inside bend fillet R5",
+   "type": "points_in",
+   "points": [
+    [
+     6.8,
+     40,
+     6.8
+    ],
+    [
+     6.8,
+     5,
+     6.8
+    ]
+   ],
+   "critical": false,
+   "dim": "engineering"
+  },
+  {
+   "id": "bend_fillet_size",
+   "desc": "Bend fillet not oversized",
+   "type": "points_out",
+   "points": [
+    [
+     7.5,
+     40,
+     7.5
+    ]
+   ],
+   "critical": false,
+   "dim": "engineering"
+  },
+  {
+   "id": "gusset",
+   "desc": "Gusset present, centred at Y=25",
+   "type": "points_in",
+   "points": [
+    [
+     16,
+     25,
+     16
+    ],
+    [
+     30,
+     25,
+     10
+    ],
+    [
+     10,
+     23,
+     30
+    ]
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "gusset_extent",
+   "desc": "Gusset limited to its triangle and 6 mm thickness",
+   "type": "points_out",
+   "points": [
+    [
+     30,
+     25,
+     30
+    ],
+    [
+     16,
+     20,
+     16
+    ],
+    [
+     16,
+     30,
+     16
+    ]
+   ],
+   "critical": false,
+   "dim": "engineering"
+  },
+  {
+   "id": "slot_a",
+   "desc": "Slot 9 x 29 at Y=12",
+   "type": "points_out",
+   "points": [
+    [
+     55,
+     12,
+     3
+    ],
+    [
+     67,
+     12,
+     3
+    ],
+    [
+     43,
+     12,
+     3
+    ],
+    [
+     55,
+     16,
+     3
+    ],
+    [
+     55,
+     8,
+     3
+    ]
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "slot_b",
+   "desc": "Slot 9 x 29 at Y=38",
+   "type": "points_out",
+   "points": [
+    [
+     55,
+     38,
+     3
+    ],
+    [
+     67,
+     38,
+     3
+    ],
+    [
+     43,
+     38,
+     3
+    ],
+    [
+     55,
+     42,
+     3
+    ],
+    [
+     55,
+     34,
+     3
+    ]
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "slot_a_extent",
+   "desc": "Slot at Y=12 not oversized",
+   "type": "points_in",
+   "points": [
+    [
+     71,
+     12,
+     3
+    ],
+    [
+     39,
+     12,
+     3
+    ],
+    [
+     55,
+     17.5,
+     3
+    ],
+    [
+     55,
+     6.5,
+     3
+    ]
+   ],
+   "critical": false,
+   "dim": "engineering"
+  },
+  {
+   "id": "slot_b_extent",
+   "desc": "Slot at Y=38 not oversized",
+   "type": "points_in",
+   "points": [
+    [
+     71,
+     38,
+     3
+    ],
+    [
+     39,
+     38,
+     3
+    ],
+    [
+     55,
+     43.5,
+     3
+    ],
+    [
+     55,
+     32.5,
+     3
+    ]
+   ],
+   "critical": false,
+   "dim": "engineering"
+  },
+  {
+   "id": "hole_a",
+   "desc": "\u00d811 hole in the upright at Y=12, Z=40",
+   "type": "hole",
+   "center": [
+    0,
+    12,
+    40
+   ],
+   "axis": "X",
+   "d": 11,
+   "span": [
+    0,
+    6
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "hole_b",
+   "desc": "\u00d811 hole in the upright at Y=38, Z=40",
+   "type": "hole",
+   "center": [
+    0,
+    38,
+    40
+   ],
+   "axis": "X",
+   "d": 11,
+   "span": [
+    0,
+    6
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "volume",
+   "desc": "Volume matches the specification (\u00b11.5 %)",
+   "type": "volume",
+   "value": null,
+   "rel_tol": 0.015,
+   "critical": false,
+   "dim": "geometry"
+  },
+  {
+   "id": "single_solid",
+   "desc": "One valid solid",
+   "type": "solids",
+   "count": 1,
+   "critical": true,
+   "dim": "engineering"
+  }
+ ],
+ "probes": [
+  {
+   "id": "wider",
+   "desc": "width 50 \u2192 70: slots/holes stay 12 mm from edges, gusset re-centres",
+   "params": {
+    "width": 70
+   }
+  },
+  {
+   "id": "thicker",
+   "desc": "thickness 6 \u2192 8",
+   "params": {
+    "thickness": 8
+   }
+  }
+ ],
+ "lean": [
+  "std-units",
+  "std-frame",
+  "part-bracket",
+  "api-core",
+  "api-holes",
+  "api-fillets",
+  "api-sketch"
+ ],
+ "id": "l2-angle-bracket",
+ "required_params": [
+  "length",
+  "width",
+  "height",
+  "thickness",
+  "bend_radius",
+  "gusset_thickness",
+  "gusset_leg",
+  "slot_width",
+  "slot_length",
+  "slot_center_x",
+  "hole_d",
+  "hole_z",
+  "edge_offset"
+ ]
+}

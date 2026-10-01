@@ -75,6 +75,10 @@ styles/app.css                Design system
 
 To connect real systems: pass an `mcpTransport` that POSTs the same JSON-RPC requests to an MCP server, an `a2aTransport` that resolves Agent Cards and POSTs `message/send`, and a `model` adapter returning provider usage — the engine, telemetry and UI are unchanged.
 
+## CAD benchmark (branch `cad-benchmark`)
+
+[`cad-benchmark/`](cad-benchmark/README.md) measures what it costs — money, time, tokens, iterations — for AI models to reach an accepted engineering CAD result (OpenCascade-evaluated, five difficulty levels, live monitoring with Ollama). Static dashboard at `/cad-benchmark/`; live monitoring with `python -m cadbench run … --serve`. The GEN7 Openness demo above is unchanged.
+
 ## Protocol Lab (previous workshop, preserved)
 
 `lab.html` keeps the original two-tab cooling-capacity workshop (Rack Deployment Planner ↔ Liquid Cooling Engineer) with live JSON-RPC over HTTP when served by `npm start`. It is linked from the page footer. Presenter script: [PROTOCOL-LAB-PRESENTER.md](PROTOCOL-LAB-PRESENTER.md).

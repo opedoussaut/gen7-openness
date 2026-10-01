@@ -1,0 +1,46 @@
+{
+  "_comment": "Scoring rules. Every sub-metric is stored with every result; the overall score is a documented weighted sum, never a replacement for the underlying metrics.",
+  "acceptance": {
+    "threshold": 0.90,
+    "require_all_critical_checks": true,
+    "rule": "A result is ACCEPTED when it executes, produces valid solids, passes every critical engineering check, and its overall quality is >= threshold. A high geometric similarity can never compensate for a failed critical check."
+  },
+  "overall_weights": {
+    "geometry": 0.30,
+    "engineering": 0.30,
+    "parametric": 0.15,
+    "manufacturability": 0.10,
+    "completion": 0.15
+  },
+  "geometry_weights": {
+    "iou": 0.35,
+    "chamfer": 0.25,
+    "bbox": 0.15,
+    "topology": 0.10,
+    "volume_check": 0.15
+  },
+  "geometry_scales": {
+    "chamfer_zero_at_fraction_of_diagonal": 0.01,
+    "bbox_zero_at_relative_error": 0.05,
+    "_comment": "Linear scores: 1 at perfect match, 0 at the stated error. Mean symmetric surface distance of 1 % of the reference bounding-box diagonal scores 0."
+  },
+  "parametric_weights": {
+    "params_keys": 0.2,
+    "probes": 0.6,
+    "literal_discipline": 0.2
+  },
+  "parametric_rules": {
+    "probe_iou_pass": 0.97,
+    "literals_full_score_at_most": 2,
+    "literals_zero_score_at": 12,
+    "_comment": "A probe re-runs the candidate's build() with one PARAMS value changed and compares the result with the reference built with the same change. It tests whether the parameters really drive the geometry with the specified design intent."
+  },
+  "check_weights": {
+    "critical": 2,
+    "non_critical": 1
+  },
+  "iteration_policy": {
+    "max_iterations": 4,
+    "feedback": "Reference-free only: execution errors, failed specification checks and failed design-intent probes, phrased from the task specification. Reference geometry, IoU and surface distances are never shown to the model."
+  }
+}

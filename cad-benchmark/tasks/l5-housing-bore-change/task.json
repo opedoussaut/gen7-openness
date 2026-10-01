@@ -1,0 +1,395 @@
+{
+ "level": 5,
+ "title": "Engineering change \u2014 bearing bore",
+ "family": "Engineering change",
+ "tests": [
+  "modification",
+  "interface preservation",
+  "dependent features"
+ ],
+ "prompt": "Engineering change request ECR-0587 on the existing actuator housing model below.\nReason: the supplier bearing changes from 32 mm to 35 mm outside diameter.\nChange: increase the bearing bore from \u00d832 to \u00d835, and increase the boss diameter from 46 to 49 so that the boss wall around the bore stays 7 mm.\nPreserve: the housing envelope (100 x 70 x 50), the boss axis and protrusion, the four screw columns and their \u00d84.2 x 12 tapped holes, wall and floor thickness. Keep the model parametric with the same PARAMS keys.\nReturn the complete modified code.",
+ "start": "start.py",
+ "checks": [
+  {
+   "id": "size",
+   "desc": "Envelope X -50\u202658, Y \u00b135, Z 0\u201350",
+   "type": "bbox",
+   "min": [
+    -50,
+    -35,
+    0
+   ],
+   "max": [
+    58,
+    35,
+    50
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "open_top",
+   "desc": "Open-top cavity",
+   "type": "points_out",
+   "points": [
+    [
+     0,
+     0,
+     48
+    ],
+    [
+     0,
+     0,
+     20
+    ],
+    [
+     -30,
+     15,
+     30
+    ]
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "floor",
+   "desc": "Floor 5 mm",
+   "type": "points_in",
+   "points": [
+    [
+     0,
+     0,
+     2.5
+    ],
+    [
+     -30,
+     15,
+     4.5
+    ]
+   ],
+   "critical": true,
+   "dim": "manufacturability"
+  },
+  {
+   "id": "floor_top",
+   "desc": "Floor top at Z=5",
+   "type": "points_out",
+   "points": [
+    [
+     0,
+     0,
+     5.5
+    ]
+   ],
+   "critical": false,
+   "dim": "engineering"
+  },
+  {
+   "id": "walls",
+   "desc": "Walls 4 mm",
+   "type": "points_in",
+   "points": [
+    [
+     -48,
+     0,
+     25
+    ],
+    [
+     0,
+     33,
+     25
+    ],
+    [
+     0,
+     -33,
+     25
+    ],
+    [
+     48,
+     15,
+     40
+    ]
+   ],
+   "critical": true,
+   "dim": "manufacturability"
+  },
+  {
+   "id": "wall_thickness",
+   "desc": "Walls not thicker than 4 mm",
+   "type": "points_out",
+   "points": [
+    [
+     -45.5,
+     0,
+     25
+    ],
+    [
+     0,
+     30.5,
+     25
+    ],
+    [
+     0,
+     -30.5,
+     25
+    ]
+   ],
+   "critical": false,
+   "dim": "manufacturability"
+  },
+  {
+   "id": "corner_fillets",
+   "desc": "Outer vertical edges rounded R8",
+   "type": "points_out",
+   "points": [
+    [
+     -49.5,
+     34.5,
+     25
+    ],
+    [
+     49.5,
+     -34.5,
+     25
+    ]
+   ],
+   "critical": false,
+   "dim": "engineering"
+  },
+  {
+   "id": "bore",
+   "desc": "\u00d835 bearing bore through boss and wall, axis X at Z=25",
+   "type": "hole",
+   "center": [
+    46,
+    0,
+    25
+   ],
+   "axis": "X",
+   "d": 35,
+   "span": [
+    46,
+    58
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "boss",
+   "desc": "\u00d849 boss protruding 8 mm on +X",
+   "type": "points_in",
+   "points": [
+    [
+     56,
+     0,
+     48.5
+    ],
+    [
+     56,
+     23.5,
+     25
+    ],
+    [
+     56,
+     0,
+     1.5
+    ]
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "boss_extent",
+   "desc": "Boss not larger than \u00d849, not longer than 8 mm",
+   "type": "points_out",
+   "points": [
+    [
+     56,
+     0,
+     50.5
+    ],
+    [
+     58.5,
+     0,
+     44.5
+    ]
+   ],
+   "critical": false,
+   "dim": "engineering"
+  },
+  {
+   "id": "columns",
+   "desc": "Four \u00d810 screw columns at (\u00b140, \u00b125)",
+   "type": "points_in",
+   "points": [
+    [
+     40,
+     25,
+     30
+    ],
+    [
+     40,
+     -25,
+     30
+    ],
+    [
+     -40,
+     25,
+     30
+    ],
+    [
+     -40,
+     -25,
+     30
+    ]
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "tap_0",
+   "desc": "\u00d84.2 tapped hole, 12 deep, at (40, 25)",
+   "type": "hole",
+   "center": [
+    40,
+    25,
+    38
+   ],
+   "axis": "Z",
+   "d": 4.2,
+   "span": [
+    38,
+    50
+   ],
+   "critical": true,
+   "tol": 0.25,
+   "dim": "engineering"
+  },
+  {
+   "id": "tap_1",
+   "desc": "\u00d84.2 tapped hole, 12 deep, at (-40, 25)",
+   "type": "hole",
+   "center": [
+    -40,
+    25,
+    38
+   ],
+   "axis": "Z",
+   "d": 4.2,
+   "span": [
+    38,
+    50
+   ],
+   "critical": true,
+   "tol": 0.25,
+   "dim": "engineering"
+  },
+  {
+   "id": "tap_2",
+   "desc": "\u00d84.2 tapped hole, 12 deep, at (40, -25)",
+   "type": "hole",
+   "center": [
+    40,
+    -25,
+    38
+   ],
+   "axis": "Z",
+   "d": 4.2,
+   "span": [
+    38,
+    50
+   ],
+   "critical": true,
+   "tol": 0.25,
+   "dim": "engineering"
+  },
+  {
+   "id": "tap_3",
+   "desc": "\u00d84.2 tapped hole, 12 deep, at (-40, -25)",
+   "type": "hole",
+   "center": [
+    -40,
+    -25,
+    38
+   ],
+   "axis": "Z",
+   "d": 4.2,
+   "span": [
+    38,
+    50
+   ],
+   "critical": true,
+   "tol": 0.25,
+   "dim": "engineering"
+  },
+  {
+   "id": "tap_blind",
+   "desc": "Tapped holes are blind (12 mm)",
+   "type": "points_in",
+   "points": [
+    [
+     40,
+     25,
+     35
+    ],
+    [
+     -40,
+     -25,
+     35
+    ]
+   ],
+   "critical": false,
+   "dim": "manufacturability"
+  },
+  {
+   "id": "volume",
+   "desc": "Volume matches the specification (\u00b11.5 %)",
+   "type": "volume",
+   "value": null,
+   "rel_tol": 0.015,
+   "critical": false,
+   "dim": "geometry"
+  },
+  {
+   "id": "single_solid",
+   "desc": "One valid solid",
+   "type": "solids",
+   "count": 1,
+   "critical": true,
+   "dim": "engineering"
+  }
+ ],
+ "probes": [
+  {
+   "id": "wall5",
+   "desc": "wall 4 \u2192 5 still drives the shell",
+   "params": {
+    "wall": 5
+   }
+  }
+ ],
+ "lean": [
+  "std-units",
+  "std-frame",
+  "std-change",
+  "part-housing",
+  "api-core"
+ ],
+ "id": "l5-housing-bore-change",
+ "required_params": [
+  "length",
+  "width",
+  "height",
+  "wall",
+  "floor",
+  "corner_radius",
+  "boss_d",
+  "boss_len",
+  "bore_d",
+  "boss_z",
+  "column_d",
+  "column_inset",
+  "tap_d",
+  "tap_depth"
+ ]
+}

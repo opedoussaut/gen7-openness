@@ -1,0 +1,319 @@
+{
+ "level": 2,
+ "title": "Finned heat sink",
+ "family": "Parametric component",
+ "tests": [
+  "patterns",
+  "feature relationships",
+  "holes"
+ ],
+ "prompt": "Model a finned heat sink (all dimensions in mm).\n- Square base 60 x 60, 5 thick, centred on the origin in X and Y, from Z = 0 to Z = 5.\n- 9 straight fins on top of the base, each 1.6 thick along X, running the full 60 length along Y, 25 tall (Z = 5 to Z = 30).\n- Fins equally spaced at a 7 mm pitch along X, symmetric about X = 0 (fin centres at X = -28, -21, ..., 28).\n- Four through holes in the base, diameter 3.4, at (\u00b125, \u00b125).\nRequired PARAMS keys: base_size, base_thickness, fin_count, fin_thickness, fin_height, fin_pitch, hole_d, hole_offset.",
+ "checks": [
+  {
+   "id": "size",
+   "desc": "Envelope 60 x 60 x 30",
+   "type": "bbox",
+   "min": [
+    -30,
+    -30,
+    0
+   ],
+   "max": [
+    30,
+    30,
+    30
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "base",
+   "desc": "Base 5 mm thick",
+   "type": "points_in",
+   "points": [
+    [
+     0,
+     0,
+     2.5
+    ],
+    [
+     3.5,
+     20,
+     2.5
+    ]
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "fins",
+   "desc": "9 fins at 7 mm pitch, 25 mm tall",
+   "type": "points_in",
+   "points": [
+    [
+     -28,
+     0,
+     17
+    ],
+    [
+     -21,
+     0,
+     17
+    ],
+    [
+     -14,
+     0,
+     17
+    ],
+    [
+     -7,
+     0,
+     17
+    ],
+    [
+     0,
+     0,
+     17
+    ],
+    [
+     7,
+     0,
+     17
+    ],
+    [
+     14,
+     0,
+     17
+    ],
+    [
+     21,
+     0,
+     17
+    ],
+    [
+     28,
+     0,
+     17
+    ],
+    [
+     -28,
+     25,
+     29.5
+    ],
+    [
+     0,
+     25,
+     29.5
+    ],
+    [
+     28,
+     25,
+     29.5
+    ]
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "gaps",
+   "desc": "Open channels between fins",
+   "type": "points_out",
+   "points": [
+    [
+     -24.5,
+     0,
+     17
+    ],
+    [
+     -17.5,
+     0,
+     17
+    ],
+    [
+     -10.5,
+     0,
+     17
+    ],
+    [
+     -3.5,
+     0,
+     17
+    ],
+    [
+     3.5,
+     0,
+     17
+    ],
+    [
+     10.5,
+     0,
+     17
+    ],
+    [
+     17.5,
+     0,
+     17
+    ],
+    [
+     24.5,
+     0,
+     17
+    ],
+    [
+     0,
+     0,
+     30.5
+    ]
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "fin_thickness",
+   "desc": "Fins 1.6 mm thick",
+   "type": "points_out",
+   "points": [
+    [
+     1.1,
+     0,
+     17
+    ],
+    [
+     -1.1,
+     0,
+     17
+    ]
+   ],
+   "critical": false,
+   "dim": "engineering"
+  },
+  {
+   "id": "hole_0",
+   "desc": "\u00d83.4 hole at (25, 25)",
+   "type": "hole",
+   "center": [
+    25,
+    25,
+    0
+   ],
+   "axis": "Z",
+   "d": 3.4,
+   "span": [
+    0,
+    5
+   ],
+   "critical": true,
+   "tol": 0.25,
+   "dim": "engineering"
+  },
+  {
+   "id": "hole_1",
+   "desc": "\u00d83.4 hole at (-25, 25)",
+   "type": "hole",
+   "center": [
+    -25,
+    25,
+    0
+   ],
+   "axis": "Z",
+   "d": 3.4,
+   "span": [
+    0,
+    5
+   ],
+   "critical": true,
+   "tol": 0.25,
+   "dim": "engineering"
+  },
+  {
+   "id": "hole_2",
+   "desc": "\u00d83.4 hole at (25, -25)",
+   "type": "hole",
+   "center": [
+    25,
+    -25,
+    0
+   ],
+   "axis": "Z",
+   "d": 3.4,
+   "span": [
+    0,
+    5
+   ],
+   "critical": true,
+   "tol": 0.25,
+   "dim": "engineering"
+  },
+  {
+   "id": "hole_3",
+   "desc": "\u00d83.4 hole at (-25, -25)",
+   "type": "hole",
+   "center": [
+    -25,
+    -25,
+    0
+   ],
+   "axis": "Z",
+   "d": 3.4,
+   "span": [
+    0,
+    5
+   ],
+   "critical": true,
+   "tol": 0.25,
+   "dim": "engineering"
+  },
+  {
+   "id": "volume",
+   "desc": "Volume matches the specification (\u00b11 %)",
+   "type": "volume",
+   "value": null,
+   "rel_tol": 0.01,
+   "critical": false,
+   "dim": "geometry"
+  },
+  {
+   "id": "single_solid",
+   "desc": "One valid solid",
+   "type": "solids",
+   "count": 1,
+   "critical": true,
+   "dim": "engineering"
+  }
+ ],
+ "probes": [
+  {
+   "id": "seven_fins",
+   "desc": "fin_count 9 \u2192 7 (pattern stays centred)",
+   "params": {
+    "fin_count": 7
+   }
+  },
+  {
+   "id": "taller",
+   "desc": "fin_height 25 \u2192 35",
+   "params": {
+    "fin_height": 35
+   }
+  }
+ ],
+ "lean": [
+  "std-units",
+  "std-frame",
+  "part-heatsink",
+  "api-core",
+  "api-patterns",
+  "api-holes"
+ ],
+ "id": "l2-heatsink",
+ "required_params": [
+  "base_size",
+  "base_thickness",
+  "fin_count",
+  "fin_thickness",
+  "fin_height",
+  "fin_pitch",
+  "hole_d",
+  "hole_offset"
+ ]
+}

@@ -1,0 +1,49 @@
+{
+ "id": "x-benchcad-user-bellows-dim1",
+ "level": 5,
+ "title": "BenchCAD edit \u2014 bellows",
+ "family": "External: BenchCAD edit-bench",
+ "tests": [
+  "modification",
+  "dim",
+  "literal_replace"
+ ],
+ "prompt": "Engineering change on the existing model below.\nChange: Increase the bellows outer radius from 22.9 to 30.\nPreserve every other feature. Return the complete modified program. For this task the PARAMS/build() contract is optional; the program must end with `result = <the cadquery Workplane>`.",
+ "start": "start.py",
+ "required_params": [],
+ "score_parametric": false,
+ "probes": [],
+ "lean": [
+  "std-units",
+  "std-change",
+  "api-core"
+ ],
+ "checks": [
+  {
+   "id": "single_solid",
+   "desc": "One valid solid",
+   "type": "solids",
+   "count": 1,
+   "critical": true,
+   "dim": "manufacturability"
+  },
+  {
+   "id": "volume",
+   "desc": "Volume matches the BenchCAD ground truth (\u00b12 %)",
+   "type": "volume",
+   "value": null,
+   "rel_tol": 0.02,
+   "critical": true,
+   "dim": "geometry"
+  }
+ ],
+ "source": {
+  "dataset": "BenchCAD/BenchCAD",
+  "split": "edit_bench",
+  "record_id": "user_bellows_dim1",
+  "licence": "CC-BY-4.0",
+  "url": "https://huggingface.co/datasets/BenchCAD/BenchCAD",
+  "benchcad_iou_orig_vs_gt": 0.9204230043299656
+ },
+ "allow_show_object": true
+}

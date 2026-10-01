@@ -1,0 +1,476 @@
+{
+ "level": 3,
+ "title": "Liquid cold plate",
+ "family": "Complex mechanical geometry",
+ "tests": [
+  "internal channels",
+  "topology",
+  "manufacturability",
+  "ports"
+ ],
+ "prompt": "Model a liquid-cooling cold plate with an internal serpentine channel (all dimensions in mm).\n- Block 120 along X, 80 along Y, 12 thick along Z, centred on the origin in X and Y, bottom on Z = 0.\n- Internal channel, rectangular section 8 wide x 4 high, between Z = 4 and Z = 8 (4 mm of material above and below).\n- The channel makes 5 straight passes along X, centred at Y = -28, -14, 0, 14, 28; channel centre lines run from X = -45 to X = 45.\n- Consecutive passes are joined by U-turns (square corners are acceptable), alternating ends: the first turn at X = +45 (between Y = -28 and -14), the next at X = -45, and so on.\n- Inlet port: vertical hole, diameter 8, from the top face down into the channel at (X = -45, Y = -28). Outlet port: same at (X = 45, Y = 28).\n- The channel must not break out of the block anywhere else.\n- Four through mounting holes, diameter 6.6, at (\u00b154, \u00b134).\nRequired PARAMS keys: length, width, thickness, channel_width, channel_height, channel_z, passes, pass_pitch, straight_half, port_d, mount_hole_d, mount_dx, mount_dy.",
+ "checks": [
+  {
+   "id": "size",
+   "desc": "Envelope 120 x 80 x 12",
+   "type": "bbox",
+   "min": [
+    -60,
+    -40,
+    0
+   ],
+   "max": [
+    60,
+    40,
+    12
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "channel_passes",
+   "desc": "5 internal passes at Z 4\u20138",
+   "type": "points_out",
+   "points": [
+    [
+     0,
+     -28,
+     6
+    ],
+    [
+     0,
+     -14,
+     6
+    ],
+    [
+     0,
+     0,
+     6
+    ],
+    [
+     0,
+     14,
+     6
+    ],
+    [
+     0,
+     28,
+     6
+    ],
+    [
+     -40,
+     -28,
+     5
+    ],
+    [
+     -40,
+     -14,
+     5
+    ],
+    [
+     -40,
+     0,
+     5
+    ],
+    [
+     -40,
+     14,
+     5
+    ],
+    [
+     -40,
+     28,
+     5
+    ],
+    [
+     40,
+     -28,
+     7
+    ],
+    [
+     40,
+     -14,
+     7
+    ],
+    [
+     40,
+     0,
+     7
+    ],
+    [
+     40,
+     14,
+     7
+    ],
+    [
+     40,
+     28,
+     7
+    ]
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "u_turns",
+   "desc": "U-turns alternate +X / -X",
+   "type": "points_out",
+   "points": [
+    [
+     45,
+     -21,
+     6
+    ],
+    [
+     -45,
+     -7,
+     6
+    ],
+    [
+     45,
+     7,
+     6
+    ],
+    [
+     -45,
+     21,
+     6
+    ]
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "no_short_circuit",
+   "desc": "No connections at the wrong ends (flow forced through every pass)",
+   "type": "points_in",
+   "points": [
+    [
+     -45,
+     -21,
+     6
+    ],
+    [
+     45,
+     -7,
+     6
+    ],
+    [
+     -45,
+     7,
+     6
+    ],
+    [
+     45,
+     21,
+     6
+    ],
+    [
+     0,
+     -21,
+     6
+    ],
+    [
+     0,
+     -7,
+     6
+    ],
+    [
+     0,
+     7,
+     6
+    ],
+    [
+     0,
+     21,
+     6
+    ]
+   ],
+   "critical": true,
+   "dim": "manufacturability"
+  },
+  {
+   "id": "walls",
+   "desc": "4 mm wall above and below the channel",
+   "type": "points_in",
+   "points": [
+    [
+     0,
+     -28,
+     10
+    ],
+    [
+     0,
+     -14,
+     10
+    ],
+    [
+     0,
+     0,
+     10
+    ],
+    [
+     0,
+     14,
+     10
+    ],
+    [
+     0,
+     28,
+     10
+    ],
+    [
+     0,
+     -28,
+     2
+    ],
+    [
+     0,
+     -14,
+     2
+    ],
+    [
+     0,
+     0,
+     2
+    ],
+    [
+     0,
+     14,
+     2
+    ],
+    [
+     0,
+     28,
+     2
+    ]
+   ],
+   "critical": true,
+   "dim": "manufacturability"
+  },
+  {
+   "id": "channel_section",
+   "desc": "Channel 8 x 4 mm, not oversized",
+   "type": "points_in",
+   "points": [
+    [
+     0,
+     -28,
+     8.6
+    ],
+    [
+     0,
+     -28,
+     3.4
+    ],
+    [
+     0,
+     -23.4,
+     6
+    ],
+    [
+     0,
+     -32.6,
+     6
+    ]
+   ],
+   "critical": false,
+   "dim": "manufacturability"
+  },
+  {
+   "id": "ports",
+   "desc": "\u00d88 inlet/outlet ports from the top",
+   "type": "hole",
+   "center": [
+    -45,
+    -28,
+    8
+   ],
+   "axis": "Z",
+   "d": 8,
+   "span": [
+    8,
+    12
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "port_out",
+   "desc": "\u00d88 outlet port at (45, 28)",
+   "type": "hole",
+   "center": [
+    45,
+    28,
+    8
+   ],
+   "axis": "Z",
+   "d": 8,
+   "span": [
+    8,
+    12
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "no_breakout",
+   "desc": "No other openings in the top face",
+   "type": "points_in",
+   "points": [
+    [
+     0,
+     0,
+     11
+    ],
+    [
+     45,
+     -28,
+     11
+    ],
+    [
+     -45,
+     28,
+     11
+    ],
+    [
+     0,
+     28,
+     11
+    ]
+   ],
+   "critical": true,
+   "dim": "manufacturability"
+  },
+  {
+   "id": "mount_0",
+   "desc": "\u00d86.6 mounting hole at (54, 34)",
+   "type": "hole",
+   "center": [
+    54,
+    34,
+    0
+   ],
+   "axis": "Z",
+   "d": 6.6,
+   "span": [
+    0,
+    12
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "mount_1",
+   "desc": "\u00d86.6 mounting hole at (-54, 34)",
+   "type": "hole",
+   "center": [
+    -54,
+    34,
+    0
+   ],
+   "axis": "Z",
+   "d": 6.6,
+   "span": [
+    0,
+    12
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "mount_2",
+   "desc": "\u00d86.6 mounting hole at (54, -34)",
+   "type": "hole",
+   "center": [
+    54,
+    -34,
+    0
+   ],
+   "axis": "Z",
+   "d": 6.6,
+   "span": [
+    0,
+    12
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "mount_3",
+   "desc": "\u00d86.6 mounting hole at (-54, -34)",
+   "type": "hole",
+   "center": [
+    -54,
+    -34,
+    0
+   ],
+   "axis": "Z",
+   "d": 6.6,
+   "span": [
+    0,
+    12
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "volume",
+   "desc": "Volume matches the specification (\u00b11 %)",
+   "type": "volume",
+   "value": null,
+   "rel_tol": 0.01,
+   "critical": false,
+   "dim": "geometry"
+  },
+  {
+   "id": "single_solid",
+   "desc": "One valid solid",
+   "type": "solids",
+   "count": 1,
+   "critical": true,
+   "dim": "engineering"
+  }
+ ],
+ "probes": [
+  {
+   "id": "three_passes",
+   "desc": "passes 5 \u2192 3 (outlet moves with the last pass)",
+   "params": {
+    "passes": 3
+   }
+  },
+  {
+   "id": "narrow",
+   "desc": "channel_width 8 \u2192 6",
+   "params": {
+    "channel_width": 6
+   }
+  }
+ ],
+ "lean": [
+  "std-units",
+  "std-frame",
+  "std-manufacturing",
+  "part-coldplate",
+  "api-core",
+  "api-boolean",
+  "api-holes"
+ ],
+ "id": "l3-cold-plate",
+ "required_params": [
+  "length",
+  "width",
+  "thickness",
+  "channel_width",
+  "channel_height",
+  "channel_z",
+  "passes",
+  "pass_pitch",
+  "straight_half",
+  "port_d",
+  "mount_hole_d",
+  "mount_dx",
+  "mount_dy"
+ ]
+}

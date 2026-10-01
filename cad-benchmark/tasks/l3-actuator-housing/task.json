@@ -1,0 +1,406 @@
+{
+ "level": 3,
+ "title": "Actuator gearbox housing",
+ "family": "Complex mechanical geometry",
+ "tests": [
+  "shelling",
+  "bosses",
+  "bearing bore",
+  "multiple interacting features",
+  "manufacturability"
+ ],
+ "prompt": "Model an open-top actuator gearbox housing (all dimensions in mm).\n- Main box: 100 along X, 70 along Y, 50 tall along Z, centred on the origin in X and Y, bottom on Z = 0, open at the top.\n- Walls 4 thick, floor 5 thick. Outer vertical edges rounded R8 (inner cavity corners R4).\n- Bearing boss on the +X wall: cylinder diameter 46, axis along X at (Y = 0, Z = 25), protruding 8 beyond the +X outer face (to X = 58).\n- Bearing bore diameter 32, through the boss and the wall, same axis.\n- Four internal screw columns, diameter 10, full height from the floor to Z = 50, centred at (\u00b140, \u00b125), merged with the walls.\n- Each column has a blind tapped hole, diameter 4.2, 12 deep from the top face.\nRequired PARAMS keys: length, width, height, wall, floor, corner_radius, boss_d, boss_len, bore_d, boss_z, column_d, column_inset, tap_d, tap_depth.",
+ "checks": [
+  {
+   "id": "size",
+   "desc": "Envelope X -50\u202658, Y \u00b135, Z 0\u201350",
+   "type": "bbox",
+   "min": [
+    -50,
+    -35,
+    0
+   ],
+   "max": [
+    58,
+    35,
+    50
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "open_top",
+   "desc": "Open-top cavity",
+   "type": "points_out",
+   "points": [
+    [
+     0,
+     0,
+     48
+    ],
+    [
+     0,
+     0,
+     20
+    ],
+    [
+     -30,
+     15,
+     30
+    ]
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "floor",
+   "desc": "Floor 5 mm",
+   "type": "points_in",
+   "points": [
+    [
+     0,
+     0,
+     2.5
+    ],
+    [
+     -30,
+     15,
+     4.5
+    ]
+   ],
+   "critical": true,
+   "dim": "manufacturability"
+  },
+  {
+   "id": "floor_top",
+   "desc": "Floor top at Z=5",
+   "type": "points_out",
+   "points": [
+    [
+     0,
+     0,
+     5.5
+    ]
+   ],
+   "critical": false,
+   "dim": "engineering"
+  },
+  {
+   "id": "walls",
+   "desc": "Walls 4 mm",
+   "type": "points_in",
+   "points": [
+    [
+     -48,
+     0,
+     25
+    ],
+    [
+     0,
+     33,
+     25
+    ],
+    [
+     0,
+     -33,
+     25
+    ],
+    [
+     48,
+     15,
+     40
+    ]
+   ],
+   "critical": true,
+   "dim": "manufacturability"
+  },
+  {
+   "id": "wall_thickness",
+   "desc": "Walls not thicker than 4 mm",
+   "type": "points_out",
+   "points": [
+    [
+     -45.5,
+     0,
+     25
+    ],
+    [
+     0,
+     30.5,
+     25
+    ],
+    [
+     0,
+     -30.5,
+     25
+    ]
+   ],
+   "critical": false,
+   "dim": "manufacturability"
+  },
+  {
+   "id": "corner_fillets",
+   "desc": "Outer vertical edges rounded R8",
+   "type": "points_out",
+   "points": [
+    [
+     -49.5,
+     34.5,
+     25
+    ],
+    [
+     49.5,
+     -34.5,
+     25
+    ]
+   ],
+   "critical": false,
+   "dim": "engineering"
+  },
+  {
+   "id": "bore",
+   "desc": "\u00d832 bearing bore through boss and wall, axis X at Z=25",
+   "type": "hole",
+   "center": [
+    46,
+    0,
+    25
+   ],
+   "axis": "X",
+   "d": 32,
+   "span": [
+    46,
+    58
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "boss",
+   "desc": "\u00d846 boss protruding 8 mm on +X",
+   "type": "points_in",
+   "points": [
+    [
+     56,
+     0,
+     47.0
+    ],
+    [
+     56,
+     22.0,
+     25
+    ],
+    [
+     56,
+     0,
+     3.0
+    ]
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "boss_extent",
+   "desc": "Boss not larger than \u00d846, not longer than 8 mm",
+   "type": "points_out",
+   "points": [
+    [
+     56,
+     0,
+     49.0
+    ],
+    [
+     58.5,
+     0,
+     43.0
+    ]
+   ],
+   "critical": false,
+   "dim": "engineering"
+  },
+  {
+   "id": "columns",
+   "desc": "Four \u00d810 screw columns at (\u00b140, \u00b125)",
+   "type": "points_in",
+   "points": [
+    [
+     40,
+     25,
+     30
+    ],
+    [
+     40,
+     -25,
+     30
+    ],
+    [
+     -40,
+     25,
+     30
+    ],
+    [
+     -40,
+     -25,
+     30
+    ]
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "tap_0",
+   "desc": "\u00d84.2 tapped hole, 12 deep, at (40, 25)",
+   "type": "hole",
+   "center": [
+    40,
+    25,
+    38
+   ],
+   "axis": "Z",
+   "d": 4.2,
+   "span": [
+    38,
+    50
+   ],
+   "critical": true,
+   "tol": 0.25,
+   "dim": "engineering"
+  },
+  {
+   "id": "tap_1",
+   "desc": "\u00d84.2 tapped hole, 12 deep, at (-40, 25)",
+   "type": "hole",
+   "center": [
+    -40,
+    25,
+    38
+   ],
+   "axis": "Z",
+   "d": 4.2,
+   "span": [
+    38,
+    50
+   ],
+   "critical": true,
+   "tol": 0.25,
+   "dim": "engineering"
+  },
+  {
+   "id": "tap_2",
+   "desc": "\u00d84.2 tapped hole, 12 deep, at (40, -25)",
+   "type": "hole",
+   "center": [
+    40,
+    -25,
+    38
+   ],
+   "axis": "Z",
+   "d": 4.2,
+   "span": [
+    38,
+    50
+   ],
+   "critical": true,
+   "tol": 0.25,
+   "dim": "engineering"
+  },
+  {
+   "id": "tap_3",
+   "desc": "\u00d84.2 tapped hole, 12 deep, at (-40, -25)",
+   "type": "hole",
+   "center": [
+    -40,
+    -25,
+    38
+   ],
+   "axis": "Z",
+   "d": 4.2,
+   "span": [
+    38,
+    50
+   ],
+   "critical": true,
+   "tol": 0.25,
+   "dim": "engineering"
+  },
+  {
+   "id": "tap_blind",
+   "desc": "Tapped holes are blind (12 mm)",
+   "type": "points_in",
+   "points": [
+    [
+     40,
+     25,
+     35
+    ],
+    [
+     -40,
+     -25,
+     35
+    ]
+   ],
+   "critical": false,
+   "dim": "manufacturability"
+  },
+  {
+   "id": "volume",
+   "desc": "Volume matches the specification (\u00b11.5 %)",
+   "type": "volume",
+   "value": null,
+   "rel_tol": 0.015,
+   "critical": false,
+   "dim": "geometry"
+  },
+  {
+   "id": "single_solid",
+   "desc": "One valid solid",
+   "type": "solids",
+   "count": 1,
+   "critical": true,
+   "dim": "engineering"
+  }
+ ],
+ "probes": [
+  {
+   "id": "wall5",
+   "desc": "wall 4 \u2192 5",
+   "params": {
+    "wall": 5
+   }
+  },
+  {
+   "id": "bore35",
+   "desc": "bore_d 32 \u2192 35",
+   "params": {
+    "bore_d": 35
+   }
+  }
+ ],
+ "lean": [
+  "std-units",
+  "std-frame",
+  "std-manufacturing",
+  "part-housing",
+  "api-core",
+  "api-shell",
+  "api-holes",
+  "api-fillets"
+ ],
+ "id": "l3-actuator-housing",
+ "required_params": [
+  "length",
+  "width",
+  "height",
+  "wall",
+  "floor",
+  "corner_radius",
+  "boss_d",
+  "boss_len",
+  "bore_d",
+  "boss_z",
+  "column_d",
+  "column_inset",
+  "tap_d",
+  "tap_depth"
+ ]
+}

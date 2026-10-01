@@ -1,0 +1,6 @@
+{
+  "_comment": "Human correction time, recorded ONLY by an engineer who actually corrected a generated result until it was acceptable. Key = attempt_id (or run_id/attempt_id). Unreviewed attempts show N/A. Re-run `python -m cadbench export` after editing.",
+  "reviews": {
+    "_example_attempt_id": {"minutes": null, "reviewer": "name", "date": "YYYY-MM-DD", "tool": "CAD system used for the correction", "notes": "what had to be fixed"}
+  }
+}

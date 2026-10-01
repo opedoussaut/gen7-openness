@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f5f8fb">
+<meta name="description" content="GEN7 CAD Benchmark — what it costs, in money, time and computation, to obtain an engineering CAD result of the required quality.">
+<title>GEN7 CAD Benchmark · Cost of engineering quality</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%230a5fae'/%3E%3Cpath d='M9 21l7-11 7 11z' fill='none' stroke='white' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="./app.css">
+</head>
+<body>
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="#overview" aria-label="GEN7 CAD Benchmark">
+      <svg viewBox="0 0 32 32" width="34" height="34" aria-hidden="true"><defs><linearGradient id="bm" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1aa3d6"/><stop offset="1" stop-color="#0a5fae"/></linearGradient></defs><circle cx="16" cy="16" r="15" fill="url(#bm)"/><g fill="none" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"><path d="M9 20.5l7 3.8 7-3.8v-8.6l-7-3.8-7 3.8z"/><path d="M9 11.9l7 3.8 7-3.8M16 15.7v8.6" opacity=".85"/></g></svg>
+      <span><strong>GEN7 <span>CAD Benchmark</span></strong><small>Cost of engineering quality</small></span>
+    </a>
+    <nav class="tabs" role="tablist" aria-label="Sections">
+      <button role="tab" data-page="overview" aria-selected="true"><i>01</i>Overview</button>
+      <button role="tab" data-page="live" aria-selected="false"><i>02</i>Live run</button>
+      <button role="tab" data-page="compare" aria-selected="false"><i>03</i>Compare</button>
+      <button role="tab" data-page="gallery" aria-selected="false"><i>04</i>CAD results</button>
+      <button role="tab" data-page="lean" aria-selected="false"><i>05</i>Lean AI</button>
+      <button role="tab" data-page="method" aria-selected="false"><i>06</i>Method &amp; data</button>
+    </nav>
+    <div class="controls">
+      <button class="live-pill" id="live-pill" type="button" data-status="idle"><span class="dot"></span><b>Idle</b></button>
+    </div>
+  </div>
+</header>
+<main id="main">
+  <section class="page" id="page-overview"></section>
+  <section class="page" id="page-live" hidden></section>
+  <section class="page" id="page-compare" hidden></section>
+  <section class="page" id="page-gallery" hidden></section>
+  <section class="page" id="page-lean" hidden></section>
+  <section class="page" id="page-method" hidden></section>
+</main>
+<footer class="site-foot">
+  <span>Every number on this page is computed from recorded benchmark runs. A value that was not measured is shown as N/A.</span>
+  <span><a href="../">GEN7 Openness</a></span>
+</footer>
+<dialog id="drawer" aria-labelledby="drawer-title">
+  <div class="dialog-head"><div><span class="eyebrow" id="drawer-kicker">Attempt</span><h2 class="h3" id="drawer-title">Details</h2></div><button class="icon-btn" id="drawer-close" aria-label="Close">×</button></div>
+  <div class="dialog-body" id="drawer-body"></div>
+</dialog>
+<div class="tooltip" id="tooltip" role="status"></div>
+<noscript><p style="padding:40px;text-align:center">This dashboard needs JavaScript and must be served over HTTP (python -m cadbench serve).</p></noscript>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

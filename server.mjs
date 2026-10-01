@@ -6,9 +6,12 @@ import { mcp, a2a, agentCard, rpcError } from './protocol.js';
 const root = fileURLToPath(new URL('.', import.meta.url));
 // Public files: legacy Protocol Lab assets, the GEN7 Openness app, and everything under src/ and styles/.
 const TOP = { '/': 'index.html', '/index.html': 'index.html', '/lab.html': 'lab.html', '/lab.css': 'lab.css', '/lab.js': 'lab.js', '/protocol.js': 'protocol.js', '/icons.js': 'icons.js', '/favicon.svg': 'favicon.svg' };
-const TYPES = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.svg': 'image/svg+xml' };
+const TYPES = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.svg': 'image/svg+xml', '.json': 'application/json', '.csv': 'text/csv' };
 function publicFile(path) {
   if (TOP[path]) return TOP[path];
+  // CAD benchmark dashboard (static view of exported results; live monitoring is served by `python -m cadbench serve`)
+  if (path === '/cad-benchmark' || path === '/cad-benchmark/') return 'cad-benchmark/index.html';
+  if (/^\/cad-benchmark\/(app\.js|app\.css|data\/[A-Za-z0-9_.\-/]+\.(json|csv|svg))$/.test(path) && !path.includes('..')) return path.slice(1);
   if (!/^\/(src|styles)\/[A-Za-z0-9_\-/]+\.(js|css)$/.test(path) || path.includes('..')) return null;
   return path.slice(1);
 }

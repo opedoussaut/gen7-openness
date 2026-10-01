@@ -1,0 +1,6 @@
+# GEN7 CAD benchmark harness — Python 3.10–3.12 recommended (CadQuery wheels).
+cadquery>=2.4
+numpy
+scipy
+trimesh
+psutil

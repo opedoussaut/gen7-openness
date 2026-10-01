@@ -1,0 +1,17 @@
+{
+  "name": "ollama-local",
+  "_comment": "Benchmarks every model installed in your local Ollama (auto-discovered via /api/tags). Edit 'include' to restrict, e.g. [\"qwen2.5-coder\", \"llama3.1\"]. Set rate_usd_per_hour to your own GPU-hour cost to get a monetary cost; leave null to show cost as N/A. Energy is measured with nvidia-smi when an NVIDIA GPU is present.",
+  "tasks": ["all"],
+  "context": "groomed",
+  "lean_tasks": ["l2-angle-bracket", "l3-cold-plate", "l5-housing-bore-change"],
+  "max_iterations": 4,
+  "repeats": 1,
+  "strict_model_match": true,
+  "models": [
+    {"kind": "ollama", "model": "auto", "base_url": "http://127.0.0.1:11434", "exclude": ["embed", "vision", "llava"],
+     "inference_provider": "Ollama (local)",
+     "params": {"temperature": 0.0, "max_tokens": 2048, "seed": 42, "num_ctx": 16384, "keep_alive": "10m"},
+     "infrastructure": {"type": "gpu", "hardware": "local workstation", "rate_usd_per_hour": null,
+                        "rate_source": "Not set — edit config/run.ollama.json (e.g. an amortised GPU-hour cost or a cloud reference price) to compute monetary cost."}}
+  ]
+}

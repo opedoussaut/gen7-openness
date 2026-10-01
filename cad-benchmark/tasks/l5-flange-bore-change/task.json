@@ -1,0 +1,319 @@
+{
+ "level": 5,
+ "title": "Engineering change \u2014 flange bore",
+ "family": "Engineering change",
+ "tests": [
+  "modification",
+  "interface preservation",
+  "design intent"
+ ],
+ "prompt": "Engineering change request ECR-0412 on the existing pipe flange model below.\nChange: increase the central bore diameter from 64 mm to 76 mm.\nPreserve: the bolt pattern (8 x \u00d818 on a 125 mm PCD, first hole on +X), the raised face (\u00d8100 x 3), the outer diameter (160) and the overall thickness (18 + 3). Keep the model parametric with the same PARAMS keys.\nReturn the complete modified code.",
+ "start": "start.py",
+ "checks": [
+  {
+   "id": "size",
+   "desc": "Envelope unchanged: \u00d8160 x 21",
+   "type": "bbox",
+   "min": [
+    -80,
+    -80,
+    0
+   ],
+   "max": [
+    80,
+    80,
+    21
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "bore",
+   "desc": "Bore now \u00d876",
+   "type": "hole",
+   "center": [
+    0,
+    0,
+    0
+   ],
+   "axis": "Z",
+   "d": 76,
+   "span": [
+    0,
+    21
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "bolt_0",
+   "desc": "Bolt hole 1 preserved (\u00d818 on PCD 125)",
+   "type": "hole",
+   "center": [
+    62.5,
+    0.0,
+    0
+   ],
+   "axis": "Z",
+   "d": 18,
+   "span": [
+    0,
+    18
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "bolt_1",
+   "desc": "Bolt hole 2 preserved (\u00d818 on PCD 125)",
+   "type": "hole",
+   "center": [
+    44.1942,
+    44.1942,
+    0
+   ],
+   "axis": "Z",
+   "d": 18,
+   "span": [
+    0,
+    18
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "bolt_2",
+   "desc": "Bolt hole 3 preserved (\u00d818 on PCD 125)",
+   "type": "hole",
+   "center": [
+    0.0,
+    62.5,
+    0
+   ],
+   "axis": "Z",
+   "d": 18,
+   "span": [
+    0,
+    18
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "bolt_3",
+   "desc": "Bolt hole 4 preserved (\u00d818 on PCD 125)",
+   "type": "hole",
+   "center": [
+    -44.1942,
+    44.1942,
+    0
+   ],
+   "axis": "Z",
+   "d": 18,
+   "span": [
+    0,
+    18
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "bolt_4",
+   "desc": "Bolt hole 5 preserved (\u00d818 on PCD 125)",
+   "type": "hole",
+   "center": [
+    -62.5,
+    0.0,
+    0
+   ],
+   "axis": "Z",
+   "d": 18,
+   "span": [
+    0,
+    18
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "bolt_5",
+   "desc": "Bolt hole 6 preserved (\u00d818 on PCD 125)",
+   "type": "hole",
+   "center": [
+    -44.1942,
+    -44.1942,
+    0
+   ],
+   "axis": "Z",
+   "d": 18,
+   "span": [
+    0,
+    18
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "bolt_6",
+   "desc": "Bolt hole 7 preserved (\u00d818 on PCD 125)",
+   "type": "hole",
+   "center": [
+    -0.0,
+    -62.5,
+    0
+   ],
+   "axis": "Z",
+   "d": 18,
+   "span": [
+    0,
+    18
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "bolt_7",
+   "desc": "Bolt hole 8 preserved (\u00d818 on PCD 125)",
+   "type": "hole",
+   "center": [
+    44.1942,
+    -44.1942,
+    0
+   ],
+   "axis": "Z",
+   "d": 18,
+   "span": [
+    0,
+    18
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "no_extra_holes",
+   "desc": "No new holes in the bolt circle",
+   "type": "points_in",
+   "points": [
+    [
+     57.742,
+     23.918,
+     9
+    ],
+    [
+     23.918,
+     57.742,
+     9
+    ],
+    [
+     -23.918,
+     57.742,
+     9
+    ],
+    [
+     -57.742,
+     23.918,
+     9
+    ],
+    [
+     -57.742,
+     -23.918,
+     9
+    ],
+    [
+     -23.918,
+     -57.742,
+     9
+    ],
+    [
+     23.918,
+     -57.742,
+     9
+    ],
+    [
+     57.742,
+     -23.918,
+     9
+    ]
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "raised_face",
+   "desc": "Raised face preserved",
+   "type": "points_in",
+   "points": [
+    [
+     0,
+     45,
+     19.5
+    ],
+    [
+     45,
+     0,
+     19.5
+    ]
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "raised_face_extent",
+   "desc": "Raised face still \u00d8100",
+   "type": "points_out",
+   "points": [
+    [
+     0,
+     55,
+     19.5
+    ]
+   ],
+   "critical": false,
+   "dim": "engineering"
+  },
+  {
+   "id": "volume",
+   "desc": "Volume matches the changed specification (\u00b11 %)",
+   "type": "volume",
+   "value": null,
+   "rel_tol": 0.01,
+   "critical": false,
+   "dim": "geometry"
+  },
+  {
+   "id": "single_solid",
+   "desc": "One valid solid",
+   "type": "solids",
+   "count": 1,
+   "critical": true,
+   "dim": "engineering"
+  }
+ ],
+ "probes": [
+  {
+   "id": "six_bolts",
+   "desc": "bolt_count 8 \u2192 6 still drives the pattern",
+   "params": {
+    "bolt_count": 6
+   }
+  }
+ ],
+ "lean": [
+  "std-units",
+  "std-frame",
+  "std-change",
+  "part-flange",
+  "api-core"
+ ],
+ "id": "l5-flange-bore-change",
+ "required_params": [
+  "outer_d",
+  "thickness",
+  "bore_d",
+  "raised_face_d",
+  "raised_face_h",
+  "bolt_count",
+  "bolt_hole_d",
+  "pcd"
+ ]
+}

@@ -1,0 +1,22 @@
+{
+  "name": "frontier-apis",
+  "_comment": "Frontier APIs. Keys are read from the environment variables named in api_key_env and are never written to results. Prices come from config/pricing.json (verify the model identifiers against each provider before running). Hugging Face Inference Providers use kind openai_compatible with base_url https://router.huggingface.co/v1 — record the inference provider, because an open model has no universal token price.",
+  "tasks": ["all"],
+  "context": "groomed",
+  "lean_tasks": ["l2-angle-bracket", "l3-cold-plate", "l5-housing-bore-change"],
+  "max_iterations": 4,
+  "strict_model_match": true,
+  "models": [
+    {"id": "claude-opus-5-5", "label": "Claude Opus 5.5", "kind": "anthropic", "model": "claude-opus-5-5", "api_key_env": "ANTHROPIC_API_KEY",
+     "params": {"temperature": 0.0, "max_tokens": 4096}},
+    {"id": "claude-sonnet-5-5", "label": "Claude Sonnet 5.5", "kind": "anthropic", "model": "claude-sonnet-5-5", "api_key_env": "ANTHROPIC_API_KEY",
+     "params": {"temperature": 0.0, "max_tokens": 4096}},
+    {"id": "gemini-3.1-pro", "label": "Gemini 3.1 Pro (preview)", "kind": "gemini", "model": "gemini-3.1-pro-preview", "api_key_env": "GEMINI_API_KEY",
+     "params": {"temperature": 0.0, "max_tokens": 8192}},
+    {"id": "gpt-6-astra", "label": "GPT-6 Astra", "kind": "openai", "model": "gpt-6-astra", "api_key_env": "OPENAI_API_KEY",
+     "params": {"max_tokens": 8192, "reasoning_effort": "medium"}},
+    {"id": "hf-qwen-coder-32b", "label": "Qwen2.5-Coder 32B via HF router", "kind": "openai_compatible", "base_url": "https://router.huggingface.co/v1",
+     "model": "Qwen/Qwen2.5-Coder-32B-Instruct", "api_key_env": "HF_TOKEN", "inference_provider": "Hugging Face Inference Providers (router; record the routed provider)",
+     "pricing_key": "hf:Qwen/Qwen2.5-Coder-32B-Instruct", "params": {"temperature": 0.0, "max_tokens": 4096}}
+  ]
+}

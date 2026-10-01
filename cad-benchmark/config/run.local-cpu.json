@@ -1,0 +1,84 @@
+{
+ "name": "open-models-cpu",
+ "_comment": "Open-weight Qwen2.5-Coder size ladder (Apache-2.0), Q4_K_M GGUF, served by llama.cpp llama-server on a 2-vCPU CPU-only workspace. No API key. One task per difficulty level to keep the CPU run to about two hours; the same five tasks for every model.",
+ "tasks": [
+  "l1-mounting-plate",
+  "l2-heatsink",
+  "l3-cold-plate",
+  "l4-shaft-support",
+  "l5-flange-bore-change"
+ ],
+ "context": "groomed",
+ "lean_tasks": [
+  "l2-heatsink",
+  "l5-flange-bore-change"
+ ],
+ "lean_models": [
+  "qwen2.5-coder-3b"
+ ],
+ "max_iterations": 3,
+ "repeats": 1,
+ "strict_model_match": true,
+ "models": [
+  {
+   "id": "qwen2.5-coder-0.5b",
+   "label": "Qwen2.5-Coder 0.5B",
+   "kind": "openai_compatible",
+   "base_url": "http://127.0.0.1:8080/v1",
+   "model": "qwen2.5-coder-0.5b-instruct",
+   "inference_provider": "llama.cpp llama-server (built from the llama-cpp-python 0.3.35 vendored source), CPU, Q4_K_M",
+   "model_file": "/home/claude/models/qwen2.5-coder-0.5b-instruct-q4_k_m.gguf",
+   "params": {
+    "temperature": 0.0,
+    "max_tokens": 1024,
+    "seed": 42
+   },
+   "infrastructure": {
+    "type": "cpu",
+    "hardware": "2 vCPU / 7 GB cloud container (benchmark workspace)",
+    "rate_usd_per_hour": 0.0892,
+    "rate_source": "Reference rate: AWS EC2 c7i.large (2 vCPU, 4 GiB) Linux on-demand us-east-1 $0.0892/h, https://www.doit.com/compute/compute/aws/us-east-1/c7i.large, retrieved 2026-10-01. Comparable, not identical, hardware."
+   }
+  },
+  {
+   "id": "qwen2.5-coder-1.5b",
+   "label": "Qwen2.5-Coder 1.5B",
+   "kind": "openai_compatible",
+   "base_url": "http://127.0.0.1:8081/v1",
+   "model": "qwen2.5-coder-1.5b-instruct",
+   "inference_provider": "llama.cpp llama-server (built from the llama-cpp-python 0.3.35 vendored source), CPU, Q4_K_M",
+   "model_file": "/home/claude/models/qwen2.5-coder-1.5b-instruct-q4_k_m.gguf",
+   "params": {
+    "temperature": 0.0,
+    "max_tokens": 1024,
+    "seed": 42
+   },
+   "infrastructure": {
+    "type": "cpu",
+    "hardware": "2 vCPU / 7 GB cloud container (benchmark workspace)",
+    "rate_usd_per_hour": 0.0892,
+    "rate_source": "Reference rate: AWS EC2 c7i.large (2 vCPU, 4 GiB) Linux on-demand us-east-1 $0.0892/h, https://www.doit.com/compute/compute/aws/us-east-1/c7i.large, retrieved 2026-10-01. Comparable, not identical, hardware."
+   }
+  },
+  {
+   "id": "qwen2.5-coder-3b",
+   "label": "Qwen2.5-Coder 3B",
+   "kind": "openai_compatible",
+   "base_url": "http://127.0.0.1:8082/v1",
+   "model": "qwen2.5-coder-3b-instruct",
+   "inference_provider": "llama.cpp llama-server (built from the llama-cpp-python 0.3.35 vendored source), CPU, Q4_K_M",
+   "model_file": "/home/claude/models/qwen2.5-coder-3b-instruct-q4_k_m.gguf",
+   "params": {
+    "temperature": 0.0,
+    "max_tokens": 1024,
+    "seed": 42
+   },
+   "infrastructure": {
+    "type": "cpu",
+    "hardware": "2 vCPU / 7 GB cloud container (benchmark workspace)",
+    "rate_usd_per_hour": 0.0892,
+    "rate_source": "Reference rate: AWS EC2 c7i.large (2 vCPU, 4 GiB) Linux on-demand us-east-1 $0.0892/h, https://www.doit.com/compute/compute/aws/us-east-1/c7i.large, retrieved 2026-10-01. Comparable, not identical, hardware."
+   }
+  }
+ ]
+}

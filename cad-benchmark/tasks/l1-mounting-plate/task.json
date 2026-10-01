@@ -1,0 +1,219 @@
+{
+ "level": 1,
+ "title": "Mounting plate",
+ "family": "Simple mechanical part",
+ "tests": [
+  "dimensions",
+  "holes",
+  "extrusion",
+  "basic constraints"
+ ],
+ "prompt": "Model a rectangular mounting plate.\n- Plate 120 mm along X, 80 mm along Y, 8 mm thick along Z.\n- Bottom face on Z = 0; plate centred on the origin in X and Y.\n- Four through holes, diameter 9 mm, each centre 12 mm from both adjacent edges.\n- One central through bore, diameter 30 mm.\n- All four vertical outer edges rounded with radius 6 mm.\nRequired PARAMS keys: length, width, thickness, corner_hole_d, edge_offset, bore_d, corner_radius.",
+ "checks": [
+  {
+   "id": "size",
+   "desc": "Envelope 120 x 80 x 8 mm, bottom on Z=0, centred",
+   "type": "bbox",
+   "min": [
+    -60,
+    -40,
+    0
+   ],
+   "max": [
+    60,
+    40,
+    8
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "hole_0",
+   "desc": "\u00d89 through hole at (48, 28)",
+   "type": "hole",
+   "center": [
+    48,
+    28,
+    0
+   ],
+   "axis": "Z",
+   "d": 9,
+   "span": [
+    0,
+    8
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "hole_1",
+   "desc": "\u00d89 through hole at (-48, 28)",
+   "type": "hole",
+   "center": [
+    -48,
+    28,
+    0
+   ],
+   "axis": "Z",
+   "d": 9,
+   "span": [
+    0,
+    8
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "hole_2",
+   "desc": "\u00d89 through hole at (48, -28)",
+   "type": "hole",
+   "center": [
+    48,
+    -28,
+    0
+   ],
+   "axis": "Z",
+   "d": 9,
+   "span": [
+    0,
+    8
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "hole_3",
+   "desc": "\u00d89 through hole at (-48, -28)",
+   "type": "hole",
+   "center": [
+    -48,
+    -28,
+    0
+   ],
+   "axis": "Z",
+   "d": 9,
+   "span": [
+    0,
+    8
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "bore",
+   "desc": "Central \u00d830 through bore",
+   "type": "hole",
+   "center": [
+    0,
+    0,
+    0
+   ],
+   "axis": "Z",
+   "d": 30,
+   "span": [
+    0,
+    8
+   ],
+   "critical": true,
+   "dim": "engineering"
+  },
+  {
+   "id": "corners",
+   "desc": "Vertical outer edges rounded R6",
+   "type": "points_out",
+   "points": [
+    [
+     59.5,
+     39.5,
+     4
+    ],
+    [
+     -59.5,
+     39.5,
+     4
+    ],
+    [
+     59.5,
+     -39.5,
+     4
+    ],
+    [
+     -59.5,
+     -39.5,
+     4
+    ]
+   ],
+   "critical": false,
+   "dim": "engineering"
+  },
+  {
+   "id": "corner_material",
+   "desc": "Corner fillet not oversized",
+   "type": "points_in",
+   "points": [
+    [
+     56,
+     38,
+     4
+    ],
+    [
+     -56,
+     -38,
+     4
+    ]
+   ],
+   "critical": false,
+   "dim": "engineering"
+  },
+  {
+   "id": "volume",
+   "desc": "Volume matches the specification (\u00b11 %)",
+   "type": "volume",
+   "value": null,
+   "rel_tol": 0.01,
+   "critical": false,
+   "dim": "geometry"
+  },
+  {
+   "id": "single_solid",
+   "desc": "One valid solid",
+   "type": "solids",
+   "count": 1,
+   "critical": true,
+   "dim": "engineering"
+  }
+ ],
+ "probes": [
+  {
+   "id": "longer",
+   "desc": "length 120 \u2192 160: holes stay 12 mm from the edges",
+   "params": {
+    "length": 160
+   }
+  },
+  {
+   "id": "thicker",
+   "desc": "thickness 8 \u2192 12",
+   "params": {
+    "thickness": 12
+   }
+  }
+ ],
+ "lean": [
+  "std-units",
+  "std-frame",
+  "part-plate",
+  "api-core",
+  "api-holes"
+ ],
+ "id": "l1-mounting-plate",
+ "required_params": [
+  "length",
+  "width",
+  "thickness",
+  "corner_hole_d",
+  "edge_offset",
+  "bore_d",
+  "corner_radius"
+ ]
+}

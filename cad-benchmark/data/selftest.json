@@ -1,0 +1,543 @@
+{
+ "generated": "2026-10-01T04:27:05Z",
+ "note": "Evaluator calibration only. These are hand-written reference and faulty programs, not model outputs.",
+ "rows": [
+  {
+   "kind": "reference",
+   "task_id": "l1-mounting-plate",
+   "label": "Reference model",
+   "expectation": "expect: accepted, 100 %",
+   "accepted": true,
+   "scores": {
+    "geometry": 1.0,
+    "engineering": 1.0,
+    "parametric": 1.0,
+    "manufacturability": 1.0,
+    "completion": 1.0,
+    "overall": 1.0
+   },
+   "critical_failed": [],
+   "failed_checks": [],
+   "failed_probes": [],
+   "iou": 1.0
+  },
+  {
+   "kind": "reference",
+   "task_id": "l1-pipe-flange",
+   "label": "Reference model",
+   "expectation": "expect: accepted, 100 %",
+   "accepted": true,
+   "scores": {
+    "geometry": 1.0,
+    "engineering": 1.0,
+    "parametric": 1.0,
+    "manufacturability": 1.0,
+    "completion": 1.0,
+    "overall": 1.0
+   },
+   "critical_failed": [],
+   "failed_checks": [],
+   "failed_probes": [],
+   "iou": 1.0
+  },
+  {
+   "kind": "reference",
+   "task_id": "l2-angle-bracket",
+   "label": "Reference model",
+   "expectation": "expect: accepted, 100 %",
+   "accepted": true,
+   "scores": {
+    "geometry": 1.0,
+    "engineering": 1.0,
+    "parametric": 1.0,
+    "manufacturability": 1.0,
+    "completion": 1.0,
+    "overall": 1.0
+   },
+   "critical_failed": [],
+   "failed_checks": [],
+   "failed_probes": [],
+   "iou": 1.0
+  },
+  {
+   "kind": "reference",
+   "task_id": "l2-heatsink",
+   "label": "Reference model",
+   "expectation": "expect: accepted, 100 %",
+   "accepted": true,
+   "scores": {
+    "geometry": 1.0,
+    "engineering": 1.0,
+    "parametric": 1.0,
+    "manufacturability": 1.0,
+    "completion": 1.0,
+    "overall": 1.0
+   },
+   "critical_failed": [],
+   "failed_checks": [],
+   "failed_probes": [],
+   "iou": 1.0
+  },
+  {
+   "kind": "reference",
+   "task_id": "l3-actuator-housing",
+   "label": "Reference model",
+   "expectation": "expect: accepted, 100 %",
+   "accepted": true,
+   "scores": {
+    "geometry": 1.0,
+    "engineering": 1.0,
+    "parametric": 1.0,
+    "manufacturability": 1.0,
+    "completion": 1.0,
+    "overall": 1.0
+   },
+   "critical_failed": [],
+   "failed_checks": [],
+   "failed_probes": [],
+   "iou": 1.0
+  },
+  {
+   "kind": "reference",
+   "task_id": "l3-cold-plate",
+   "label": "Reference model",
+   "expectation": "expect: accepted, 100 %",
+   "accepted": true,
+   "scores": {
+    "geometry": 1.0,
+    "engineering": 1.0,
+    "parametric": 1.0,
+    "manufacturability": 1.0,
+    "completion": 1.0,
+    "overall": 1.0
+   },
+   "critical_failed": [],
+   "failed_checks": [],
+   "failed_probes": [],
+   "iou": 1.0
+  },
+  {
+   "kind": "reference",
+   "task_id": "l4-shaft-support",
+   "label": "Reference model",
+   "expectation": "expect: accepted, 100 %",
+   "accepted": true,
+   "scores": {
+    "geometry": 1.0,
+    "engineering": 1.0,
+    "parametric": 1.0,
+    "manufacturability": 1.0,
+    "completion": 1.0,
+    "overall": 1.0
+   },
+   "critical_failed": [],
+   "failed_checks": [],
+   "failed_probes": [],
+   "iou": 1.0
+  },
+  {
+   "kind": "reference",
+   "task_id": "l5-flange-bore-change",
+   "label": "Reference model",
+   "expectation": "expect: accepted, 100 %",
+   "accepted": true,
+   "scores": {
+    "geometry": 1.0,
+    "engineering": 1.0,
+    "parametric": 1.0,
+    "manufacturability": 1.0,
+    "completion": 1.0,
+    "overall": 1.0
+   },
+   "critical_failed": [],
+   "failed_checks": [],
+   "failed_probes": [],
+   "iou": 1.0
+  },
+  {
+   "kind": "reference",
+   "task_id": "l5-housing-bore-change",
+   "label": "Reference model",
+   "expectation": "expect: accepted, 100 %",
+   "accepted": true,
+   "scores": {
+    "geometry": 1.0,
+    "engineering": 1.0,
+    "parametric": 1.0,
+    "manufacturability": 1.0,
+    "completion": 1.0,
+    "overall": 1.0
+   },
+   "critical_failed": [],
+   "failed_checks": [],
+   "failed_probes": [],
+   "iou": 1.0
+  },
+  {
+   "kind": "variant",
+   "task_id": "l1-mounting-plate",
+   "label": "Independent implementation, hard-coded",
+   "expectation": "expect: geometry and engineering pass, parametric low",
+   "accepted": false,
+   "scores": {
+    "geometry": 0.8305,
+    "engineering": 1.0,
+    "parametric": 0.0,
+    "manufacturability": 1.0,
+    "completion": 1.0,
+    "overall": 0.7992
+   },
+   "critical_failed": [],
+   "failed_checks": [],
+   "failed_probes": [
+    "longer",
+    "thicker"
+   ],
+   "iou": 1.0
+  },
+  {
+   "kind": "variant",
+   "task_id": "l1-mounting-plate",
+   "label": "Corner holes \u00d88 instead of \u00d89",
+   "expectation": "expect: hole checks fail",
+   "accepted": false,
+   "scores": {
+    "geometry": 0.8389,
+    "engineering": 0.5,
+    "parametric": 1.0,
+    "manufacturability": 1.0,
+    "completion": 0.4286,
+    "overall": 0.716
+   },
+   "critical_failed": [
+    "hole_0",
+    "hole_1",
+    "hole_2",
+    "hole_3"
+   ],
+   "failed_checks": [
+    "hole_0",
+    "hole_1",
+    "hole_2",
+    "hole_3"
+   ],
+   "failed_probes": [],
+   "iou": 0.9938
+  },
+  {
+   "kind": "variant",
+   "task_id": "l1-mounting-plate",
+   "label": "Plate 10 mm thick instead of 8",
+   "expectation": "expect: envelope fails",
+   "accepted": false,
+   "scores": {
+    "geometry": 0.4117,
+    "engineering": 0.875,
+    "parametric": 0.7,
+    "manufacturability": 1.0,
+    "completion": 0.8571,
+    "overall": 0.7196
+   },
+   "critical_failed": [
+    "size"
+   ],
+   "failed_checks": [
+    "size",
+    "volume"
+   ],
+   "failed_probes": [
+    "longer"
+   ],
+   "iou": 0.8
+  },
+  {
+   "kind": "variant",
+   "task_id": "l1-mounting-plate",
+   "label": "Holes not linked to edges (fixed at \u00b148, \u00b128)",
+   "expectation": "expect: geometry passes, design-intent probe fails",
+   "accepted": true,
+   "scores": {
+    "geometry": 0.9689,
+    "engineering": 1.0,
+    "parametric": 0.7,
+    "manufacturability": 1.0,
+    "completion": 1.0,
+    "overall": 0.9457
+   },
+   "critical_failed": [],
+   "failed_checks": [],
+   "failed_probes": [
+    "longer"
+   ],
+   "iou": 1.0
+  },
+  {
+   "kind": "variant",
+   "task_id": "l1-pipe-flange",
+   "label": "6 bolt holes instead of 8",
+   "expectation": "expect: bolt-pattern checks fail",
+   "accepted": false,
+   "scores": {
+    "geometry": 0.5475,
+    "engineering": 0.4615,
+    "parametric": 0.7,
+    "manufacturability": 1.0,
+    "completion": 0.4167,
+    "overall": 0.5702
+   },
+   "critical_failed": [
+    "bolt_1",
+    "bolt_2",
+    "bolt_3",
+    "bolt_5",
+    "bolt_6",
+    "bolt_7",
+    "no_extra_holes"
+   ],
+   "failed_checks": [
+    "bolt_1",
+    "bolt_2",
+    "bolt_3",
+    "bolt_5",
+    "bolt_6",
+    "bolt_7",
+    "no_extra_holes",
+    "volume"
+   ],
+   "failed_probes": [
+    "pcd"
+   ],
+   "iou": 0.8554
+  },
+  {
+   "kind": "variant",
+   "task_id": "l2-angle-bracket",
+   "label": "Gusset missing",
+   "expectation": "expect: gusset check fails",
+   "accepted": false,
+   "scores": {
+    "geometry": 0.5519,
+    "engineering": 0.92,
+    "parametric": 0.4,
+    "manufacturability": 1.0,
+    "completion": 0.8889,
+    "overall": 0.7349
+   },
+   "critical_failed": [
+    "gusset"
+   ],
+   "failed_checks": [
+    "gusset",
+    "volume"
+   ],
+   "failed_probes": [
+    "wider",
+    "thicker"
+   ],
+   "iou": 0.8842
+  },
+  {
+   "kind": "variant",
+   "task_id": "l2-heatsink",
+   "label": "8 fins instead of 9",
+   "expectation": "expect: fin pattern fails",
+   "accepted": false,
+   "scores": {
+    "geometry": 0.3559,
+    "engineering": 0.7895,
+    "parametric": 0.7,
+    "manufacturability": 1.0,
+    "completion": 0.7778,
+    "overall": 0.6653
+   },
+   "critical_failed": [
+    "fins",
+    "gaps"
+   ],
+   "failed_checks": [
+    "fins",
+    "gaps",
+    "volume"
+   ],
+   "failed_probes": [
+    "taller"
+   ],
+   "iou": 0.304
+  },
+  {
+   "kind": "variant",
+   "task_id": "l3-actuator-housing",
+   "label": "Tapped holes missing",
+   "expectation": "expect: tapped-hole checks fail",
+   "accepted": false,
+   "scores": {
+    "geometry": 0.8532,
+    "engineering": 0.6522,
+    "parametric": 1.0,
+    "manufacturability": 1.0,
+    "completion": 0.6667,
+    "overall": 0.8016
+   },
+   "critical_failed": [
+    "tap_0",
+    "tap_1",
+    "tap_2",
+    "tap_3"
+   ],
+   "failed_checks": [
+    "tap_0",
+    "tap_1",
+    "tap_2",
+    "tap_3"
+   ],
+   "failed_probes": [],
+   "iou": 0.9939
+  },
+  {
+   "kind": "variant",
+   "task_id": "l3-cold-plate",
+   "label": "Channel too low: 2 mm floor wall",
+   "expectation": "expect: manufacturability wall check fails",
+   "accepted": false,
+   "scores": {
+    "geometry": 0.8115,
+    "engineering": 0.8,
+    "parametric": 0.4,
+    "manufacturability": 0.9048,
+    "completion": 0.8462,
+    "overall": 0.7609
+   },
+   "critical_failed": [
+    "channel_passes",
+    "u_turns"
+   ],
+   "failed_checks": [
+    "channel_passes",
+    "u_turns",
+    "channel_section"
+   ],
+   "failed_probes": [
+    "three_passes",
+    "narrow"
+   ],
+   "iou": 0.8449
+  },
+  {
+   "kind": "variant",
+   "task_id": "l3-cold-plate",
+   "label": "Short circuit: every U-turn at +X",
+   "expectation": "expect: flow-path checks fail",
+   "accepted": false,
+   "scores": {
+    "geometry": 0.9248,
+    "engineering": 0.9,
+    "parametric": 1.0,
+    "manufacturability": 0.8095,
+    "completion": 0.8462,
+    "overall": 0.9053
+   },
+   "critical_failed": [
+    "u_turns",
+    "no_short_circuit"
+   ],
+   "failed_checks": [
+    "u_turns",
+    "no_short_circuit"
+   ],
+   "failed_probes": [],
+   "iou": 0.9921
+  },
+  {
+   "kind": "variant",
+   "task_id": "l4-shaft-support",
+   "label": "No clearance: bore = shaft diameter",
+   "expectation": "expect: clearance check fails",
+   "accepted": false,
+   "scores": {
+    "geometry": 0.9724,
+    "engineering": 1.0,
+    "parametric": 1.0,
+    "manufacturability": 0.76,
+    "completion": 0.8889,
+    "overall": 0.9511
+   },
+   "critical_failed": [
+    "clearance"
+   ],
+   "failed_checks": [
+    "clearance"
+   ],
+   "failed_probes": [],
+   "iou": 0.9967
+  },
+  {
+   "kind": "variant",
+   "task_id": "l4-shaft-support",
+   "label": "Plate bolt holes not following the housings",
+   "expectation": "expect: geometry passes, design-intent probe fails",
+   "accepted": true,
+   "scores": {
+    "geometry": 0.9986,
+    "engineering": 1.0,
+    "parametric": 1.0,
+    "manufacturability": 1.0,
+    "completion": 1.0,
+    "overall": 0.9996
+   },
+   "critical_failed": [],
+   "failed_checks": [],
+   "failed_probes": [],
+   "iou": 1.0
+  },
+  {
+   "kind": "variant",
+   "task_id": "l5-flange-bore-change",
+   "label": "Change not applied (start model returned)",
+   "expectation": "expect: bore check fails",
+   "accepted": false,
+   "scores": {
+    "geometry": 0.5694,
+    "engineering": 0.9259,
+    "parametric": 0.4,
+    "manufacturability": 1.0,
+    "completion": 0.9231,
+    "overall": 0.747
+   },
+   "critical_failed": [
+    "bore"
+   ],
+   "failed_checks": [
+    "bore",
+    "volume"
+   ],
+   "failed_probes": [
+    "six_bolts"
+   ],
+   "iou": 0.9015
+  },
+  {
+   "kind": "variant",
+   "task_id": "l5-housing-bore-change",
+   "label": "Bore changed, boss not enlarged",
+   "expectation": "expect: boss checks fail",
+   "accepted": false,
+   "scores": {
+    "geometry": 0.756,
+    "engineering": 0.913,
+    "parametric": 1.0,
+    "manufacturability": 1.0,
+    "completion": 0.9167,
+    "overall": 0.8882
+   },
+   "critical_failed": [
+    "boss"
+   ],
+   "failed_checks": [
+    "boss",
+    "volume"
+   ],
+   "failed_probes": [],
+   "iou": 0.9835
+  }
+ ]
+}

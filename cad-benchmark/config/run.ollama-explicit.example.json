@@ -1,0 +1,16 @@
+{
+  "name": "ollama-selected",
+  "_comment": "Same as run.ollama.json but with an explicit model list. Use the names shown by `python -m cadbench discover`.",
+  "tasks": ["all"],
+  "context": "groomed",
+  "lean_tasks": ["l3-cold-plate"],
+  "max_iterations": 4,
+  "models": [
+    {"id": "qwen2.5-coder-7b", "label": "Qwen2.5-Coder 7B", "kind": "ollama", "model": "qwen2.5-coder:7b", "inference_provider": "Ollama (local)",
+     "params": {"temperature": 0.0, "max_tokens": 2048, "seed": 42, "num_ctx": 16384},
+     "infrastructure": {"type": "gpu", "hardware": "local workstation", "rate_usd_per_hour": null, "rate_source": "Not set"}},
+    {"id": "qwen2.5-coder-14b", "label": "Qwen2.5-Coder 14B", "kind": "ollama", "model": "qwen2.5-coder:14b", "inference_provider": "Ollama (local)",
+     "params": {"temperature": 0.0, "max_tokens": 2048, "seed": 42, "num_ctx": 16384},
+     "infrastructure": {"type": "gpu", "hardware": "local workstation", "rate_usd_per_hour": null, "rate_source": "Not set"}}
+  ]
+}
