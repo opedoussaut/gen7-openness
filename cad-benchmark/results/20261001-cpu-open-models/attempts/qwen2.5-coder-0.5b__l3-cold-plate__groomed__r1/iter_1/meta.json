@@ -1,0 +1,22 @@
+{
+ "ok": false,
+ "static": {
+  "cad_operations": 8,
+  "build_literals": 0,
+  "has_params": true,
+  "has_build": true
+ },
+ "probes": {
+  "three_passes": {
+   "ok": false,
+   "error": "no build(PARAMS) entry point"
+  },
+  "narrow": {
+   "ok": false,
+   "error": "no build(PARAMS) entry point"
+  }
+ },
+ "error": "AttributeError: module 'cadquery' has no attribute 'rect'",
+ "traceback": "Traceback (most recent call last):\n  File \"/home/claude/gen7-openness/cad-benchmark/cadbench/worker.py\", line 101, in main\n    exec(compile(code, \"candidate.py\", \"exec\"), ns)\n  File \"candidate.py\", line 47, in <module>\n    result = build()\n             ^^^^^^^\n  File \"candidate.py\", line 26, in build\n    rect = cq.rect(p[\"length\"], p[\"width\"])\n           ^^^^^^^\nAttributeError: module 'cadquery' has no attribute 'rect'\n",
+ "exec_seconds": 1.4987
+}

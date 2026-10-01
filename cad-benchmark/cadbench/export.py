@@ -112,6 +112,11 @@ def export_all():
                      "max_iterations": man["max_iterations"], "attempts": len(run_attempts),
                      "planned": len(live.get("plan", [])) or None})
 
+    live_runs = {r["run_id"] for r in runs}
+    for d in os.listdir(os.path.join(DATA, "renders")):   # drop renders of runs that no longer exist in results/
+        if d != "reference" and d not in live_runs:
+            shutil.rmtree(os.path.join(DATA, "renders", d), ignore_errors=True)
+
     by_model = {}
     for a in attempts:
         if a["context"]["mode"] == "raw":

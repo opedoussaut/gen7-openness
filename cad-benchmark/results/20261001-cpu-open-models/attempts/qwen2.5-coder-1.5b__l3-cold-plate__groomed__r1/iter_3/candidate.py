@@ -1,0 +1,61 @@
+import cadquery as cq
+from math import pi
+
+# Define driving dimensions
+PARAMS = {
+    "length": 120,
+    "width": 80,
+    "thickness": 12,
+    "channel_width": 8,
+    "channel_height": 4,
+    "channel_z": 4,
+    "passes": 5,
+    "pass_pitch": 14,
+    "straight_half": 28,
+    "port_d": 8,
+    "mount_hole_d": 6.6,
+    "mount_dx": 54,
+    "mount_dy": 34
+}
+
+# Create the base block
+block = cq.Workplane("XY").box(PARAMS["length"], PARAMS["width"], PARAMS["thickness"], centered=True)
+
+# Create the internal channel
+channel = cq.Workplane("YZ", origin=(0, 0, PARAMS["channel_z"])).center(PARAMS["channel_width"]/2, 0).circle(PARAMS["channel_width"]/2).extrude(PARAMS["channel_height"])
+
+# Define the channel passes
+channel_passes = []
+for i in range(PARAMS["passes"]):
+    # Calculate the start and end points of the pass
+    start_x = -PARAMS["channel_width"]/2 + i * PARAMS["pass_pitch"]
+    end_x = PARAMS["channel_width"]/2 + i * PARAMS["pass_pitch"]
+    start_y = -PARAMS["channel_height"]/2 + i * PARAMS["pass_pitch"]
+    end_y = PARAMS["channel_height"]/2 + i * PARAMS["pass_pitch"]
+    
+    # Create the pass
+    pass_shape = cq.Workplane("YZ", origin=(start_x, start_y, 0)).center(PARAMS["channel_width"]/2, 0).circle(PARAMS["channel_width"]/2).extrude(PARAMS["channel_height"])
+    pass_shape = pass_shape.union(cq.Workplane("YZ", origin=(end_x, end_y, 0)).center(PARAMS["channel_width"]/2, 0).circle(PARAMS["channel_width"]/2).extrude(PARAMS["channel_height"]))
+    
+    # Add the pass to the list
+    channel_passes.append(pass_shape)
+
+# Join the channel passes with U-turns
+for i in range(PARAMS["passes"] - 1):
+    channel_passes[i].cut(channel_passes[i+1])
+
+# Create the inlet and outlet ports
+inlet_port = cq.Workplane("YZ", origin=(-PARAMS["channel_width"]/2, -PARAMS["channel_height"]/2, 0)).center(PARAMS["channel_width"]/2, 0).circle(PARAMS["channel_width"]/2).extrude(PARAMS["channel_height"])
+outlet_port = cq.Workplane("YZ", origin=(PARAMS["channel_width"]/2, PARAMS["channel_height"]/2, 0)).center(PARAMS["channel_width"]/2, 0).circle(PARAMS["channel_width"]/2).extrude(PARAMS["channel_height"])
+
+# Create the mounting holes
+mount_holes = []
+for i in range(2):
+    mount_hole = cq.Workplane("XY").center(PARAMS["mount_dx"], PARAMS["mount_dy"]).circle(PARAMS["mount_hole_d"])
+    mount_holes.append(mount_hole)
+
+# Combine the channel, ports, and mounting holes
+result = block.union(channel).union(inlet_port).union(outlet_port).union(mount_holes)
+
+# Display the result
+result.show()

@@ -1,0 +1,1 @@
+[{"id": "seven_fins", "desc": "fin_count 9 \u2192 7 (pattern stays centred)", "params": {"fin_count": 7}}, {"id": "taller", "desc": "fin_height 25 \u2192 35", "params": {"fin_height": 35}}]

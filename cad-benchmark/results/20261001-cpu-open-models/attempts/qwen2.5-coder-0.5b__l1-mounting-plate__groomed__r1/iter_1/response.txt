@@ -1,0 +1,64 @@
+```python
+import cadquery as cq
+
+# Define the PARAMS dictionary
+PARAMS = {
+    "length": 120,
+    "width": 80,
+    "thickness": 8,
+    "corner_hole_d": 9,
+    "edge_offset": 12,
+    "bore_d": 30,
+    "corner_radius": 6
+}
+
+# Define the build function
+def build(p=PARAMS):
+    # Create a Workplane with dimensions specified in PARAMS
+    workplane = cq.Workplane("XY")
+    
+    # Define the rectangular mounting plate
+    rect = workplane.rect(p["length"], p["width"])
+    
+    # Define the four through holes
+    for i in range(4):
+        # Define the diameter of the through hole
+        hole_d = p["corner_hole_d"]
+        # Define the center of the through hole
+        center = p["corner_radius"]
+        # Define the offset for the through hole
+        offset = p["edge_offset"]
+        # Define the radius for the through hole
+        radius = p["corner_radius"]
+        
+        # Define the through hole
+        hole = rect.hole(hole_d, center, offset, radius)
+        
+        # Push the through hole to the workplane
+        workplane.pushPoints([(hole.x, hole.y), (hole.x + hole_d, hole.y), (hole.x + hole_d, hole.y + hole_d), (hole.x, hole.y + hole_d)])
+    
+    # Define the central through bore
+    central_bore = rect.hole(p["bore_d"], p["corner_radius"])
+    
+    # Push the central through bore to the workplane
+    workplane.pushPoints([(central_bore.x, central_bore.y), (central_bore.x + central_bore_d, central_bore.y), (central_bore.x + central_bore_d, central_bore.y + central_bore_d), (central_bore.x, central_bore.y + central_bore_d)])
+    
+    # Define the four vertical outer edges
+    for i in range(4):
+        # Define the radius for the outer edge
+        radius = p["corner_radius"]
+        # Define the offset for the outer edge
+        offset = p["edge_offset"]
+        
+        # Define the outer edge
+        outer_edge = rect.hole(radius, p["corner_radius"], offset, radius)
+        
+        # Push the outer edge to the workplane
+        workplane.pushPoints([(outer_edge.x, outer_edge.y), (outer_edge.x + outer_edge_d, outer_edge.y), (outer_edge.x + outer_edge_d, outer_edge.y + outer_edge_d), (outer_edge.x, outer_edge.y + outer_edge_d)])
+    
+    # Return the Workplane containing the solid
+    return workplane
+
+# Call the build function and store the result
+result = build()
+```

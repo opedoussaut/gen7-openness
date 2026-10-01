@@ -1,0 +1,38 @@
+{
+ "ok": true,
+ "static": {
+  "cad_operations": 13,
+  "build_literals": 0,
+  "has_params": true,
+  "has_build": true
+ },
+ "probes": {
+  "six_bolts": {
+   "ok": true,
+   "files": {
+    "part": "probe_six_bolts__part.brep"
+   },
+   "solid_counts": {
+    "part": 1
+   }
+  }
+ },
+ "params": {
+  "outer_d": 160.0,
+  "thickness": 18.0,
+  "bore_d": 64.0,
+  "raised_face_d": 100.0,
+  "raised_face_h": 3.0,
+  "bolt_count": 8,
+  "bolt_hole_d": 18.0,
+  "pcd": 125.0
+ },
+ "files": {
+  "part": "main__part.brep"
+ },
+ "solid_counts": {
+  "part": 1
+ },
+ "step": "model.step",
+ "exec_seconds": 1.6045
+}

@@ -1,0 +1,82 @@
+{
+ "ok": true,
+ "static": {
+  "cad_operations": 16,
+  "build_literals": 0,
+  "has_params": true,
+  "has_build": true
+ },
+ "probes": {
+  "shaft25": {
+   "ok": true,
+   "files": {
+    "base_plate": "probe_shaft25__base_plate.brep",
+    "housing_left": "probe_shaft25__housing_left.brep",
+    "housing_right": "probe_shaft25__housing_right.brep",
+    "shaft": "probe_shaft25__shaft.brep",
+    "bolt_left": "probe_shaft25__bolt_left.brep",
+    "bolt_right": "probe_shaft25__bolt_right.brep"
+   },
+   "solid_counts": {
+    "base_plate": 1,
+    "housing_left": 1,
+    "housing_right": 1,
+    "shaft": 1,
+    "bolt_left": 1,
+    "bolt_right": 1
+   }
+  },
+  "spread": {
+   "ok": true,
+   "files": {
+    "base_plate": "probe_spread__base_plate.brep",
+    "housing_left": "probe_spread__housing_left.brep",
+    "housing_right": "probe_spread__housing_right.brep",
+    "shaft": "probe_spread__shaft.brep",
+    "bolt_left": "probe_spread__bolt_left.brep",
+    "bolt_right": "probe_spread__bolt_right.brep"
+   },
+   "solid_counts": {
+    "base_plate": 1,
+    "housing_left": 1,
+    "housing_right": 1,
+    "shaft": 1,
+    "bolt_left": 1,
+    "bolt_right": 1
+   }
+  }
+ },
+ "params": {
+  "plate_length": 160,
+  "plate_width": 60,
+  "plate_thickness": 10,
+  "housing_x": 20,
+  "housing_width": 56,
+  "housing_depth": 45,
+  "housing_height": 55,
+  "axis_z": 40,
+  "shaft_d": 20,
+  "shaft_length": 140,
+  "clearance": 0.2,
+  "bolt_d": 9,
+  "bolt_dy": 20
+ },
+ "files": {
+  "base_plate": "main__base_plate.brep",
+  "housing_left": "main__housing_left.brep",
+  "housing_right": "main__housing_right.brep",
+  "shaft": "main__shaft.brep",
+  "bolt_left": "main__bolt_left.brep",
+  "bolt_right": "main__bolt_right.brep"
+ },
+ "solid_counts": {
+  "base_plate": 1,
+  "housing_left": 1,
+  "housing_right": 1,
+  "shaft": 1,
+  "bolt_left": 1,
+  "bolt_right": 1
+ },
+ "step": "model.step",
+ "exec_seconds": 1.5722
+}

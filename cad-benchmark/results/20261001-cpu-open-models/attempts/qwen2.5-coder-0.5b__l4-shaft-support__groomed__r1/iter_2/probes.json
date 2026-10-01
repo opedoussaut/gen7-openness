@@ -1,0 +1,1 @@
+[{"id": "shaft25", "desc": "shaft_d 20 \u2192 25: bores follow with the same clearance", "params": {"shaft_d": 25}}, {"id": "spread", "desc": "housing_x 50 \u2192 60: plate bolt holes follow the housings", "params": {"housing_x": 60}}]

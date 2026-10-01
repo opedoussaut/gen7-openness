@@ -1,0 +1,44 @@
+import cadquery as cq
+import math
+
+PARAMS = {
+    "length": 120,
+    "width": 80,
+    "thickness": 8,
+    "corner_hole_d": 9,
+    "edge_offset": 12,
+    "bore_d": 30,
+    "corner_radius": 6
+}
+
+def build(p=PARAMS):
+    # Create the base plate
+    base_plate = cq.Workplane("XY").box(p["length"], p["width"], p["thickness"], centered=True)
+    
+    # Create the bottom face
+    bottom_face = base_plate.faces(">Z").workplane().pushPoints([(0, 0, 0), (p["length"], 0, 0), (p["length"], p["width"], 0), (0, p["width"], 0)])
+    
+    # Create the four through holes
+    for i in range(4):
+        x = p["edge_offset"] + i * (p["length"] - 2 * p["edge_offset"]) / 4
+        y = p["edge_offset"] + i * (p["width"] - 2 * p["edge_offset"]) / 4
+        hole = bottom_face.faces(">Z").workplane().pushPoints([(x, y, 0), (x, y, p["thickness"])])
+        hole = hole.cut(cq.Workplane("YZ", origin=(x, 0, 0)).center(y, p["thickness"]).circle(p["corner_hole_d"]).extrude(p["thickness"]))
+    
+    # Create the central through bore
+    bore = bottom_face.faces(">Z").workplane().pushPoints([(0, 0, 0), (p["length"], 0, 0), (p["length"], p["width"], 0), (0, p["width"], 0)])
+    bore = bore.cut(cq.Workplane("YZ", origin=(p["length"] / 2, 0, 0)).center(p["width"] / 2, p["thickness"]).circle(p["bore_d"]).extrude(p["thickness"]))
+    
+    # Round the vertical outer edges
+    for i in range(4):
+        x = p["edge_offset"] + i * (p["length"] - 2 * p["edge_offset"]) / 4
+        y = p["edge_offset"] + i * (p["width"] - 2 * p["edge_offset"]) / 4
+        corner = bottom_face.faces(">Z").workplane().pushPoints([(x, y, 0), (x, y, p["thickness"])])
+        corner = corner.cut(cq.Workplane("YZ", origin=(x, 0, 0)).center(y, p["thickness"]).circle(p["corner_radius"]).extrude(p["thickness"]))
+    
+    # Combine all parts
+    result = base_plate.union(bottom_face).union(hole).union(bore).union(corner)
+    
+    return result
+
+result = build()

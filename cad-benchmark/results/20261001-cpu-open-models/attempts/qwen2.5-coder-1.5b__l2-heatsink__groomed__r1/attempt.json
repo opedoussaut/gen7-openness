@@ -1,0 +1,369 @@
+{
+ "attempt_id": "qwen2.5-coder-1.5b__l2-heatsink__groomed__r1",
+ "run_id": "20261001-cpu-open-models",
+ "started": "2026-10-01T05:35:59Z",
+ "model": {
+  "id": "qwen2.5-coder-1.5b",
+  "provider": "openai_compatible",
+  "model": "qwen2.5-coder-1.5b-instruct",
+  "label": "Qwen2.5-Coder 1.5B",
+  "inference_provider": "llama.cpp llama-server (built from the llama-cpp-python 0.3.35 vendored source), CPU, Q4_K_M",
+  "params": {
+   "temperature": 0.0,
+   "max_tokens": 1024,
+   "seed": 42
+  },
+  "version": {
+   "model_file": "qwen2.5-coder-1.5b-instruct-q4_k_m.gguf",
+   "model_file_sha256": "cc324af070c2ecbfd324a30884d2f951a7ff756aba85cb811a6ec436933bb046"
+  },
+  "reported": [
+   "qwen2.5-coder-1.5b-instruct"
+  ],
+  "mismatch": false,
+  "infrastructure": {
+   "type": "cpu",
+   "hardware": "2 vCPU / 7 GB cloud container (benchmark workspace)",
+   "rate_usd_per_hour": 0.0892,
+   "rate_source": "Reference rate: AWS EC2 c7i.large (2 vCPU, 4 GiB) Linux on-demand us-east-1 $0.0892/h, https://www.doit.com/compute/compute/aws/us-east-1/c7i.large, retrieved 2026-10-01. Comparable, not identical, hardware."
+  }
+ },
+ "task": {
+  "id": "l2-heatsink",
+  "level": 2,
+  "title": "Finned heat sink",
+  "family": "Parametric component"
+ },
+ "context": {
+  "mode": "groomed",
+  "sections_total": 32,
+  "sections_kept": 6,
+  "kept_tags": [
+   "api-core",
+   "api-holes",
+   "api-patterns",
+   "part-heatsink",
+   "std-frame",
+   "std-units"
+  ],
+  "bytes_raw": 16789,
+  "bytes_kept": 2921,
+  "reduction_pct": 82.6
+ },
+ "iterations": [
+  {
+   "n": 1,
+   "llm": {
+    "ttft_s": 6.298691836999751,
+    "duration_s": 48.79110901700005,
+    "usage": {
+     "input": 1171,
+     "cached_input": 427,
+     "cache_write": 0,
+     "output": 496,
+     "reasoning": null,
+     "total": 1667
+    },
+    "raw_usage": {
+     "completion_tokens": 496,
+     "prompt_tokens": 1171,
+     "total_tokens": 1667,
+     "prompt_tokens_details": {
+      "cached_tokens": 427
+     }
+    },
+    "model_reported": "qwen2.5-coder-1.5b-instruct",
+    "provider_timings": {
+     "prompt_eval_s": 6.219346,
+     "eval_s": 42.493815000000005,
+     "prompt_tokens_evaluated": 744,
+     "prompt_tokens_cached": 427,
+     "prompt_tokens_per_s": 119.62672602553388,
+     "output_tokens_per_s": 11.648754059855532
+    },
+    "http_retries": 0,
+    "cost": {
+     "basis": "infrastructure",
+     "input": null,
+     "cached_input": null,
+     "cache_write": null,
+     "output": null,
+     "infrastructure": 0.001208935256754557,
+     "total": 0.001208935256754557,
+     "rate_usd_per_hour": 0.0892,
+     "rate_source": "Reference rate: AWS EC2 c7i.large (2 vCPU, 4 GiB) Linux on-demand us-east-1 $0.0892/h, https://www.doit.com/compute/compute/aws/us-east-1/c7i.large, retrieved 2026-10-01. Comparable, not identical, hardware."
+    },
+    "response_chars": 1604,
+    "code_chars": 1591
+   },
+   "resources": {
+    "duration_s": 48.791406273000575,
+    "samples": 193,
+    "gpu_measured": false,
+    "gpu_seconds": null,
+    "gpu_util_mean_pct": null,
+    "gpu_mem_peak_mib": null,
+    "gpu_power_mean_w": null,
+    "energy_wh": null,
+    "cpu_util_mean_pct": 99.77150259067358
+   },
+   "cad": {
+    "executed": false,
+    "error": "ValueError: Cannot union type '<class 'list'>'",
+    "exec_s": 1.6077,
+    "process_s": 1.92,
+    "eval_s": 0.0,
+    "operations": 8
+   },
+   "quality": {
+    "scores": {
+     "geometry": 0.0,
+     "engineering": 0.0,
+     "parametric": 0.0,
+     "manufacturability": 0.0,
+     "completion": 0.0,
+     "overall": 0.0
+    },
+    "accepted": false,
+    "critical_failed": [],
+    "checks_passed": 0,
+    "checks_total": 0,
+    "probes_passed": 0,
+    "probes_total": 0,
+    "metrics": {}
+   },
+   "render": null,
+   "cumulative": {
+    "cost_usd": 0.001208935256754557,
+    "tokens": 1667,
+    "elapsed_s": 50.71926407000046,
+    "energy_wh": null
+   }
+  },
+  {
+   "n": 2,
+   "llm": {
+    "ttft_s": 1.8921365789992706,
+    "duration_s": 44.88723051599936,
+    "usage": {
+     "input": 1809,
+     "cached_input": 1666,
+     "cache_write": 0,
+     "output": 492,
+     "reasoning": null,
+     "total": 2301
+    },
+    "raw_usage": {
+     "completion_tokens": 492,
+     "prompt_tokens": 1809,
+     "total_tokens": 2301,
+     "prompt_tokens_details": {
+      "cached_tokens": 1666
+     }
+    },
+    "model_reported": "qwen2.5-coder-1.5b-instruct",
+    "provider_timings": {
+     "prompt_eval_s": 1.882475,
+     "eval_s": 42.994741999999995,
+     "prompt_tokens_evaluated": 143,
+     "prompt_tokens_cached": 1666,
+     "prompt_tokens_per_s": 75.96382422077318,
+     "output_tokens_per_s": 11.420001078271385
+    },
+    "http_retries": 0,
+    "cost": {
+     "basis": "infrastructure",
+     "input": null,
+     "cached_input": null,
+     "cache_write": null,
+     "output": null,
+     "infrastructure": 0.0011122058227853175,
+     "total": 0.0011122058227853175,
+     "rate_usd_per_hour": 0.0892,
+     "rate_source": "Reference rate: AWS EC2 c7i.large (2 vCPU, 4 GiB) Linux on-demand us-east-1 $0.0892/h, https://www.doit.com/compute/compute/aws/us-east-1/c7i.large, retrieved 2026-10-01. Comparable, not identical, hardware."
+    },
+    "response_chars": 1588,
+    "code_chars": 1575
+   },
+   "resources": {
+    "duration_s": 44.88747374600007,
+    "samples": 177,
+    "gpu_measured": false,
+    "gpu_seconds": null,
+    "gpu_util_mean_pct": null,
+    "gpu_mem_peak_mib": null,
+    "gpu_power_mean_w": null,
+    "energy_wh": null,
+    "cpu_util_mean_pct": 99.72485875706217
+   },
+   "cad": {
+    "executed": false,
+    "error": "ValueError: Cannot union type '<class 'list'>'",
+    "exec_s": 1.5353,
+    "process_s": 1.851,
+    "eval_s": 0.0,
+    "operations": 7
+   },
+   "quality": {
+    "scores": {
+     "geometry": 0.0,
+     "engineering": 0.0,
+     "parametric": 0.0,
+     "manufacturability": 0.0,
+     "completion": 0.0,
+     "overall": 0.0
+    },
+    "accepted": false,
+    "critical_failed": [],
+    "checks_passed": 0,
+    "checks_total": 0,
+    "probes_passed": 0,
+    "probes_total": 0,
+    "metrics": {}
+   },
+   "render": null,
+   "cumulative": {
+    "cost_usd": 0.0023211410795398743,
+    "tokens": 3968,
+    "elapsed_s": 97.4663974340001,
+    "energy_wh": null
+   }
+  },
+  {
+   "n": 3,
+   "llm": {
+    "ttft_s": 2.1688676730000225,
+    "duration_s": 50.09120729700044,
+    "usage": {
+     "input": 2443,
+     "cached_input": 2300,
+     "cache_write": 0,
+     "output": 492,
+     "reasoning": null,
+     "total": 2935
+    },
+    "raw_usage": {
+     "completion_tokens": 492,
+     "prompt_tokens": 2443,
+     "total_tokens": 2935,
+     "prompt_tokens_details": {
+      "cached_tokens": 2300
+     }
+    },
+    "model_reported": "qwen2.5-coder-1.5b-instruct",
+    "provider_timings": {
+     "prompt_eval_s": 2.158373,
+     "eval_s": 47.92197,
+     "prompt_tokens_evaluated": 143,
+     "prompt_tokens_cached": 2300,
+     "prompt_tokens_per_s": 66.25360862093808,
+     "output_tokens_per_s": 10.245822531920119
+    },
+    "http_retries": 0,
+    "cost": {
+     "basis": "infrastructure",
+     "input": null,
+     "cached_input": null,
+     "cache_write": null,
+     "output": null,
+     "infrastructure": 0.0012411488030256777,
+     "total": 0.0012411488030256777,
+     "rate_usd_per_hour": 0.0892,
+     "rate_source": "Reference rate: AWS EC2 c7i.large (2 vCPU, 4 GiB) Linux on-demand us-east-1 $0.0892/h, https://www.doit.com/compute/compute/aws/us-east-1/c7i.large, retrieved 2026-10-01. Comparable, not identical, hardware."
+    },
+    "response_chars": 1588,
+    "code_chars": 1575
+   },
+   "resources": {
+    "duration_s": 50.09144582499994,
+    "samples": 198,
+    "gpu_measured": false,
+    "gpu_seconds": null,
+    "gpu_util_mean_pct": null,
+    "gpu_mem_peak_mib": null,
+    "gpu_power_mean_w": null,
+    "energy_wh": null,
+    "cpu_util_mean_pct": 99.68636363636364
+   },
+   "cad": {
+    "executed": false,
+    "error": "ValueError: Cannot union type '<class 'list'>'",
+    "exec_s": 1.6134,
+    "process_s": 1.924,
+    "eval_s": 0.0,
+    "operations": 7
+   },
+   "quality": {
+    "scores": {
+     "geometry": 0.0,
+     "engineering": 0.0,
+     "parametric": 0.0,
+     "manufacturability": 0.0,
+     "completion": 0.0,
+     "overall": 0.0
+    },
+    "accepted": false,
+    "critical_failed": [],
+    "checks_passed": 0,
+    "checks_total": 0,
+    "probes_passed": 0,
+    "probes_total": 0,
+    "metrics": {}
+   },
+   "render": null,
+   "cumulative": {
+    "cost_usd": 0.003562289882565552,
+    "tokens": 6903,
+    "elapsed_s": 149.49136384699977,
+    "energy_wh": null
+   }
+  }
+ ],
+ "status": "ok",
+ "finished": "2026-10-01T05:38:28Z",
+ "elapsed_s": 149.49404974200024,
+ "messages_final": 5,
+ "summary": {
+  "iterations": 3,
+  "llm_calls": 3,
+  "tool_calls": 3,
+  "cad_operations": 7,
+  "retries": 0,
+  "failures": 3,
+  "corrections_required": 2,
+  "accepted": false,
+  "first_pass": false,
+  "iterations_to_threshold": null,
+  "first_quality": 0.0,
+  "final_quality": 0.0,
+  "best_quality": 0.0,
+  "quality_progression": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "input_tokens": 5423,
+  "cached_input_tokens": 4393,
+  "output_tokens": 1480,
+  "reasoning_tokens": null,
+  "total_tokens": 6903,
+  "cost_usd": 0.003562289882565552,
+  "cost_input_usd": null,
+  "cost_output_usd": null,
+  "cost_cached_usd": null,
+  "cost_infrastructure_usd": 0.003562289882565552,
+  "cost_tools_usd": 0.0,
+  "ttft_s": 6.298691836999751,
+  "llm_seconds": 143.76954682999985,
+  "tool_seconds": 5.695,
+  "cad_seconds": 4.756399999999999,
+  "elapsed_s": 149.49404974200024,
+  "energy_wh": null,
+  "gpu_seconds": null,
+  "gpu_util_mean_pct": null,
+  "gpu_mem_peak_mib": null,
+  "cost_to_quality_usd": null,
+  "time_to_quality_s": null,
+  "tokens_to_quality": null
+ }
+}

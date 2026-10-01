@@ -1,0 +1,1 @@
+[{"id": "longer", "desc": "length 120 \u2192 160: holes stay 12 mm from the edges", "params": {"length": 160}}, {"id": "thicker", "desc": "thickness 8 \u2192 12", "params": {"thickness": 12}}]

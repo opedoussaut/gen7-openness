@@ -1,0 +1,455 @@
+{
+ "attempt_id": "qwen2.5-coder-0.5b__l5-flange-bore-change__groomed__r1",
+ "run_id": "20261001-cpu-open-models",
+ "started": "2026-10-01T05:31:02Z",
+ "model": {
+  "id": "qwen2.5-coder-0.5b",
+  "provider": "openai_compatible",
+  "model": "qwen2.5-coder-0.5b-instruct",
+  "label": "Qwen2.5-Coder 0.5B",
+  "inference_provider": "llama.cpp llama-server (built from the llama-cpp-python 0.3.35 vendored source), CPU, Q4_K_M",
+  "params": {
+   "temperature": 0.0,
+   "max_tokens": 1024,
+   "seed": 42
+  },
+  "version": {
+   "model_file": "qwen2.5-coder-0.5b-instruct-q4_k_m.gguf",
+   "model_file_sha256": "1d9614638d18024d0fbb36575a15f1302a3adf044df10345688ec4f6e1c4ff32"
+  },
+  "reported": [
+   "qwen2.5-coder-0.5b-instruct"
+  ],
+  "mismatch": false,
+  "infrastructure": {
+   "type": "cpu",
+   "hardware": "2 vCPU / 7 GB cloud container (benchmark workspace)",
+   "rate_usd_per_hour": 0.0892,
+   "rate_source": "Reference rate: AWS EC2 c7i.large (2 vCPU, 4 GiB) Linux on-demand us-east-1 $0.0892/h, https://www.doit.com/compute/compute/aws/us-east-1/c7i.large, retrieved 2026-10-01. Comparable, not identical, hardware."
+  }
+ },
+ "task": {
+  "id": "l5-flange-bore-change",
+  "level": 5,
+  "title": "Engineering change \u2014 flange bore",
+  "family": "Engineering change"
+ },
+ "context": {
+  "mode": "groomed",
+  "sections_total": 32,
+  "sections_kept": 5,
+  "kept_tags": [
+   "api-core",
+   "part-flange",
+   "std-change",
+   "std-frame",
+   "std-units"
+  ],
+  "bytes_raw": 16789,
+  "bytes_kept": 2650,
+  "reduction_pct": 84.2
+ },
+ "iterations": [
+  {
+   "n": 1,
+   "llm": {
+    "ttft_s": 5.55110801400042,
+    "duration_s": 30.975550205000218,
+    "usage": {
+     "input": 1303,
+     "cached_input": 427,
+     "cache_write": 0,
+     "output": 332,
+     "reasoning": null,
+     "total": 1635
+    },
+    "raw_usage": {
+     "completion_tokens": 332,
+     "prompt_tokens": 1303,
+     "total_tokens": 1635,
+     "prompt_tokens_details": {
+      "cached_tokens": 427
+     }
+    },
+    "model_reported": "qwen2.5-coder-0.5b-instruct",
+    "provider_timings": {
+     "prompt_eval_s": 5.514622,
+     "eval_s": 25.424076,
+     "prompt_tokens_evaluated": 876,
+     "prompt_tokens_cached": 427,
+     "prompt_tokens_per_s": 158.85041622073098,
+     "output_tokens_per_s": 13.019155543745228
+    },
+    "http_retries": 0,
+    "cost": {
+     "basis": "infrastructure",
+     "input": null,
+     "cached_input": null,
+     "cache_write": null,
+     "output": null,
+     "infrastructure": 0.0007675052995238942,
+     "total": 0.0007675052995238942,
+     "rate_usd_per_hour": 0.0892,
+     "rate_source": "Reference rate: AWS EC2 c7i.large (2 vCPU, 4 GiB) Linux on-demand us-east-1 $0.0892/h, https://www.doit.com/compute/compute/aws/us-east-1/c7i.large, retrieved 2026-10-01. Comparable, not identical, hardware."
+    },
+    "response_chars": 926,
+    "code_chars": 913
+   },
+   "resources": {
+    "duration_s": 30.975725835999583,
+    "samples": 122,
+    "gpu_measured": false,
+    "gpu_seconds": null,
+    "gpu_util_mean_pct": null,
+    "gpu_mem_peak_mib": null,
+    "gpu_power_mean_w": null,
+    "energy_wh": null,
+    "cpu_util_mean_pct": 99.64590163934426
+   },
+   "cad": {
+    "executed": true,
+    "error": null,
+    "exec_s": 1.6045,
+    "process_s": 1.954,
+    "eval_s": 0.808,
+    "operations": 13
+   },
+   "quality": {
+    "scores": {
+     "geometry": 0.6201,
+     "engineering": 0.9259,
+     "parametric": 0.4,
+     "manufacturability": 1.0,
+     "completion": 0.9231,
+     "overall": 0.7623
+    },
+    "accepted": false,
+    "critical_failed": [
+     "bore"
+    ],
+    "checks_passed": 13,
+    "checks_total": 15,
+    "probes_passed": 0,
+    "probes_total": 1,
+    "metrics": {
+     "iou": 0.9015,
+     "chamfer_mm": 1.7763,
+     "hausdorff_mm": 7.1817,
+     "volume_mm3": 281273.07,
+     "reference_volume_mm3": 253564.23,
+     "volume_rel_error": 0.10928,
+     "bbox_size_mm": [
+      160.0,
+      160.0,
+      21.0
+     ],
+     "reference_bbox_size_mm": [
+      160.0,
+      160.0,
+      21.0
+     ],
+     "bbox_max_rel_error": 0.0,
+     "faces": 14,
+     "reference_faces": 14,
+     "solids": {
+      "part": 1
+     },
+     "valid_brep": true,
+     "params_keys_fraction": 1.0,
+     "probe_pass_fraction": 0.0,
+     "build_literals": 0
+    }
+   },
+   "render": "attempts/qwen2.5-coder-0.5b__l5-flange-bore-change__groomed__r1/iter_1/render.svg",
+   "cumulative": {
+    "cost_usd": 0.0007675052995238942,
+    "tokens": 1635,
+    "elapsed_s": 33.74533388600048,
+    "energy_wh": null
+   }
+  },
+  {
+   "n": 2,
+   "llm": {
+    "ttft_s": 1.2143997109997144,
+    "duration_s": 31.1055740339998,
+    "usage": {
+     "input": 1783,
+     "cached_input": 1634,
+     "cache_write": 0,
+     "output": 332,
+     "reasoning": null,
+     "total": 2115
+    },
+    "raw_usage": {
+     "completion_tokens": 332,
+     "prompt_tokens": 1783,
+     "total_tokens": 2115,
+     "prompt_tokens_details": {
+      "cached_tokens": 1634
+     }
+    },
+    "model_reported": "qwen2.5-coder-0.5b-instruct",
+    "provider_timings": {
+     "prompt_eval_s": 1.204267,
+     "eval_s": 29.890833999999998,
+     "prompt_tokens_evaluated": 149,
+     "prompt_tokens_cached": 1634,
+     "prompt_tokens_per_s": 123.72671508892961,
+     "output_tokens_per_s": 11.07362879202367
+    },
+    "http_retries": 0,
+    "cost": {
+     "basis": "infrastructure",
+     "input": null,
+     "cached_input": null,
+     "cache_write": null,
+     "output": null,
+     "infrastructure": 0.0007707270010646617,
+     "total": 0.0007707270010646617,
+     "rate_usd_per_hour": 0.0892,
+     "rate_source": "Reference rate: AWS EC2 c7i.large (2 vCPU, 4 GiB) Linux on-demand us-east-1 $0.0892/h, https://www.doit.com/compute/compute/aws/us-east-1/c7i.large, retrieved 2026-10-01. Comparable, not identical, hardware."
+    },
+    "response_chars": 926,
+    "code_chars": 913
+   },
+   "resources": {
+    "duration_s": 31.10588436300077,
+    "samples": 123,
+    "gpu_measured": false,
+    "gpu_seconds": null,
+    "gpu_util_mean_pct": null,
+    "gpu_mem_peak_mib": null,
+    "gpu_power_mean_w": null,
+    "energy_wh": null,
+    "cpu_util_mean_pct": 99.15447154471545
+   },
+   "cad": {
+    "executed": true,
+    "error": null,
+    "exec_s": 1.6326,
+    "process_s": 1.987,
+    "eval_s": 0.189,
+    "operations": 13
+   },
+   "quality": {
+    "scores": {
+     "geometry": 0.6201,
+     "engineering": 0.9259,
+     "parametric": 0.4,
+     "manufacturability": 1.0,
+     "completion": 0.9231,
+     "overall": 0.7623
+    },
+    "accepted": false,
+    "critical_failed": [
+     "bore"
+    ],
+    "checks_passed": 13,
+    "checks_total": 15,
+    "probes_passed": 0,
+    "probes_total": 1,
+    "metrics": {
+     "iou": 0.9015,
+     "chamfer_mm": 1.7763,
+     "hausdorff_mm": 7.1817,
+     "volume_mm3": 281273.07,
+     "reference_volume_mm3": 253564.23,
+     "volume_rel_error": 0.10928,
+     "bbox_size_mm": [
+      160.0,
+      160.0,
+      21.0
+     ],
+     "reference_bbox_size_mm": [
+      160.0,
+      160.0,
+      21.0
+     ],
+     "bbox_max_rel_error": 0.0,
+     "faces": 14,
+     "reference_faces": 14,
+     "solids": {
+      "part": 1
+     },
+     "valid_brep": true,
+     "params_keys_fraction": 1.0,
+     "probe_pass_fraction": 0.0,
+     "build_literals": 0
+    }
+   },
+   "render": "attempts/qwen2.5-coder-0.5b__l5-flange-bore-change__groomed__r1/iter_2/render.svg",
+   "cumulative": {
+    "cost_usd": 0.0015382323005885558,
+    "tokens": 3750,
+    "elapsed_s": 67.03578931799984,
+    "energy_wh": null
+   }
+  },
+  {
+   "n": 3,
+   "llm": {
+    "ttft_s": 1.3302485060003164,
+    "duration_s": 35.85061248999955,
+    "usage": {
+     "input": 2263,
+     "cached_input": 2114,
+     "cache_write": 0,
+     "output": 332,
+     "reasoning": null,
+     "total": 2595
+    },
+    "raw_usage": {
+     "completion_tokens": 332,
+     "prompt_tokens": 2263,
+     "total_tokens": 2595,
+     "prompt_tokens_details": {
+      "cached_tokens": 2114
+     }
+    },
+    "model_reported": "qwen2.5-coder-0.5b-instruct",
+    "provider_timings": {
+     "prompt_eval_s": 1.316521,
+     "eval_s": 34.523354,
+     "prompt_tokens_evaluated": 149,
+     "prompt_tokens_cached": 2114,
+     "prompt_tokens_per_s": 113.17707807167527,
+     "output_tokens_per_s": 9.587712711806622
+    },
+    "http_retries": 0,
+    "cost": {
+     "basis": "infrastructure",
+     "input": null,
+     "cached_input": null,
+     "cache_write": null,
+     "output": null,
+     "infrastructure": 0.0008882985094744332,
+     "total": 0.0008882985094744332,
+     "rate_usd_per_hour": 0.0892,
+     "rate_source": "Reference rate: AWS EC2 c7i.large (2 vCPU, 4 GiB) Linux on-demand us-east-1 $0.0892/h, https://www.doit.com/compute/compute/aws/us-east-1/c7i.large, retrieved 2026-10-01. Comparable, not identical, hardware."
+    },
+    "response_chars": 926,
+    "code_chars": 913
+   },
+   "resources": {
+    "duration_s": 35.850909865000176,
+    "samples": 141,
+    "gpu_measured": false,
+    "gpu_seconds": null,
+    "gpu_util_mean_pct": null,
+    "gpu_mem_peak_mib": null,
+    "gpu_power_mean_w": null,
+    "energy_wh": null,
+    "cpu_util_mean_pct": 99.66312056737588
+   },
+   "cad": {
+    "executed": true,
+    "error": null,
+    "exec_s": 1.6023,
+    "process_s": 1.976,
+    "eval_s": 0.204,
+    "operations": 13
+   },
+   "quality": {
+    "scores": {
+     "geometry": 0.6201,
+     "engineering": 0.9259,
+     "parametric": 0.4,
+     "manufacturability": 1.0,
+     "completion": 0.9231,
+     "overall": 0.7623
+    },
+    "accepted": false,
+    "critical_failed": [
+     "bore"
+    ],
+    "checks_passed": 13,
+    "checks_total": 15,
+    "probes_passed": 0,
+    "probes_total": 1,
+    "metrics": {
+     "iou": 0.9015,
+     "chamfer_mm": 1.7763,
+     "hausdorff_mm": 7.1817,
+     "volume_mm3": 281273.07,
+     "reference_volume_mm3": 253564.23,
+     "volume_rel_error": 0.10928,
+     "bbox_size_mm": [
+      160.0,
+      160.0,
+      21.0
+     ],
+     "reference_bbox_size_mm": [
+      160.0,
+      160.0,
+      21.0
+     ],
+     "bbox_max_rel_error": 0.0,
+     "faces": 14,
+     "reference_faces": 14,
+     "solids": {
+      "part": 1
+     },
+     "valid_brep": true,
+     "params_keys_fraction": 1.0,
+     "probe_pass_fraction": 0.0,
+     "build_literals": 0
+    }
+   },
+   "render": "attempts/qwen2.5-coder-0.5b__l5-flange-bore-change__groomed__r1/iter_3/render.svg",
+   "cumulative": {
+    "cost_usd": 0.002426530810062989,
+    "tokens": 6345,
+    "elapsed_s": 105.07747746800032,
+    "energy_wh": null
+   }
+  }
+ ],
+ "status": "ok",
+ "finished": "2026-10-01T05:32:47Z",
+ "elapsed_s": 105.08006624300015,
+ "messages_final": 5,
+ "summary": {
+  "iterations": 3,
+  "llm_calls": 3,
+  "tool_calls": 3,
+  "cad_operations": 13,
+  "retries": 0,
+  "failures": 0,
+  "corrections_required": 2,
+  "accepted": false,
+  "first_pass": false,
+  "iterations_to_threshold": null,
+  "first_quality": 0.7623,
+  "final_quality": 0.7623,
+  "best_quality": 0.7623,
+  "quality_progression": [
+   0.7623,
+   0.7623,
+   0.7623
+  ],
+  "input_tokens": 5349,
+  "cached_input_tokens": 4175,
+  "output_tokens": 996,
+  "reasoning_tokens": null,
+  "total_tokens": 6345,
+  "cost_usd": 0.002426530810062989,
+  "cost_input_usd": null,
+  "cost_output_usd": null,
+  "cost_cached_usd": null,
+  "cost_infrastructure_usd": 0.002426530810062989,
+  "cost_tools_usd": 0.0,
+  "ttft_s": 5.55110801400042,
+  "llm_seconds": 97.93173672899957,
+  "tool_seconds": 7.118,
+  "cad_seconds": 4.8393999999999995,
+  "elapsed_s": 105.08006624300015,
+  "energy_wh": null,
+  "gpu_seconds": null,
+  "gpu_util_mean_pct": null,
+  "gpu_mem_peak_mib": null,
+  "cost_to_quality_usd": null,
+  "time_to_quality_s": null,
+  "tokens_to_quality": null
+ }
+}

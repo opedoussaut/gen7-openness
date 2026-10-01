@@ -204,7 +204,7 @@ class OpenAICompatible(Provider):
 
         def on_line(line):
             nonlocal usage
-            if not line.startswith("data:"):
+            if not line.startswith("data:") or line[5:].strip() == "[DONE]":
                 return
             payload = line[5:].strip()
             if payload == "[DONE]":
@@ -261,7 +261,7 @@ class OpenAI(Provider):
 
         def on_line(line):
             nonlocal final
-            if not line.startswith("data:"):
+            if not line.startswith("data:") or line[5:].strip() == "[DONE]":
                 return
             ev = json.loads(line[5:].strip())
             if ev.get("type") == "response.output_text.delta":
@@ -307,7 +307,7 @@ class Anthropic(Provider):
         parts, usage = [], {}
 
         def on_line(line):
-            if not line.startswith("data:"):
+            if not line.startswith("data:") or line[5:].strip() == "[DONE]":
                 return
             ev = json.loads(line[5:].strip())
             t = ev.get("type")
@@ -360,7 +360,7 @@ class Gemini(Provider):
 
         def on_line(line):
             nonlocal usage
-            if not line.startswith("data:"):
+            if not line.startswith("data:") or line[5:].strip() == "[DONE]":
                 return
             ev = json.loads(line[5:].strip())
             if ev.get("modelVersion"):

@@ -1,0 +1,187 @@
+{
+ "task_id": "l5-flange-bore-change",
+ "executed": true,
+ "error": null,
+ "traceback": null,
+ "cad_exec_seconds": 1.6023,
+ "cad_process_seconds": 1.976,
+ "static": {
+  "cad_operations": 13,
+  "build_literals": 0,
+  "has_params": true,
+  "has_build": true
+ },
+ "checks": [
+  {
+   "id": "size",
+   "desc": "Envelope unchanged: \u00d8160 x 21",
+   "critical": true,
+   "dim": "engineering",
+   "passed": true,
+   "detail": "measured 160.0 x 160.0 x 21.0 from (-80, -80, 0) to (80, 80, 21); specified (-80, -80, 0) to (80, 80, 21)"
+  },
+  {
+   "id": "bore",
+   "desc": "Bore now \u00d876",
+   "critical": true,
+   "dim": "engineering",
+   "passed": false,
+   "detail": "material found where the specification requires empty space at (37.7, 0, 10.5), (0, 37.7, 10.5), (-37.7, 0, 10.5)"
+  },
+  {
+   "id": "bolt_0",
+   "desc": "Bolt hole 1 preserved (\u00d818 on PCD 125)",
+   "critical": true,
+   "dim": "engineering",
+   "passed": true,
+   "detail": "satisfied"
+  },
+  {
+   "id": "bolt_1",
+   "desc": "Bolt hole 2 preserved (\u00d818 on PCD 125)",
+   "critical": true,
+   "dim": "engineering",
+   "passed": true,
+   "detail": "satisfied"
+  },
+  {
+   "id": "bolt_2",
+   "desc": "Bolt hole 3 preserved (\u00d818 on PCD 125)",
+   "critical": true,
+   "dim": "engineering",
+   "passed": true,
+   "detail": "satisfied"
+  },
+  {
+   "id": "bolt_3",
+   "desc": "Bolt hole 4 preserved (\u00d818 on PCD 125)",
+   "critical": true,
+   "dim": "engineering",
+   "passed": true,
+   "detail": "satisfied"
+  },
+  {
+   "id": "bolt_4",
+   "desc": "Bolt hole 5 preserved (\u00d818 on PCD 125)",
+   "critical": true,
+   "dim": "engineering",
+   "passed": true,
+   "detail": "satisfied"
+  },
+  {
+   "id": "bolt_5",
+   "desc": "Bolt hole 6 preserved (\u00d818 on PCD 125)",
+   "critical": true,
+   "dim": "engineering",
+   "passed": true,
+   "detail": "satisfied"
+  },
+  {
+   "id": "bolt_6",
+   "desc": "Bolt hole 7 preserved (\u00d818 on PCD 125)",
+   "critical": true,
+   "dim": "engineering",
+   "passed": true,
+   "detail": "satisfied"
+  },
+  {
+   "id": "bolt_7",
+   "desc": "Bolt hole 8 preserved (\u00d818 on PCD 125)",
+   "critical": true,
+   "dim": "engineering",
+   "passed": true,
+   "detail": "satisfied"
+  },
+  {
+   "id": "no_extra_holes",
+   "desc": "No new holes in the bolt circle",
+   "critical": true,
+   "dim": "engineering",
+   "passed": true,
+   "detail": "satisfied"
+  },
+  {
+   "id": "raised_face",
+   "desc": "Raised face preserved",
+   "critical": true,
+   "dim": "engineering",
+   "passed": true,
+   "detail": "satisfied"
+  },
+  {
+   "id": "raised_face_extent",
+   "desc": "Raised face still \u00d8100",
+   "critical": false,
+   "dim": "engineering",
+   "passed": true,
+   "detail": "satisfied"
+  },
+  {
+   "id": "volume",
+   "desc": "Volume matches the changed specification (\u00b11 %)",
+   "critical": false,
+   "dim": "geometry",
+   "passed": false,
+   "detail": "volume deviates 10.9 % from the specified geometry"
+  },
+  {
+   "id": "single_solid",
+   "desc": "One valid solid",
+   "critical": true,
+   "dim": "engineering",
+   "passed": true,
+   "detail": "solids per part {'part': 1}, valid=True"
+  }
+ ],
+ "probes": [
+  {
+   "id": "six_bolts",
+   "desc": "bolt_count 8 \u2192 6 still drives the pattern",
+   "passed": false,
+   "iou": 0.9046,
+   "detail": "geometry does not follow the parameter change with the specified design intent"
+  }
+ ],
+ "metrics": {
+  "iou": 0.9015,
+  "chamfer_mm": 1.7763,
+  "hausdorff_mm": 7.1817,
+  "volume_mm3": 281273.07,
+  "reference_volume_mm3": 253564.23,
+  "volume_rel_error": 0.10928,
+  "bbox_size_mm": [
+   160.0,
+   160.0,
+   21.0
+  ],
+  "reference_bbox_size_mm": [
+   160.0,
+   160.0,
+   21.0
+  ],
+  "bbox_max_rel_error": 0.0,
+  "faces": 14,
+  "reference_faces": 14,
+  "solids": {
+   "part": 1
+  },
+  "valid_brep": true,
+  "params_keys_fraction": 1.0,
+  "probe_pass_fraction": 0.0,
+  "build_literals": 0
+ },
+ "scores": {
+  "geometry": 0.6201,
+  "engineering": 0.9259,
+  "parametric": 0.4,
+  "manufacturability": 1.0,
+  "completion": 0.9231,
+  "overall": 0.7623
+ },
+ "accepted": false,
+ "critical_failed": [
+  "bore"
+ ],
+ "render": "render.svg",
+ "eval_seconds": 0.204
+}

@@ -1,0 +1,189 @@
+{
+ "task_id": "l4-shaft-support",
+ "executed": true,
+ "error": null,
+ "traceback": null,
+ "cad_exec_seconds": 1.5893,
+ "cad_process_seconds": 1.951,
+ "static": {
+  "cad_operations": 16,
+  "build_literals": 0,
+  "has_params": true,
+  "has_build": true
+ },
+ "checks": [
+  {
+   "id": "parts",
+   "desc": "Four named parts returned",
+   "critical": true,
+   "dim": "engineering",
+   "passed": false,
+   "detail": "unexpected ['bolt_left', 'bolt_right']"
+  },
+  {
+   "id": "no_interference",
+   "desc": "No interference between any two parts",
+   "critical": true,
+   "dim": "manufacturability",
+   "passed": false,
+   "detail": "interference base_plate / shaft: 12566.4 mm\u00b3; housing_left / bolt_left: 7994.4 mm\u00b3; housing_left / bolt_right: 5076.7 mm\u00b3; housing_right / shaft: 5690.3 mm\u00b3; bolt_left / bolt_right: 25446.9 mm\u00b3"
+  },
+  {
+   "id": "plate_size",
+   "desc": "Base plate 160 x 60 x 10",
+   "critical": true,
+   "dim": "engineering",
+   "passed": false,
+   "detail": "measured 160.0 x 60.0 x 10.0 from (-80, -30, 5) to (80, 30, 15); specified (-80, -30, 0) to (80, 30, 10)"
+  },
+  {
+   "id": "housing_left_pos",
+   "desc": "Left housing seated at X=-50 on the plate",
+   "critical": true,
+   "dim": "engineering",
+   "passed": false,
+   "detail": "measured 54.8 x 40.8 x 40.8 from (50, 7.6, 24.6) to (104.8, 48.4, 65.4); specified (-60, -28, 10) to (-40, 28, 55)"
+  },
+  {
+   "id": "housing_right_pos",
+   "desc": "Right housing seated at X=+50 on the plate",
+   "critical": true,
+   "dim": "engineering",
+   "passed": false,
+   "detail": "measured 54.8 x 40.8 x 40.8 from (-50, 7.6, 24.6) to (4.8, 48.4, 65.4); specified (40, -28, 10) to (60, 28, 55)"
+  },
+  {
+   "id": "shaft_pos",
+   "desc": "Shaft \u00d820 x 140 on the bore axis",
+   "critical": true,
+   "dim": "engineering",
+   "passed": false,
+   "detail": "measured 40.0 x 40.0 x 140.0 from (-20, -20, 0) to (20, 20, 140); specified (-70, -10, 30) to (70, 10, 50)"
+  },
+  {
+   "id": "shaft_through",
+   "desc": "Shaft passes through both housings",
+   "critical": true,
+   "dim": "engineering",
+   "passed": false,
+   "detail": "no material where the specification requires material at (-50, 0, 40), (50, 0, 40)"
+  },
+  {
+   "id": "clearance",
+   "desc": "0.2 mm radial clearance in both bores",
+   "critical": true,
+   "dim": "manufacturability",
+   "passed": false,
+   "detail": "material found where the specification requires empty space at (50, 10.1, 40), (-50, 10.1, 40)"
+  },
+  {
+   "id": "bore_not_oversized",
+   "desc": "Bore not oversized (\u2264 \u00d821)",
+   "critical": false,
+   "dim": "engineering",
+   "passed": false,
+   "detail": "no material where the specification requires material at (50, 0, 50.6), (50, 0, 29.4)"
+  },
+  {
+   "id": "bolt_interface",
+   "desc": "Coaxial \u00d89 bolt holes through housings and plate",
+   "critical": true,
+   "dim": "engineering",
+   "passed": false,
+   "detail": "material found where the specification requires empty space at (50, 20, 5), (50, 20, 30), (50, -20, 5)"
+  },
+  {
+   "id": "bolt_size",
+   "desc": "Bolt holes \u00d89 (not oversized)",
+   "critical": false,
+   "dim": "engineering",
+   "passed": true,
+   "detail": "satisfied"
+  },
+  {
+   "id": "seated",
+   "desc": "Housings seated on the plate (contact at Z=10)",
+   "critical": false,
+   "dim": "manufacturability",
+   "passed": false,
+   "detail": "no material where the specification requires material at (-50, -10, 10.3)"
+  }
+ ],
+ "probes": [
+  {
+   "id": "shaft25",
+   "desc": "shaft_d 20 \u2192 25: bores follow with the same clearance",
+   "passed": false,
+   "iou": 0.0,
+   "detail": "geometry does not follow the parameter change with the specified design intent"
+  },
+  {
+   "id": "spread",
+   "desc": "housing_x 50 \u2192 60: plate bolt holes follow the housings",
+   "passed": false,
+   "iou": 0.0,
+   "detail": "geometry does not follow the parameter change with the specified design intent"
+  }
+ ],
+ "metrics": {
+  "iou_per_part": {
+   "base_plate": 0.3274,
+   "housing_left": 0.0,
+   "housing_right": 0.0,
+   "shaft": 0.0585
+  },
+  "iou": 0.0965,
+  "chamfer_mm": 16.0362,
+  "hausdorff_mm": 135.2907,
+  "volume_mm3": 486472.12,
+  "reference_volume_mm3": 213712.45,
+  "volume_rel_error": 1.27629,
+  "bbox_size_mm": [
+   290.0,
+   78.4,
+   140.0
+  ],
+  "reference_bbox_size_mm": [
+   160.0,
+   60.0,
+   55.0
+  ],
+  "bbox_max_rel_error": 1.54545,
+  "faces": 21,
+  "reference_faces": 31,
+  "solids": {
+   "base_plate": 1,
+   "housing_left": 1,
+   "housing_right": 1,
+   "shaft": 1,
+   "bolt_left": 1,
+   "bolt_right": 1
+  },
+  "valid_brep": true,
+  "params_keys_fraction": 1.0,
+  "probe_pass_fraction": 0.0,
+  "build_literals": 0
+ },
+ "scores": {
+  "geometry": 0.2515,
+  "engineering": 0.0625,
+  "parametric": 0.4,
+  "manufacturability": 0.4,
+  "completion": 0.0,
+  "overall": 0.1942
+ },
+ "accepted": false,
+ "critical_failed": [
+  "parts",
+  "no_interference",
+  "plate_size",
+  "housing_left_pos",
+  "housing_right_pos",
+  "shaft_pos",
+  "shaft_through",
+  "clearance",
+  "bolt_interface"
+ ],
+ "render": "render.svg",
+ "eval_seconds": 0.387
+}

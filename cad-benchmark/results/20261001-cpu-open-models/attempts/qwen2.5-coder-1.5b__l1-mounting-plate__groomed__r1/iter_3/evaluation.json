@@ -1,0 +1,27 @@
+{
+ "task_id": "l1-mounting-plate",
+ "executed": false,
+ "error": "ValueError: Can not return the Nth element of an empty list",
+ "traceback": "Traceback (most recent call last):\n  File \"/home/claude/gen7-openness/cad-benchmark/cadbench/worker.py\", line 101, in main\n    exec(compile(code, \"candidate.py\", \"exec\"), ns)\n  File \"candidate.py\", line 44, in <module>\n    result = build()\n             ^^^^^^^\n  File \"candidate.py\", line 25, in build\n    hole = bottom_face.faces(\">Z\").workplane().pushPoints([(x, y, 0), (x, y, p[\"thickness\"])])\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/dist-packages/cadquery/cq.py\", line 859, in faces\n    return self._selectObjects(\"Faces\", selector, tag)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/dist-packages/cadquery/cq.py\", line 776, in _selectObjects\n    return self.newObject(self._filter(toReturn, selector))\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/dist-packages/cadquery/cq.py\", line 786, in _filter\n    toReturn = selectorObj.filter(objs)\n               ^^^^^^^^^^^^^^^^^^^^^^^^\nValueError: Can not return the Nth element of an empty list\n",
+ "cad_exec_seconds": 1.5252,
+ "cad_process_seconds": 1.829,
+ "static": {
+  "cad_operations": 25,
+  "build_literals": 6,
+  "has_params": true,
+  "has_build": true
+ },
+ "checks": [],
+ "probes": [],
+ "metrics": {},
+ "scores": {
+  "geometry": 0.0,
+  "engineering": 0.0,
+  "parametric": 0.0,
+  "manufacturability": 0.0,
+  "completion": 0.0,
+  "overall": 0.0
+ },
+ "accepted": false,
+ "eval_seconds": 0.0
+}

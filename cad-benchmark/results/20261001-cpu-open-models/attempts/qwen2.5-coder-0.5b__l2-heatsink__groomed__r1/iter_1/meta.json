@@ -1,0 +1,22 @@
+{
+ "ok": false,
+ "static": {
+  "cad_operations": null,
+  "build_literals": null,
+  "has_params": false,
+  "has_build": false
+ },
+ "probes": {
+  "seven_fins": {
+   "ok": false,
+   "error": "no build(PARAMS) entry point"
+  },
+  "taller": {
+   "ok": false,
+   "error": "no build(PARAMS) entry point"
+  }
+ },
+ "error": "SyntaxError: '(' was never closed (candidate.py, line 53)",
+ "traceback": "Traceback (most recent call last):\n  File \"/home/claude/gen7-openness/cad-benchmark/cadbench/worker.py\", line 101, in main\n    exec(compile(code, \"candidate.py\", \"exec\"), ns)\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"candidate.py\", line 53\n    base_faces = base_workplane.faces(\">Z\").workplane().pushPoints([(base_center\n                                                                    ^\nSyntaxError: '(' was never closed\n",
+ "exec_seconds": 0.0007
+}

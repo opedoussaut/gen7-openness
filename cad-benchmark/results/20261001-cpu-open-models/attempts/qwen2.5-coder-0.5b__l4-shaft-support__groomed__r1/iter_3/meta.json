@@ -1,0 +1,22 @@
+{
+ "ok": false,
+ "static": {
+  "cad_operations": 9,
+  "build_literals": 0,
+  "has_params": true,
+  "has_build": true
+ },
+ "probes": {
+  "shaft25": {
+   "ok": false,
+   "error": "no build(PARAMS) entry point"
+  },
+  "spread": {
+   "ok": false,
+   "error": "no build(PARAMS) entry point"
+  }
+ },
+ "error": "NameError: name 'plate_length' is not defined",
+ "traceback": "Traceback (most recent call last):\n  File \"/home/claude/gen7-openness/cad-benchmark/cadbench/worker.py\", line 101, in main\n    exec(compile(code, \"candidate.py\", \"exec\"), ns)\n  File \"candidate.py\", line 47, in <module>\n    result = build()\n             ^^^^^^^\n  File \"candidate.py\", line 23, in build\n    base_plate.pushPoints([(0, 0), (plate_length, 0), (plate_length, plate_thickness), (0, plate_thickness)])\n                                    ^^^^^^^^^^^^\nNameError: name 'plate_length' is not defined\n",
+ "exec_seconds": 1.4596
+}
