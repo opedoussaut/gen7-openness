@@ -90,6 +90,19 @@ To connect real systems: pass an `mcpTransport` that POSTs the same JSON-RPC req
 
 Retrain: `cd models/system1 && python3 train.py` (numpy, onnx). Tests: `npm test` (includes ONNX hash, JS-vs-ONNX golden parity, holdout accuracy, R-17 escalation, R-22 bounded path).
 
+## Engineering intelligence — Cooling Loop A MBSE (branch `cooling-loop-mbse`)
+
+What happens after Decision Intelligence: GEN7 detects that the projected AI load exceeds Loop A's validated envelope,
+tests the operational options with the model, escalates an engineering question, and asks the authoritative MBSE model in
+**CATIA Magic** through **[cameo-mcp-bridge](https://github.com/ajhcs/cameo-mcp-bridge)** (MCP). Loop A v1 and a proposed
+Loop A v2 are evaluated under identical conditions; the evidence comes back to a human engineering decision.
+
+* Page: **08 Engineering** (`#engineering`). Mode badge: *Recorded Cameo evidence* (default) or *Live Cameo* (`?cameo=live`).
+* Engineering source of truth: `src/engineering/` (deterministic; no randomness). Report: [`docs/COOLING-LOOP-MBSE.md`](docs/COOLING-LOOP-MBSE.md).
+* Cameo agent, live server and how to rebuild the model: [`tools/cameo/README.md`](tools/cameo/README.md).
+* Recorded evidence: `evidence/cameo/` — native Cameo diagram exports, capability probe, build and workflow logs.
+* Honest boundaries: SysML v1 (no SysML v2 plugin installed); the calculation runs in GEN7 (no Cameo Simulation Toolkit) and is labelled as such.
+
 ## Protocol Lab (previous workshop, preserved)
 
 `lab.html` keeps the original two-tab cooling-capacity workshop (Rack Deployment Planner ↔ Liquid Cooling Engineer) with live JSON-RPC over HTTP when served by `npm start`. It is linked from the page footer. Presenter script: [PROTOCOL-LAB-PRESENTER.md](PROTOCOL-LAB-PRESENTER.md).

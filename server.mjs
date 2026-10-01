@@ -6,8 +6,8 @@ import { mcp, a2a, agentCard, rpcError } from './protocol.js';
 const root = fileURLToPath(new URL('.', import.meta.url));
 // Public files: legacy Protocol Lab assets, the GEN7 Openness app, and everything under src/ and styles/.
 const TOP = { '/': 'index.html', '/index.html': 'index.html', '/lab.html': 'lab.html', '/lab.css': 'lab.css', '/lab.js': 'lab.js', '/protocol.js': 'protocol.js', '/icons.js': 'icons.js', '/favicon.svg': 'favicon.svg' };
-const TYPES = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.mjs': 'text/javascript', '.svg': 'image/svg+xml', '.wasm': 'application/wasm', '.onnx': 'application/octet-stream', '.json': 'application/json', '.mp4': 'video/mp4', '.jpg': 'image/jpeg' };
-const BINARY = new Set(['.wasm', '.onnx', '.mp4', '.jpg']);
+const TYPES = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.mjs': 'text/javascript', '.svg': 'image/svg+xml', '.wasm': 'application/wasm', '.onnx': 'application/octet-stream', '.json': 'application/json', '.mp4': 'video/mp4', '.jpg': 'image/jpeg', '.png': 'image/png' };
+const BINARY = new Set(['.wasm', '.onnx', '.mp4', '.jpg', '.png']);
 function publicFile(path) {
   if (TOP[path]) return TOP[path];
   if (path.includes('..')) return null;
@@ -16,6 +16,8 @@ function publicFile(path) {
   if (/^\/models\/system1\/(decision-mlp\.onnx|model-card\.json)$/.test(path)) return path.slice(1);
   if (/^\/vendor\/onnxruntime-web\/1\.22\.0\/[A-Za-z0-9_.\-]+\.(mjs|wasm)$/.test(path)) return path.slice(1);
   if (/^\/media\/[A-Za-z0-9_\-]+\.(mp4|jpg)$/.test(path)) return path.slice(1);
+  // Recorded Cameo evidence (native diagram exports and the agent's logs) for the Engineering page.
+  if (/^\/evidence\/cameo\/(index\.json|diagrams\/[a-z0-9_]+\.png)$/.test(path)) return path.slice(1);
   return null;
 }
 export function createAppServer() {

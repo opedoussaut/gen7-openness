@@ -9,5 +9,9 @@ for (const f of ['decision-mlp.onnx', 'model-card.json']) await copyFile(new URL
 // Cinematics (both the original and the System 1 / System 2 version) when present.
 await mkdir(new URL('media/', output), { recursive: true });
 for (const f of await readdir(new URL('../media/', import.meta.url))) if (/\.(mp4|jpg)$/.test(f)) await copyFile(new URL(`../media/${f}`, import.meta.url), new URL(`media/${f}`, output));
+// Recorded Cameo evidence for the Engineering page: the index and the native diagram exports only (raw logs stay in the repo).
+await mkdir(new URL('evidence/cameo/diagrams/', output), { recursive: true });
+await copyFile(new URL('../evidence/cameo/index.json', import.meta.url), new URL('evidence/cameo/index.json', output));
+for (const f of await readdir(new URL('../evidence/cameo/diagrams/', import.meta.url))) if (f.endsWith('.png')) await copyFile(new URL(`../evidence/cameo/diagrams/${f}`, import.meta.url), new URL(`evidence/cameo/diagrams/${f}`, output));
 await writeFile(new URL('.nojekyll', output), '');
 console.log('Static build: dist/ (relative URLs support GitHub Pages).');

@@ -1,0 +1,5 @@
+# GEN7 Cameo MBSE agent — Python ≥ 3.10
+mcp<2            # MCP client; cameo-mcp-bridge 2.3.5 uses the 1.x FastMCP API
+httpx>=0.25
+# The bridge's own MCP server (spawned over stdio by mcp_session.py):
+#   git clone https://github.com/ajhcs/cameo-mcp-bridge && pip install -e cameo-mcp-bridge/mcp-server

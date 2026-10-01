@@ -11,11 +11,12 @@ import { mountTechnical } from './ui/technical.js';
 import { mountScale } from './ui/scale.js';
 import { mountPrereq } from './ui/prereq.js';
 import { mountStory } from './ui/story.js';
+import { mountEngineering } from './ui/engineering.js';
 import { createBrowserSystem1, initSystem1, system1Status } from './system1/runtime.js';
 import { FEATURES } from './system1/features.js';
 import { MODEL_CARD } from './system1/model.js';
 
-const PAGES = ['story', 'learn', 'demo', 'economics', 'scale', 'prereq', 'technical'];
+const PAGES = ['story', 'learn', 'demo', 'economics', 'scale', 'prereq', 'technical', 'engineering'];
 // Live engine: System 1 runs in the browser (WebGPU → WASM → labelled JS fallback). Reference runs use the JS evaluator of the same weights.
 const engine = new DemoEngine(scenario, { system1: createBrowserSystem1() });
 const reference = new DemoEngine(scenario);
@@ -68,7 +69,8 @@ const views = {
   scale: mountScale($('#page-scale'), app),
   prereq: mountPrereq($('#page-prereq'), app),
   technical: mountTechnical($('#page-technical'), app),
-  story: mountStory($('#page-story'), app)
+  story: mountStory($('#page-story'), app),
+  engineering: mountEngineering($('#page-engineering'), app)
 };
 
 function setPage(page, focus = false) {

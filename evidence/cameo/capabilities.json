@@ -1,0 +1,3639 @@
+{
+  "mcpServer": {
+    "name": "CameoMCPBridge",
+    "version": "1.30.0",
+    "protocolVersion": "2025-11-25",
+    "toolCount": 162
+  },
+  "mcpTools": [
+    "cameo_status",
+    "cameo_get_capabilities",
+    "cameo_probe_bridge",
+    "cameo_get_ui_state",
+    "cameo_get_active_diagram",
+    "cameo_get_ui_selection",
+    "cameo_list_methodology_packs",
+    "cameo_get_methodology_pack",
+    "cameo_get_methodology_guidance",
+    "cameo_execute_methodology_recipe",
+    "cameo_validate_methodology_recipe",
+    "cameo_generate_review_packet",
+    "cameo_get_project",
+    "cameo_save_project",
+    "cameo_reset_session",
+    "cameo_query_elements",
+    "cameo_get_element",
+    "cameo_get_containment_tree",
+    "cameo_list_containment_children",
+    "cameo_create_element",
+    "cameo_modify_element",
+    "cameo_delete_element",
+    "cameo_apply_stereotype",
+    "cameo_set_tagged_values",
+    "cameo_set_stereotype_metaclasses",
+    "cameo_apply_profile",
+    "cameo_create_relationship",
+    "cameo_get_relationships",
+    "cameo_list_matrices",
+    "cameo_get_matrix",
+    "cameo_verify_matrix_consistency",
+    "cameo_verify_activity_flow_semantics",
+    "cameo_verify_port_boundary_consistency",
+    "cameo_verify_requirement_quality",
+    "cameo_verify_cross_diagram_traceability",
+    "cameo_detect_cross_diagram_inconsistencies",
+    "cameo_build_cross_diagram_remediation_plan",
+    "cameo_proof_model_text",
+    "cameo_apply_proofing_patch_plan",
+    "cameo_compare_expected_artifact_list",
+    "cameo_validate_methodology_package",
+    "cameo_export_required_diagrams",
+    "cameo_assemble_ppt_pdf",
+    "cameo_list_matrix_kinds",
+    "cameo_create_matrix",
+    "cameo_list_generic_tables",
+    "cameo_get_generic_table",
+    "cameo_list_generic_table_columns",
+    "cameo_create_generic_table",
+    "cameo_list_relation_maps",
+    "cameo_get_relation_map",
+    "cameo_create_relation_map",
+    "cameo_configure_relation_map",
+    "cameo_refresh_relation_map",
+    "cameo_dump_relation_map_raw_settings",
+    "cameo_list_relation_map_presentations",
+    "cameo_list_relation_map_criteria_templates",
+    "cameo_set_relation_map_criteria",
+    "cameo_expand_relation_map",
+    "cameo_collapse_relation_map",
+    "cameo_render_relation_map",
+    "cameo_verify_relation_map",
+    "cameo_compare_relation_maps",
+    "cameo_create_snapshot",
+    "cameo_list_snapshots",
+    "cameo_get_snapshot",
+    "cameo_delete_snapshot",
+    "cameo_diff_snapshots",
+    "cameo_get_validation_capabilities",
+    "cameo_list_validation_suites",
+    "cameo_run_native_validation",
+    "cameo_get_validation_result",
+    "cameo_list_probe_templates",
+    "cameo_execute_probe",
+    "cameo_run_validation",
+    "cameo_get_report_capabilities",
+    "cameo_list_report_templates",
+    "cameo_generate_report_preview",
+    "cameo_generate_report",
+    "cameo_get_report_job",
+    "cameo_get_requirements_capabilities",
+    "cameo_get_import_export_capabilities",
+    "cameo_export_requirements",
+    "cameo_preview_requirements_import",
+    "cameo_apply_requirements_import",
+    "cameo_export_requirements_preview",
+    "cameo_import_requirements_preview",
+    "cameo_get_simulation_capabilities",
+    "cameo_list_simulation_configurations",
+    "cameo_run_simulation_preview",
+    "cameo_run_simulation",
+    "cameo_get_simulation_result",
+    "cameo_terminate_simulation",
+    "cameo_get_teamwork_capabilities",
+    "cameo_get_teamwork_project",
+    "cameo_preview_teamwork_commit",
+    "cameo_preview_teamwork_update",
+    "cameo_list_teamwork_descriptors",
+    "cameo_list_teamwork_branches",
+    "cameo_get_teamwork_history",
+    "cameo_get_teamwork_locks",
+    "cameo_get_datahub_capabilities",
+    "cameo_list_datahub_sources",
+    "cameo_preview_datahub_sync",
+    "cameo_get_criteria_capabilities",
+    "cameo_list_criteria_templates",
+    "cameo_build_criteria_expression",
+    "cameo_parse_criteria_expression",
+    "cameo_apply_criteria_template",
+    "cameo_capture_criteria_template_from_diff",
+    "cameo_get_profile_capabilities",
+    "cameo_export_profile_summary",
+    "cameo_preview_profile_operation",
+    "cameo_get_variant_capabilities",
+    "cameo_analyze_variants_preview",
+    "cameo_install_variant_pattern_preview",
+    "cameo_export_variant_configuration",
+    "cameo_get_extension_capabilities",
+    "cameo_scan_extensions",
+    "cameo_list_extension_profiles",
+    "cameo_install_extension_pattern_preview",
+    "cameo_get_typed_diagram_capabilities",
+    "cameo_list_typed_diagrams",
+    "cameo_inspect_typed_diagram",
+    "cameo_preview_typed_diagram_operation",
+    "cameo_refuse_compliance_claim",
+    "cameo_get_traceability_graph",
+    "cameo_dump_diagram_properties",
+    "cameo_dump_presentation_properties",
+    "cameo_list_diagram_types",
+    "cameo_list_diagrams",
+    "cameo_create_diagram",
+    "cameo_add_to_diagram",
+    "cameo_get_diagram_image",
+    "cameo_verify_diagram_visual",
+    "cameo_auto_layout",
+    "cameo_list_diagram_shapes",
+    "cameo_get_shape_properties",
+    "cameo_move_shapes",
+    "cameo_delete_shapes",
+    "cameo_add_diagram_paths",
+    "cameo_set_shape_properties",
+    "cameo_set_shape_compartments",
+    "cameo_set_transition_label_presentation",
+    "cameo_set_item_flow_label_presentation",
+    "cameo_set_allocation_compartment_presentation",
+    "cameo_repair_hidden_labels",
+    "cameo_repair_label_positions",
+    "cameo_repair_conveyed_item_labels",
+    "cameo_normalize_compartment_presets",
+    "cameo_prune_diagram_presentations",
+    "cameo_prune_path_decorations",
+    "cameo_reparent_shapes",
+    "cameo_route_paths",
+    "cameo_get_specification",
+    "cameo_set_specification",
+    "cameo_set_usecase_subject",
+    "cameo_get_transition_triggers",
+    "cameo_set_transition_trigger",
+    "cameo_get_state_behaviors",
+    "cameo_set_state_behaviors",
+    "cameo_execute_macro"
+  ],
+  "status": {
+    "pluginId": "com.claude.cameo.bridge",
+    "plugin": "CameoMCPBridge",
+    "pluginName": "Cameo MCP Bridge",
+    "version": "2.3.5",
+    "pluginVersion": "2.3.5",
+    "apiVersion": "v1",
+    "handshakeVersion": "1",
+    "port": 18740,
+    "statusEndpoint": "/api/v1/status",
+    "statusAliases": [
+      "/status",
+      "/api/v1/status"
+    ],
+    "capabilitiesEndpoint": "/api/v1/capabilities",
+    "capabilitiesAliases": [
+      "/capabilities",
+      "/api/v1/capabilities"
+    ],
+    "compatibility": {
+      "requiresExactPluginVersionMatch": true,
+      "expectedPluginVersion": "2.3.5",
+      "supportedHandshakeVersion": "1",
+      "supportedPluginVersions": [
+        "2.3.5"
+      ],
+      "clientExpectedPluginVersion": "2.3.5",
+      "clientExpectedHandshakeVersion": "1",
+      "clientExpectedApiVersion": "v1",
+      "clientCompatible": true,
+      "clientCompatibilityErrors": []
+    },
+    "capabilities": {
+      "count": 144,
+      "groups": {
+        "health": [
+          "cameo_status",
+          "cameo_capabilities"
+        ],
+        "project": [
+          "cameo_get_project",
+          "cameo_save_project"
+        ],
+        "ui": [
+          "cameo_get_ui_state",
+          "cameo_get_active_diagram",
+          "cameo_get_ui_selection"
+        ],
+        "session": [
+          "cameo_reset_session"
+        ],
+        "elements": [
+          "cameo_query_elements",
+          "cameo_get_element",
+          "cameo_create_element",
+          "cameo_modify_element",
+          "cameo_delete_element",
+          "cameo_get_containment_tree",
+          "cameo_list_containment_children",
+          "cameo_set_usecase_subject"
+        ],
+        "stereotypes": [
+          "cameo_apply_profile",
+          "cameo_apply_stereotype",
+          "cameo_set_tagged_values",
+          "cameo_set_stereotype_metaclasses"
+        ],
+        "relationships": [
+          "cameo_create_relationship",
+          "cameo_get_relationships"
+        ],
+        "matrices": [
+          "cameo_list_matrices",
+          "cameo_get_matrix",
+          "cameo_create_matrix"
+        ],
+        "genericTables": [
+          "cameo_list_generic_tables",
+          "cameo_get_generic_table",
+          "cameo_create_generic_table",
+          "cameo_list_generic_table_columns"
+        ],
+        "diagrams": [
+          "cameo_list_diagrams",
+          "cameo_create_diagram",
+          "cameo_add_to_diagram",
+          "cameo_get_diagram_image",
+          "cameo_auto_layout",
+          "cameo_list_diagram_shapes",
+          "cameo_get_shape_properties",
+          "cameo_move_shapes",
+          "cameo_delete_shapes",
+          "cameo_add_diagram_paths",
+          "cameo_set_shape_properties",
+          "cameo_set_shape_compartments",
+          "cameo_set_transition_label_presentation",
+          "cameo_set_item_flow_label_presentation",
+          "cameo_set_allocation_compartment_presentation",
+          "cameo_prune_path_decorations",
+          "cameo_repair_hidden_labels",
+          "cameo_repair_label_positions",
+          "cameo_repair_conveyed_item_labels",
+          "cameo_normalize_compartment_presets",
+          "cameo_prune_diagram_presentations",
+          "cameo_reparent_shapes",
+          "cameo_route_paths"
+        ],
+        "inspection": [
+          "cameo_dump_diagram_properties",
+          "cameo_dump_presentation_properties"
+        ],
+        "relationMaps": [
+          "cameo_list_relation_maps",
+          "cameo_get_relation_map",
+          "cameo_create_relation_map",
+          "cameo_configure_relation_map",
+          "cameo_dump_relation_map_raw_settings",
+          "cameo_list_relation_map_presentations",
+          "cameo_refresh_relation_map",
+          "cameo_get_traceability_graph",
+          "cameo_list_relation_map_criteria_templates",
+          "cameo_set_relation_map_criteria",
+          "cameo_expand_relation_map",
+          "cameo_collapse_relation_map",
+          "cameo_render_relation_map",
+          "cameo_verify_relation_map",
+          "cameo_compare_relation_maps"
+        ],
+        "snapshots": [
+          "cameo_create_snapshot",
+          "cameo_list_snapshots",
+          "cameo_get_snapshot",
+          "cameo_delete_snapshot",
+          "cameo_diff_snapshots"
+        ],
+        "validation": [
+          "cameo_get_validation_capabilities",
+          "cameo_list_validation_suites",
+          "cameo_run_native_validation",
+          "cameo_get_validation_result",
+          "cameo_run_validation"
+        ],
+        "probes": [
+          "cameo_list_probe_templates",
+          "cameo_execute_probe"
+        ],
+        "specification": [
+          "cameo_get_specification",
+          "cameo_set_specification"
+        ],
+        "reports": [
+          "cameo_get_report_capabilities",
+          "cameo_list_report_templates",
+          "cameo_generate_report_preview",
+          "cameo_generate_report",
+          "cameo_get_report_job"
+        ],
+        "requirements": [
+          "cameo_get_requirements_capabilities",
+          "cameo_export_requirements_preview",
+          "cameo_import_requirements_preview"
+        ],
+        "importExport": [
+          "cameo_get_import_export_capabilities",
+          "cameo_export_requirements",
+          "cameo_preview_requirements_import",
+          "cameo_apply_requirements_import"
+        ],
+        "simulation": [
+          "cameo_get_simulation_capabilities",
+          "cameo_list_simulation_configurations",
+          "cameo_run_simulation_preview",
+          "cameo_run_simulation",
+          "cameo_run_simulation_async",
+          "cameo_get_simulation_result",
+          "cameo_terminate_simulation"
+        ],
+        "teamwork": [
+          "cameo_get_teamwork_capabilities",
+          "cameo_get_teamwork_project",
+          "cameo_list_teamwork_descriptors",
+          "cameo_list_teamwork_branches",
+          "cameo_get_teamwork_history",
+          "cameo_get_teamwork_locks",
+          "cameo_preview_teamwork_update",
+          "cameo_preview_teamwork_commit",
+          "cameo_commit_teamwork"
+        ],
+        "datahub": [
+          "cameo_get_datahub_capabilities",
+          "cameo_list_datahub_sources",
+          "cameo_preview_datahub_sync"
+        ],
+        "criteria": [
+          "cameo_get_criteria_capabilities",
+          "cameo_list_criteria_templates",
+          "cameo_build_criteria_expression",
+          "cameo_parse_criteria_expression",
+          "cameo_apply_criteria_template",
+          "cameo_capture_criteria_template_from_diff"
+        ],
+        "profiles": [
+          "cameo_get_profile_capabilities",
+          "cameo_create_profile_preview",
+          "cameo_create_stereotype_preview",
+          "cameo_create_tag_preview",
+          "cameo_apply_profile_preview",
+          "cameo_set_profile_tags_preview",
+          "cameo_export_profile_summary"
+        ],
+        "variants": [
+          "cameo_get_variant_capabilities",
+          "cameo_install_variant_pattern_preview",
+          "cameo_evaluate_variant_configuration",
+          "cameo_export_variant_configuration"
+        ],
+        "extensions": [
+          "cameo_get_extension_capabilities",
+          "cameo_list_extension_profiles",
+          "cameo_scan_extensions",
+          "cameo_install_extension_pattern_preview",
+          "cameo_refuse_compliance_claim"
+        ],
+        "typedDiagrams": [
+          "cameo_get_typed_diagram_capabilities",
+          "cameo_list_typed_diagrams",
+          "cameo_inspect_typed_diagram",
+          "cameo_create_sequence_message_preview",
+          "cameo_create_state_transition_preview",
+          "cameo_create_parametric_binding_preview",
+          "cameo_apply_diagram_legend_preview"
+        ],
+        "macros": [
+          "cameo_execute_macro"
+        ]
+      },
+      "endpoints": [
+        {
+          "group": "health",
+          "name": "cameo_status",
+          "method": "GET",
+          "path": "/api/v1/status",
+          "mode": "read"
+        },
+        {
+          "group": "health",
+          "name": "cameo_capabilities",
+          "method": "GET",
+          "path": "/api/v1/capabilities",
+          "mode": "read"
+        },
+        {
+          "group": "project",
+          "name": "cameo_get_project",
+          "method": "GET",
+          "path": "/api/v1/project",
+          "mode": "read"
+        },
+        {
+          "group": "project",
+          "name": "cameo_save_project",
+          "method": "POST",
+          "path": "/api/v1/project/save",
+          "mode": "write"
+        },
+        {
+          "group": "ui",
+          "name": "cameo_get_ui_state",
+          "method": "GET",
+          "path": "/api/v1/ui/state",
+          "mode": "read"
+        },
+        {
+          "group": "ui",
+          "name": "cameo_get_active_diagram",
+          "method": "GET",
+          "path": "/api/v1/ui/active-diagram",
+          "mode": "read"
+        },
+        {
+          "group": "ui",
+          "name": "cameo_get_ui_selection",
+          "method": "GET",
+          "path": "/api/v1/ui/selection",
+          "mode": "read"
+        },
+        {
+          "group": "session",
+          "name": "cameo_reset_session",
+          "method": "POST",
+          "path": "/api/v1/session/reset",
+          "mode": "write"
+        },
+        {
+          "group": "elements",
+          "name": "cameo_query_elements",
+          "method": "GET",
+          "path": "/api/v1/elements",
+          "mode": "read"
+        },
+        {
+          "group": "elements",
+          "name": "cameo_get_element",
+          "method": "GET",
+          "path": "/api/v1/elements/{elementId}",
+          "mode": "read"
+        },
+        {
+          "group": "elements",
+          "name": "cameo_create_element",
+          "method": "POST",
+          "path": "/api/v1/elements",
+          "mode": "write"
+        },
+        {
+          "group": "elements",
+          "name": "cameo_modify_element",
+          "method": "PUT",
+          "path": "/api/v1/elements/{elementId}",
+          "mode": "write"
+        },
+        {
+          "group": "elements",
+          "name": "cameo_delete_element",
+          "method": "DELETE",
+          "path": "/api/v1/elements/{elementId}",
+          "mode": "write"
+        },
+        {
+          "group": "elements",
+          "name": "cameo_get_containment_tree",
+          "method": "GET",
+          "path": "/api/v1/containment-tree",
+          "mode": "read"
+        },
+        {
+          "group": "elements",
+          "name": "cameo_list_containment_children",
+          "method": "GET",
+          "path": "/api/v1/containment-tree/children",
+          "mode": "read"
+        },
+        {
+          "group": "elements",
+          "name": "cameo_set_usecase_subject",
+          "method": "PUT",
+          "path": "/api/v1/elements/{elementId}/usecase-subject",
+          "mode": "write"
+        },
+        {
+          "group": "stereotypes",
+          "name": "cameo_apply_profile",
+          "method": "POST",
+          "path": "/api/v1/elements/{elementId}/apply-profile",
+          "mode": "write"
+        },
+        {
+          "group": "stereotypes",
+          "name": "cameo_apply_stereotype",
+          "method": "POST",
+          "path": "/api/v1/elements/{elementId}/stereotypes",
+          "mode": "write"
+        },
+        {
+          "group": "stereotypes",
+          "name": "cameo_set_tagged_values",
+          "method": "PUT",
+          "path": "/api/v1/elements/{elementId}/tagged-values",
+          "mode": "write"
+        },
+        {
+          "group": "stereotypes",
+          "name": "cameo_set_stereotype_metaclasses",
+          "method": "PUT",
+          "path": "/api/v1/elements/{elementId}/metaclasses",
+          "mode": "write"
+        },
+        {
+          "group": "relationships",
+          "name": "cameo_create_relationship",
+          "method": "POST",
+          "path": "/api/v1/relationships",
+          "mode": "write"
+        },
+        {
+          "group": "relationships",
+          "name": "cameo_get_relationships",
+          "method": "GET",
+          "path": "/api/v1/elements/{elementId}/relationships",
+          "mode": "read"
+        },
+        {
+          "group": "matrices",
+          "name": "cameo_list_matrices",
+          "method": "GET",
+          "path": "/api/v1/matrices",
+          "mode": "read"
+        },
+        {
+          "group": "matrices",
+          "name": "cameo_get_matrix",
+          "method": "GET",
+          "path": "/api/v1/matrices/{matrixId}",
+          "mode": "read"
+        },
+        {
+          "group": "matrices",
+          "name": "cameo_create_matrix",
+          "method": "POST",
+          "path": "/api/v1/matrices",
+          "mode": "write"
+        },
+        {
+          "group": "genericTables",
+          "name": "cameo_list_generic_tables",
+          "method": "GET",
+          "path": "/api/v1/generic-tables",
+          "mode": "read"
+        },
+        {
+          "group": "genericTables",
+          "name": "cameo_get_generic_table",
+          "method": "GET",
+          "path": "/api/v1/generic-tables/{tableId}",
+          "mode": "read"
+        },
+        {
+          "group": "genericTables",
+          "name": "cameo_create_generic_table",
+          "method": "POST",
+          "path": "/api/v1/generic-tables",
+          "mode": "write"
+        },
+        {
+          "group": "genericTables",
+          "name": "cameo_list_generic_table_columns",
+          "method": "GET",
+          "path": "/api/v1/generic-tables/columns",
+          "mode": "read"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_list_diagrams",
+          "method": "GET",
+          "path": "/api/v1/diagrams",
+          "mode": "read"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_create_diagram",
+          "method": "POST",
+          "path": "/api/v1/diagrams",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_add_to_diagram",
+          "method": "POST",
+          "path": "/api/v1/diagrams/{diagramId}/elements",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_get_diagram_image",
+          "method": "GET",
+          "path": "/api/v1/diagrams/{diagramId}/image",
+          "mode": "read"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_auto_layout",
+          "method": "POST",
+          "path": "/api/v1/diagrams/{diagramId}/layout",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_list_diagram_shapes",
+          "method": "GET",
+          "path": "/api/v1/diagrams/{diagramId}/shapes",
+          "mode": "read"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_get_shape_properties",
+          "method": "GET",
+          "path": "/api/v1/diagrams/{diagramId}/shapes/{presentationId}/properties",
+          "mode": "read"
+        },
+        {
+          "group": "inspection",
+          "name": "cameo_dump_diagram_properties",
+          "method": "GET",
+          "path": "/api/v1/inspect/diagrams/{diagramId}/properties",
+          "mode": "read"
+        },
+        {
+          "group": "inspection",
+          "name": "cameo_dump_presentation_properties",
+          "method": "GET",
+          "path": "/api/v1/inspect/diagrams/{diagramId}/presentations/{presentationId}/properties",
+          "mode": "read"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_move_shapes",
+          "method": "PUT",
+          "path": "/api/v1/diagrams/{diagramId}/shapes",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_delete_shapes",
+          "method": "DELETE",
+          "path": "/api/v1/diagrams/{diagramId}/shapes",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_add_diagram_paths",
+          "method": "POST",
+          "path": "/api/v1/diagrams/{diagramId}/paths",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_set_shape_properties",
+          "method": "PUT",
+          "path": "/api/v1/diagrams/{diagramId}/shapes/{presentationId}/properties",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_set_shape_compartments",
+          "method": "PUT",
+          "path": "/api/v1/diagrams/{diagramId}/shapes/{presentationId}/compartments",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_set_transition_label_presentation",
+          "method": "PUT",
+          "path": "/api/v1/diagrams/{diagramId}/presentation/transition-labels",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_set_item_flow_label_presentation",
+          "method": "PUT",
+          "path": "/api/v1/diagrams/{diagramId}/presentation/item-flow-labels",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_set_allocation_compartment_presentation",
+          "method": "PUT",
+          "path": "/api/v1/diagrams/{diagramId}/presentation/allocation-compartments",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_prune_path_decorations",
+          "method": "PUT",
+          "path": "/api/v1/diagrams/{diagramId}/repair/path-decorations",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_repair_hidden_labels",
+          "method": "PUT",
+          "path": "/api/v1/diagrams/{diagramId}/repair/hidden-labels",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_repair_label_positions",
+          "method": "PUT",
+          "path": "/api/v1/diagrams/{diagramId}/repair/label-positions",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_repair_conveyed_item_labels",
+          "method": "PUT",
+          "path": "/api/v1/diagrams/{diagramId}/repair/conveyed-item-labels",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_normalize_compartment_presets",
+          "method": "PUT",
+          "path": "/api/v1/diagrams/{diagramId}/repair/compartment-presets",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_prune_diagram_presentations",
+          "method": "PUT",
+          "path": "/api/v1/diagrams/{diagramId}/repair/prune-presentations",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_reparent_shapes",
+          "method": "PUT",
+          "path": "/api/v1/diagrams/{diagramId}/shapes/reparent",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_route_paths",
+          "method": "PUT",
+          "path": "/api/v1/diagrams/{diagramId}/paths/route",
+          "mode": "write"
+        },
+        {
+          "group": "relationMaps",
+          "name": "cameo_list_relation_maps",
+          "method": "GET",
+          "path": "/api/v1/relation-maps",
+          "mode": "read"
+        },
+        {
+          "group": "relationMaps",
+          "name": "cameo_get_relation_map",
+          "method": "GET",
+          "path": "/api/v1/relation-maps/{relationMapId}",
+          "mode": "read"
+        },
+        {
+          "group": "relationMaps",
+          "name": "cameo_create_relation_map",
+          "method": "POST",
+          "path": "/api/v1/relation-maps",
+          "mode": "write"
+        },
+        {
+          "group": "relationMaps",
+          "name": "cameo_configure_relation_map",
+          "method": "PUT",
+          "path": "/api/v1/relation-maps/{relationMapId}/settings",
+          "mode": "write"
+        },
+        {
+          "group": "relationMaps",
+          "name": "cameo_dump_relation_map_raw_settings",
+          "method": "GET",
+          "path": "/api/v1/relation-maps/{relationMapId}/settings/raw",
+          "mode": "read"
+        },
+        {
+          "group": "relationMaps",
+          "name": "cameo_list_relation_map_presentations",
+          "method": "GET",
+          "path": "/api/v1/relation-maps/{relationMapId}/presentations",
+          "mode": "read"
+        },
+        {
+          "group": "relationMaps",
+          "name": "cameo_refresh_relation_map",
+          "method": "POST",
+          "path": "/api/v1/relation-maps/{relationMapId}/refresh",
+          "mode": "write"
+        },
+        {
+          "group": "relationMaps",
+          "name": "cameo_get_traceability_graph",
+          "method": "POST",
+          "path": "/api/v1/relation-maps/traceability-graph",
+          "mode": "read"
+        },
+        {
+          "group": "relationMaps",
+          "name": "cameo_list_relation_map_criteria_templates",
+          "method": "GET",
+          "path": "/api/v1/relation-maps/criteria/templates",
+          "mode": "read"
+        },
+        {
+          "group": "relationMaps",
+          "name": "cameo_set_relation_map_criteria",
+          "method": "PUT",
+          "path": "/api/v1/relation-maps/{relationMapId}/criteria",
+          "mode": "write"
+        },
+        {
+          "group": "relationMaps",
+          "name": "cameo_expand_relation_map",
+          "method": "POST",
+          "path": "/api/v1/relation-maps/{relationMapId}/expand",
+          "mode": "write"
+        },
+        {
+          "group": "relationMaps",
+          "name": "cameo_collapse_relation_map",
+          "method": "POST",
+          "path": "/api/v1/relation-maps/{relationMapId}/collapse",
+          "mode": "write"
+        },
+        {
+          "group": "relationMaps",
+          "name": "cameo_render_relation_map",
+          "method": "POST",
+          "path": "/api/v1/relation-maps/{relationMapId}/render",
+          "mode": "write"
+        },
+        {
+          "group": "relationMaps",
+          "name": "cameo_verify_relation_map",
+          "method": "POST",
+          "path": "/api/v1/relation-maps/{relationMapId}/verify",
+          "mode": "read"
+        },
+        {
+          "group": "relationMaps",
+          "name": "cameo_compare_relation_maps",
+          "method": "POST",
+          "path": "/api/v1/relation-maps/compare",
+          "mode": "read"
+        },
+        {
+          "group": "snapshots",
+          "name": "cameo_create_snapshot",
+          "method": "POST",
+          "path": "/api/v1/snapshots",
+          "mode": "read"
+        },
+        {
+          "group": "snapshots",
+          "name": "cameo_list_snapshots",
+          "method": "GET",
+          "path": "/api/v1/snapshots",
+          "mode": "read"
+        },
+        {
+          "group": "snapshots",
+          "name": "cameo_get_snapshot",
+          "method": "GET",
+          "path": "/api/v1/snapshots/{snapshotId}",
+          "mode": "read"
+        },
+        {
+          "group": "snapshots",
+          "name": "cameo_delete_snapshot",
+          "method": "DELETE",
+          "path": "/api/v1/snapshots/{snapshotId}",
+          "mode": "write"
+        },
+        {
+          "group": "snapshots",
+          "name": "cameo_diff_snapshots",
+          "method": "POST",
+          "path": "/api/v1/snapshots/diff",
+          "mode": "read"
+        },
+        {
+          "group": "validation",
+          "name": "cameo_get_validation_capabilities",
+          "method": "GET",
+          "path": "/api/v1/validation/capabilities",
+          "mode": "read"
+        },
+        {
+          "group": "validation",
+          "name": "cameo_list_validation_suites",
+          "method": "GET",
+          "path": "/api/v1/validation/suites",
+          "mode": "read"
+        },
+        {
+          "group": "validation",
+          "name": "cameo_run_native_validation",
+          "method": "POST",
+          "path": "/api/v1/validation/run",
+          "mode": "read"
+        },
+        {
+          "group": "validation",
+          "name": "cameo_get_validation_result",
+          "method": "GET",
+          "path": "/api/v1/validation/results/{runId}",
+          "mode": "read"
+        },
+        {
+          "group": "probes",
+          "name": "cameo_list_probe_templates",
+          "method": "GET",
+          "path": "/api/v1/probes/templates",
+          "mode": "read"
+        },
+        {
+          "group": "probes",
+          "name": "cameo_execute_probe",
+          "method": "POST",
+          "path": "/api/v1/probes/execute",
+          "mode": "read"
+        },
+        {
+          "group": "specification",
+          "name": "cameo_get_specification",
+          "method": "GET",
+          "path": "/api/v1/elements/{elementId}/specification",
+          "mode": "read"
+        },
+        {
+          "group": "specification",
+          "name": "cameo_set_specification",
+          "method": "PUT",
+          "path": "/api/v1/elements/{elementId}/specification",
+          "mode": "write"
+        },
+        {
+          "group": "validation",
+          "name": "cameo_run_validation",
+          "method": "POST",
+          "path": "/api/v1/validation/run",
+          "mode": "read"
+        },
+        {
+          "group": "reports",
+          "name": "cameo_get_report_capabilities",
+          "method": "GET",
+          "path": "/api/v1/reports/capabilities",
+          "mode": "read"
+        },
+        {
+          "group": "reports",
+          "name": "cameo_list_report_templates",
+          "method": "GET",
+          "path": "/api/v1/reports/templates",
+          "mode": "read"
+        },
+        {
+          "group": "reports",
+          "name": "cameo_generate_report_preview",
+          "method": "POST",
+          "path": "/api/v1/reports/generate-preview",
+          "mode": "read"
+        },
+        {
+          "group": "reports",
+          "name": "cameo_generate_report",
+          "method": "POST",
+          "path": "/api/v1/reports/generate",
+          "mode": "write"
+        },
+        {
+          "group": "reports",
+          "name": "cameo_get_report_job",
+          "method": "GET",
+          "path": "/api/v1/reports/jobs/{jobId}",
+          "mode": "read"
+        },
+        {
+          "group": "requirements",
+          "name": "cameo_get_requirements_capabilities",
+          "method": "GET",
+          "path": "/api/v1/requirements/capabilities",
+          "mode": "read"
+        },
+        {
+          "group": "requirements",
+          "name": "cameo_export_requirements_preview",
+          "method": "POST",
+          "path": "/api/v1/requirements/export",
+          "mode": "read"
+        },
+        {
+          "group": "requirements",
+          "name": "cameo_import_requirements_preview",
+          "method": "POST",
+          "path": "/api/v1/requirements/import/preview",
+          "mode": "read"
+        },
+        {
+          "group": "importExport",
+          "name": "cameo_get_import_export_capabilities",
+          "method": "GET",
+          "path": "/api/v1/import-export/capabilities",
+          "mode": "read"
+        },
+        {
+          "group": "importExport",
+          "name": "cameo_export_requirements",
+          "method": "POST",
+          "path": "/api/v1/import-export/requirements/export",
+          "mode": "read"
+        },
+        {
+          "group": "importExport",
+          "name": "cameo_preview_requirements_import",
+          "method": "POST",
+          "path": "/api/v1/import-export/requirements/import-preview",
+          "mode": "read"
+        },
+        {
+          "group": "importExport",
+          "name": "cameo_apply_requirements_import",
+          "method": "POST",
+          "path": "/api/v1/import-export/requirements/apply",
+          "mode": "write"
+        },
+        {
+          "group": "simulation",
+          "name": "cameo_get_simulation_capabilities",
+          "method": "GET",
+          "path": "/api/v1/simulation/capabilities",
+          "mode": "read"
+        },
+        {
+          "group": "simulation",
+          "name": "cameo_list_simulation_configurations",
+          "method": "GET",
+          "path": "/api/v1/simulation/configurations",
+          "mode": "read"
+        },
+        {
+          "group": "simulation",
+          "name": "cameo_run_simulation_preview",
+          "method": "POST",
+          "path": "/api/v1/simulation/run-preview",
+          "mode": "read"
+        },
+        {
+          "group": "simulation",
+          "name": "cameo_run_simulation",
+          "method": "POST",
+          "path": "/api/v1/simulation/run",
+          "mode": "write"
+        },
+        {
+          "group": "simulation",
+          "name": "cameo_run_simulation_async",
+          "method": "POST",
+          "path": "/api/v1/simulation/run-async",
+          "mode": "write"
+        },
+        {
+          "group": "simulation",
+          "name": "cameo_get_simulation_result",
+          "method": "GET",
+          "path": "/api/v1/simulation/results/{runId}",
+          "mode": "read"
+        },
+        {
+          "group": "simulation",
+          "name": "cameo_terminate_simulation",
+          "method": "POST",
+          "path": "/api/v1/simulation/results/{runId}/terminate",
+          "mode": "write"
+        },
+        {
+          "group": "teamwork",
+          "name": "cameo_get_teamwork_capabilities",
+          "method": "GET",
+          "path": "/api/v1/teamwork/capabilities",
+          "mode": "read"
+        },
+        {
+          "group": "teamwork",
+          "name": "cameo_get_teamwork_project",
+          "method": "GET",
+          "path": "/api/v1/teamwork/project",
+          "mode": "read"
+        },
+        {
+          "group": "teamwork",
+          "name": "cameo_list_teamwork_descriptors",
+          "method": "GET",
+          "path": "/api/v1/teamwork/descriptors",
+          "mode": "read"
+        },
+        {
+          "group": "teamwork",
+          "name": "cameo_list_teamwork_branches",
+          "method": "GET",
+          "path": "/api/v1/teamwork/branches",
+          "mode": "read"
+        },
+        {
+          "group": "teamwork",
+          "name": "cameo_get_teamwork_history",
+          "method": "GET",
+          "path": "/api/v1/teamwork/history",
+          "mode": "read"
+        },
+        {
+          "group": "teamwork",
+          "name": "cameo_get_teamwork_locks",
+          "method": "GET",
+          "path": "/api/v1/teamwork/locks",
+          "mode": "read"
+        },
+        {
+          "group": "teamwork",
+          "name": "cameo_preview_teamwork_update",
+          "method": "POST",
+          "path": "/api/v1/teamwork/update-preview",
+          "mode": "read"
+        },
+        {
+          "group": "teamwork",
+          "name": "cameo_preview_teamwork_commit",
+          "method": "POST",
+          "path": "/api/v1/teamwork/commit-preview",
+          "mode": "read"
+        },
+        {
+          "group": "teamwork",
+          "name": "cameo_commit_teamwork",
+          "method": "POST",
+          "path": "/api/v1/teamwork/commit",
+          "mode": "write"
+        },
+        {
+          "group": "datahub",
+          "name": "cameo_get_datahub_capabilities",
+          "method": "GET",
+          "path": "/api/v1/datahub/capabilities",
+          "mode": "read"
+        },
+        {
+          "group": "datahub",
+          "name": "cameo_list_datahub_sources",
+          "method": "GET",
+          "path": "/api/v1/datahub/sources",
+          "mode": "read"
+        },
+        {
+          "group": "datahub",
+          "name": "cameo_preview_datahub_sync",
+          "method": "POST",
+          "path": "/api/v1/datahub/sync-preview",
+          "mode": "read"
+        },
+        {
+          "group": "criteria",
+          "name": "cameo_get_criteria_capabilities",
+          "method": "GET",
+          "path": "/api/v1/criteria/capabilities",
+          "mode": "read"
+        },
+        {
+          "group": "criteria",
+          "name": "cameo_list_criteria_templates",
+          "method": "GET",
+          "path": "/api/v1/criteria/templates",
+          "mode": "read"
+        },
+        {
+          "group": "criteria",
+          "name": "cameo_build_criteria_expression",
+          "method": "POST",
+          "path": "/api/v1/criteria/build",
+          "mode": "read"
+        },
+        {
+          "group": "criteria",
+          "name": "cameo_parse_criteria_expression",
+          "method": "POST",
+          "path": "/api/v1/criteria/parse",
+          "mode": "read"
+        },
+        {
+          "group": "criteria",
+          "name": "cameo_apply_criteria_template",
+          "method": "POST",
+          "path": "/api/v1/criteria/apply",
+          "mode": "write"
+        },
+        {
+          "group": "criteria",
+          "name": "cameo_capture_criteria_template_from_diff",
+          "method": "POST",
+          "path": "/api/v1/criteria/capture-template-from-diff",
+          "mode": "read"
+        },
+        {
+          "group": "profiles",
+          "name": "cameo_get_profile_capabilities",
+          "method": "GET",
+          "path": "/api/v1/profiles/capabilities",
+          "mode": "read"
+        },
+        {
+          "group": "profiles",
+          "name": "cameo_create_profile_preview",
+          "method": "POST",
+          "path": "/api/v1/profiles/create",
+          "mode": "read"
+        },
+        {
+          "group": "profiles",
+          "name": "cameo_create_stereotype_preview",
+          "method": "POST",
+          "path": "/api/v1/profiles/stereotypes/create",
+          "mode": "read"
+        },
+        {
+          "group": "profiles",
+          "name": "cameo_create_tag_preview",
+          "method": "POST",
+          "path": "/api/v1/profiles/tags/create",
+          "mode": "read"
+        },
+        {
+          "group": "profiles",
+          "name": "cameo_apply_profile_preview",
+          "method": "POST",
+          "path": "/api/v1/profiles/apply",
+          "mode": "read"
+        },
+        {
+          "group": "profiles",
+          "name": "cameo_set_profile_tags_preview",
+          "method": "PUT",
+          "path": "/api/v1/profiles/tags",
+          "mode": "read"
+        },
+        {
+          "group": "profiles",
+          "name": "cameo_export_profile_summary",
+          "method": "POST",
+          "path": "/api/v1/profiles/export-summary",
+          "mode": "read"
+        },
+        {
+          "group": "variants",
+          "name": "cameo_get_variant_capabilities",
+          "method": "GET",
+          "path": "/api/v1/variants/capabilities",
+          "mode": "read"
+        },
+        {
+          "group": "variants",
+          "name": "cameo_install_variant_pattern_preview",
+          "method": "POST",
+          "path": "/api/v1/variants/pattern/install-preview",
+          "mode": "read"
+        },
+        {
+          "group": "variants",
+          "name": "cameo_evaluate_variant_configuration",
+          "method": "POST",
+          "path": "/api/v1/variants/configurations/evaluate",
+          "mode": "read"
+        },
+        {
+          "group": "variants",
+          "name": "cameo_export_variant_configuration",
+          "method": "POST",
+          "path": "/api/v1/variants/configurations/export",
+          "mode": "read"
+        },
+        {
+          "group": "extensions",
+          "name": "cameo_get_extension_capabilities",
+          "method": "GET",
+          "path": "/api/v1/extensions/capabilities",
+          "mode": "read"
+        },
+        {
+          "group": "extensions",
+          "name": "cameo_list_extension_profiles",
+          "method": "GET",
+          "path": "/api/v1/extensions/profiles",
+          "mode": "read"
+        },
+        {
+          "group": "extensions",
+          "name": "cameo_scan_extensions",
+          "method": "POST",
+          "path": "/api/v1/extensions/model-scan",
+          "mode": "read"
+        },
+        {
+          "group": "extensions",
+          "name": "cameo_install_extension_pattern_preview",
+          "method": "POST",
+          "path": "/api/v1/extensions/pattern/install-preview",
+          "mode": "read"
+        },
+        {
+          "group": "extensions",
+          "name": "cameo_refuse_compliance_claim",
+          "method": "POST",
+          "path": "/api/v1/extensions/compliance-claim",
+          "mode": "read"
+        },
+        {
+          "group": "typedDiagrams",
+          "name": "cameo_get_typed_diagram_capabilities",
+          "method": "GET",
+          "path": "/api/v1/typed-diagrams/capabilities",
+          "mode": "read"
+        },
+        {
+          "group": "typedDiagrams",
+          "name": "cameo_list_typed_diagrams",
+          "method": "GET",
+          "path": "/api/v1/typed-diagrams",
+          "mode": "read"
+        },
+        {
+          "group": "typedDiagrams",
+          "name": "cameo_inspect_typed_diagram",
+          "method": "POST",
+          "path": "/api/v1/typed-diagrams/inspect",
+          "mode": "read"
+        },
+        {
+          "group": "typedDiagrams",
+          "name": "cameo_create_sequence_message_preview",
+          "method": "POST",
+          "path": "/api/v1/typed-diagrams/sequence/messages",
+          "mode": "read"
+        },
+        {
+          "group": "typedDiagrams",
+          "name": "cameo_create_state_transition_preview",
+          "method": "POST",
+          "path": "/api/v1/typed-diagrams/state/transitions",
+          "mode": "read"
+        },
+        {
+          "group": "typedDiagrams",
+          "name": "cameo_create_parametric_binding_preview",
+          "method": "POST",
+          "path": "/api/v1/typed-diagrams/parametric/bindings",
+          "mode": "read"
+        },
+        {
+          "group": "typedDiagrams",
+          "name": "cameo_apply_diagram_legend_preview",
+          "method": "POST",
+          "path": "/api/v1/typed-diagrams/legends/apply",
+          "mode": "read"
+        },
+        {
+          "group": "macros",
+          "name": "cameo_execute_macro",
+          "method": "POST",
+          "path": "/api/v1/macros/execute",
+          "mode": "write"
+        }
+      ]
+    },
+    "status": "ok",
+    "healthy": true
+  },
+  "capabilities": {
+    "pluginId": "com.claude.cameo.bridge",
+    "plugin": "CameoMCPBridge",
+    "pluginName": "Cameo MCP Bridge",
+    "version": "2.3.5",
+    "pluginVersion": "2.3.5",
+    "apiVersion": "v1",
+    "handshakeVersion": "1",
+    "port": 18740,
+    "statusEndpoint": "/api/v1/status",
+    "statusAliases": [
+      "/status",
+      "/api/v1/status"
+    ],
+    "capabilitiesEndpoint": "/api/v1/capabilities",
+    "capabilitiesAliases": [
+      "/capabilities",
+      "/api/v1/capabilities"
+    ],
+    "compatibility": {
+      "requiresExactPluginVersionMatch": true,
+      "expectedPluginVersion": "2.3.5",
+      "supportedHandshakeVersion": "1",
+      "supportedPluginVersions": [
+        "2.3.5"
+      ],
+      "clientExpectedPluginVersion": "2.3.5",
+      "clientExpectedHandshakeVersion": "1",
+      "clientExpectedApiVersion": "v1",
+      "clientCompatible": true,
+      "clientCompatibilityErrors": []
+    },
+    "capabilities": {
+      "count": 144,
+      "groups": {
+        "health": [
+          "cameo_status",
+          "cameo_capabilities"
+        ],
+        "project": [
+          "cameo_get_project",
+          "cameo_save_project"
+        ],
+        "ui": [
+          "cameo_get_ui_state",
+          "cameo_get_active_diagram",
+          "cameo_get_ui_selection"
+        ],
+        "session": [
+          "cameo_reset_session"
+        ],
+        "elements": [
+          "cameo_query_elements",
+          "cameo_get_element",
+          "cameo_create_element",
+          "cameo_modify_element",
+          "cameo_delete_element",
+          "cameo_get_containment_tree",
+          "cameo_list_containment_children",
+          "cameo_set_usecase_subject"
+        ],
+        "stereotypes": [
+          "cameo_apply_profile",
+          "cameo_apply_stereotype",
+          "cameo_set_tagged_values",
+          "cameo_set_stereotype_metaclasses"
+        ],
+        "relationships": [
+          "cameo_create_relationship",
+          "cameo_get_relationships"
+        ],
+        "matrices": [
+          "cameo_list_matrices",
+          "cameo_get_matrix",
+          "cameo_create_matrix"
+        ],
+        "genericTables": [
+          "cameo_list_generic_tables",
+          "cameo_get_generic_table",
+          "cameo_create_generic_table",
+          "cameo_list_generic_table_columns"
+        ],
+        "diagrams": [
+          "cameo_list_diagrams",
+          "cameo_create_diagram",
+          "cameo_add_to_diagram",
+          "cameo_get_diagram_image",
+          "cameo_auto_layout",
+          "cameo_list_diagram_shapes",
+          "cameo_get_shape_properties",
+          "cameo_move_shapes",
+          "cameo_delete_shapes",
+          "cameo_add_diagram_paths",
+          "cameo_set_shape_properties",
+          "cameo_set_shape_compartments",
+          "cameo_set_transition_label_presentation",
+          "cameo_set_item_flow_label_presentation",
+          "cameo_set_allocation_compartment_presentation",
+          "cameo_prune_path_decorations",
+          "cameo_repair_hidden_labels",
+          "cameo_repair_label_positions",
+          "cameo_repair_conveyed_item_labels",
+          "cameo_normalize_compartment_presets",
+          "cameo_prune_diagram_presentations",
+          "cameo_reparent_shapes",
+          "cameo_route_paths"
+        ],
+        "inspection": [
+          "cameo_dump_diagram_properties",
+          "cameo_dump_presentation_properties"
+        ],
+        "relationMaps": [
+          "cameo_list_relation_maps",
+          "cameo_get_relation_map",
+          "cameo_create_relation_map",
+          "cameo_configure_relation_map",
+          "cameo_dump_relation_map_raw_settings",
+          "cameo_list_relation_map_presentations",
+          "cameo_refresh_relation_map",
+          "cameo_get_traceability_graph",
+          "cameo_list_relation_map_criteria_templates",
+          "cameo_set_relation_map_criteria",
+          "cameo_expand_relation_map",
+          "cameo_collapse_relation_map",
+          "cameo_render_relation_map",
+          "cameo_verify_relation_map",
+          "cameo_compare_relation_maps"
+        ],
+        "snapshots": [
+          "cameo_create_snapshot",
+          "cameo_list_snapshots",
+          "cameo_get_snapshot",
+          "cameo_delete_snapshot",
+          "cameo_diff_snapshots"
+        ],
+        "validation": [
+          "cameo_get_validation_capabilities",
+          "cameo_list_validation_suites",
+          "cameo_run_native_validation",
+          "cameo_get_validation_result",
+          "cameo_run_validation"
+        ],
+        "probes": [
+          "cameo_list_probe_templates",
+          "cameo_execute_probe"
+        ],
+        "specification": [
+          "cameo_get_specification",
+          "cameo_set_specification"
+        ],
+        "reports": [
+          "cameo_get_report_capabilities",
+          "cameo_list_report_templates",
+          "cameo_generate_report_preview",
+          "cameo_generate_report",
+          "cameo_get_report_job"
+        ],
+        "requirements": [
+          "cameo_get_requirements_capabilities",
+          "cameo_export_requirements_preview",
+          "cameo_import_requirements_preview"
+        ],
+        "importExport": [
+          "cameo_get_import_export_capabilities",
+          "cameo_export_requirements",
+          "cameo_preview_requirements_import",
+          "cameo_apply_requirements_import"
+        ],
+        "simulation": [
+          "cameo_get_simulation_capabilities",
+          "cameo_list_simulation_configurations",
+          "cameo_run_simulation_preview",
+          "cameo_run_simulation",
+          "cameo_run_simulation_async",
+          "cameo_get_simulation_result",
+          "cameo_terminate_simulation"
+        ],
+        "teamwork": [
+          "cameo_get_teamwork_capabilities",
+          "cameo_get_teamwork_project",
+          "cameo_list_teamwork_descriptors",
+          "cameo_list_teamwork_branches",
+          "cameo_get_teamwork_history",
+          "cameo_get_teamwork_locks",
+          "cameo_preview_teamwork_update",
+          "cameo_preview_teamwork_commit",
+          "cameo_commit_teamwork"
+        ],
+        "datahub": [
+          "cameo_get_datahub_capabilities",
+          "cameo_list_datahub_sources",
+          "cameo_preview_datahub_sync"
+        ],
+        "criteria": [
+          "cameo_get_criteria_capabilities",
+          "cameo_list_criteria_templates",
+          "cameo_build_criteria_expression",
+          "cameo_parse_criteria_expression",
+          "cameo_apply_criteria_template",
+          "cameo_capture_criteria_template_from_diff"
+        ],
+        "profiles": [
+          "cameo_get_profile_capabilities",
+          "cameo_create_profile_preview",
+          "cameo_create_stereotype_preview",
+          "cameo_create_tag_preview",
+          "cameo_apply_profile_preview",
+          "cameo_set_profile_tags_preview",
+          "cameo_export_profile_summary"
+        ],
+        "variants": [
+          "cameo_get_variant_capabilities",
+          "cameo_install_variant_pattern_preview",
+          "cameo_evaluate_variant_configuration",
+          "cameo_export_variant_configuration"
+        ],
+        "extensions": [
+          "cameo_get_extension_capabilities",
+          "cameo_list_extension_profiles",
+          "cameo_scan_extensions",
+          "cameo_install_extension_pattern_preview",
+          "cameo_refuse_compliance_claim"
+        ],
+        "typedDiagrams": [
+          "cameo_get_typed_diagram_capabilities",
+          "cameo_list_typed_diagrams",
+          "cameo_inspect_typed_diagram",
+          "cameo_create_sequence_message_preview",
+          "cameo_create_state_transition_preview",
+          "cameo_create_parametric_binding_preview",
+          "cameo_apply_diagram_legend_preview"
+        ],
+        "macros": [
+          "cameo_execute_macro"
+        ]
+      },
+      "endpoints": [
+        {
+          "group": "health",
+          "name": "cameo_status",
+          "method": "GET",
+          "path": "/api/v1/status",
+          "mode": "read"
+        },
+        {
+          "group": "health",
+          "name": "cameo_capabilities",
+          "method": "GET",
+          "path": "/api/v1/capabilities",
+          "mode": "read"
+        },
+        {
+          "group": "project",
+          "name": "cameo_get_project",
+          "method": "GET",
+          "path": "/api/v1/project",
+          "mode": "read"
+        },
+        {
+          "group": "project",
+          "name": "cameo_save_project",
+          "method": "POST",
+          "path": "/api/v1/project/save",
+          "mode": "write"
+        },
+        {
+          "group": "ui",
+          "name": "cameo_get_ui_state",
+          "method": "GET",
+          "path": "/api/v1/ui/state",
+          "mode": "read"
+        },
+        {
+          "group": "ui",
+          "name": "cameo_get_active_diagram",
+          "method": "GET",
+          "path": "/api/v1/ui/active-diagram",
+          "mode": "read"
+        },
+        {
+          "group": "ui",
+          "name": "cameo_get_ui_selection",
+          "method": "GET",
+          "path": "/api/v1/ui/selection",
+          "mode": "read"
+        },
+        {
+          "group": "session",
+          "name": "cameo_reset_session",
+          "method": "POST",
+          "path": "/api/v1/session/reset",
+          "mode": "write"
+        },
+        {
+          "group": "elements",
+          "name": "cameo_query_elements",
+          "method": "GET",
+          "path": "/api/v1/elements",
+          "mode": "read"
+        },
+        {
+          "group": "elements",
+          "name": "cameo_get_element",
+          "method": "GET",
+          "path": "/api/v1/elements/{elementId}",
+          "mode": "read"
+        },
+        {
+          "group": "elements",
+          "name": "cameo_create_element",
+          "method": "POST",
+          "path": "/api/v1/elements",
+          "mode": "write"
+        },
+        {
+          "group": "elements",
+          "name": "cameo_modify_element",
+          "method": "PUT",
+          "path": "/api/v1/elements/{elementId}",
+          "mode": "write"
+        },
+        {
+          "group": "elements",
+          "name": "cameo_delete_element",
+          "method": "DELETE",
+          "path": "/api/v1/elements/{elementId}",
+          "mode": "write"
+        },
+        {
+          "group": "elements",
+          "name": "cameo_get_containment_tree",
+          "method": "GET",
+          "path": "/api/v1/containment-tree",
+          "mode": "read"
+        },
+        {
+          "group": "elements",
+          "name": "cameo_list_containment_children",
+          "method": "GET",
+          "path": "/api/v1/containment-tree/children",
+          "mode": "read"
+        },
+        {
+          "group": "elements",
+          "name": "cameo_set_usecase_subject",
+          "method": "PUT",
+          "path": "/api/v1/elements/{elementId}/usecase-subject",
+          "mode": "write"
+        },
+        {
+          "group": "stereotypes",
+          "name": "cameo_apply_profile",
+          "method": "POST",
+          "path": "/api/v1/elements/{elementId}/apply-profile",
+          "mode": "write"
+        },
+        {
+          "group": "stereotypes",
+          "name": "cameo_apply_stereotype",
+          "method": "POST",
+          "path": "/api/v1/elements/{elementId}/stereotypes",
+          "mode": "write"
+        },
+        {
+          "group": "stereotypes",
+          "name": "cameo_set_tagged_values",
+          "method": "PUT",
+          "path": "/api/v1/elements/{elementId}/tagged-values",
+          "mode": "write"
+        },
+        {
+          "group": "stereotypes",
+          "name": "cameo_set_stereotype_metaclasses",
+          "method": "PUT",
+          "path": "/api/v1/elements/{elementId}/metaclasses",
+          "mode": "write"
+        },
+        {
+          "group": "relationships",
+          "name": "cameo_create_relationship",
+          "method": "POST",
+          "path": "/api/v1/relationships",
+          "mode": "write"
+        },
+        {
+          "group": "relationships",
+          "name": "cameo_get_relationships",
+          "method": "GET",
+          "path": "/api/v1/elements/{elementId}/relationships",
+          "mode": "read"
+        },
+        {
+          "group": "matrices",
+          "name": "cameo_list_matrices",
+          "method": "GET",
+          "path": "/api/v1/matrices",
+          "mode": "read"
+        },
+        {
+          "group": "matrices",
+          "name": "cameo_get_matrix",
+          "method": "GET",
+          "path": "/api/v1/matrices/{matrixId}",
+          "mode": "read"
+        },
+        {
+          "group": "matrices",
+          "name": "cameo_create_matrix",
+          "method": "POST",
+          "path": "/api/v1/matrices",
+          "mode": "write"
+        },
+        {
+          "group": "genericTables",
+          "name": "cameo_list_generic_tables",
+          "method": "GET",
+          "path": "/api/v1/generic-tables",
+          "mode": "read"
+        },
+        {
+          "group": "genericTables",
+          "name": "cameo_get_generic_table",
+          "method": "GET",
+          "path": "/api/v1/generic-tables/{tableId}",
+          "mode": "read"
+        },
+        {
+          "group": "genericTables",
+          "name": "cameo_create_generic_table",
+          "method": "POST",
+          "path": "/api/v1/generic-tables",
+          "mode": "write"
+        },
+        {
+          "group": "genericTables",
+          "name": "cameo_list_generic_table_columns",
+          "method": "GET",
+          "path": "/api/v1/generic-tables/columns",
+          "mode": "read"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_list_diagrams",
+          "method": "GET",
+          "path": "/api/v1/diagrams",
+          "mode": "read"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_create_diagram",
+          "method": "POST",
+          "path": "/api/v1/diagrams",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_add_to_diagram",
+          "method": "POST",
+          "path": "/api/v1/diagrams/{diagramId}/elements",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_get_diagram_image",
+          "method": "GET",
+          "path": "/api/v1/diagrams/{diagramId}/image",
+          "mode": "read"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_auto_layout",
+          "method": "POST",
+          "path": "/api/v1/diagrams/{diagramId}/layout",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_list_diagram_shapes",
+          "method": "GET",
+          "path": "/api/v1/diagrams/{diagramId}/shapes",
+          "mode": "read"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_get_shape_properties",
+          "method": "GET",
+          "path": "/api/v1/diagrams/{diagramId}/shapes/{presentationId}/properties",
+          "mode": "read"
+        },
+        {
+          "group": "inspection",
+          "name": "cameo_dump_diagram_properties",
+          "method": "GET",
+          "path": "/api/v1/inspect/diagrams/{diagramId}/properties",
+          "mode": "read"
+        },
+        {
+          "group": "inspection",
+          "name": "cameo_dump_presentation_properties",
+          "method": "GET",
+          "path": "/api/v1/inspect/diagrams/{diagramId}/presentations/{presentationId}/properties",
+          "mode": "read"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_move_shapes",
+          "method": "PUT",
+          "path": "/api/v1/diagrams/{diagramId}/shapes",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_delete_shapes",
+          "method": "DELETE",
+          "path": "/api/v1/diagrams/{diagramId}/shapes",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_add_diagram_paths",
+          "method": "POST",
+          "path": "/api/v1/diagrams/{diagramId}/paths",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_set_shape_properties",
+          "method": "PUT",
+          "path": "/api/v1/diagrams/{diagramId}/shapes/{presentationId}/properties",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_set_shape_compartments",
+          "method": "PUT",
+          "path": "/api/v1/diagrams/{diagramId}/shapes/{presentationId}/compartments",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_set_transition_label_presentation",
+          "method": "PUT",
+          "path": "/api/v1/diagrams/{diagramId}/presentation/transition-labels",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_set_item_flow_label_presentation",
+          "method": "PUT",
+          "path": "/api/v1/diagrams/{diagramId}/presentation/item-flow-labels",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_set_allocation_compartment_presentation",
+          "method": "PUT",
+          "path": "/api/v1/diagrams/{diagramId}/presentation/allocation-compartments",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_prune_path_decorations",
+          "method": "PUT",
+          "path": "/api/v1/diagrams/{diagramId}/repair/path-decorations",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_repair_hidden_labels",
+          "method": "PUT",
+          "path": "/api/v1/diagrams/{diagramId}/repair/hidden-labels",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_repair_label_positions",
+          "method": "PUT",
+          "path": "/api/v1/diagrams/{diagramId}/repair/label-positions",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_repair_conveyed_item_labels",
+          "method": "PUT",
+          "path": "/api/v1/diagrams/{diagramId}/repair/conveyed-item-labels",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_normalize_compartment_presets",
+          "method": "PUT",
+          "path": "/api/v1/diagrams/{diagramId}/repair/compartment-presets",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_prune_diagram_presentations",
+          "method": "PUT",
+          "path": "/api/v1/diagrams/{diagramId}/repair/prune-presentations",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_reparent_shapes",
+          "method": "PUT",
+          "path": "/api/v1/diagrams/{diagramId}/shapes/reparent",
+          "mode": "write"
+        },
+        {
+          "group": "diagrams",
+          "name": "cameo_route_paths",
+          "method": "PUT",
+          "path": "/api/v1/diagrams/{diagramId}/paths/route",
+          "mode": "write"
+        },
+        {
+          "group": "relationMaps",
+          "name": "cameo_list_relation_maps",
+          "method": "GET",
+          "path": "/api/v1/relation-maps",
+          "mode": "read"
+        },
+        {
+          "group": "relationMaps",
+          "name": "cameo_get_relation_map",
+          "method": "GET",
+          "path": "/api/v1/relation-maps/{relationMapId}",
+          "mode": "read"
+        },
+        {
+          "group": "relationMaps",
+          "name": "cameo_create_relation_map",
+          "method": "POST",
+          "path": "/api/v1/relation-maps",
+          "mode": "write"
+        },
+        {
+          "group": "relationMaps",
+          "name": "cameo_configure_relation_map",
+          "method": "PUT",
+          "path": "/api/v1/relation-maps/{relationMapId}/settings",
+          "mode": "write"
+        },
+        {
+          "group": "relationMaps",
+          "name": "cameo_dump_relation_map_raw_settings",
+          "method": "GET",
+          "path": "/api/v1/relation-maps/{relationMapId}/settings/raw",
+          "mode": "read"
+        },
+        {
+          "group": "relationMaps",
+          "name": "cameo_list_relation_map_presentations",
+          "method": "GET",
+          "path": "/api/v1/relation-maps/{relationMapId}/presentations",
+          "mode": "read"
+        },
+        {
+          "group": "relationMaps",
+          "name": "cameo_refresh_relation_map",
+          "method": "POST",
+          "path": "/api/v1/relation-maps/{relationMapId}/refresh",
+          "mode": "write"
+        },
+        {
+          "group": "relationMaps",
+          "name": "cameo_get_traceability_graph",
+          "method": "POST",
+          "path": "/api/v1/relation-maps/traceability-graph",
+          "mode": "read"
+        },
+        {
+          "group": "relationMaps",
+          "name": "cameo_list_relation_map_criteria_templates",
+          "method": "GET",
+          "path": "/api/v1/relation-maps/criteria/templates",
+          "mode": "read"
+        },
+        {
+          "group": "relationMaps",
+          "name": "cameo_set_relation_map_criteria",
+          "method": "PUT",
+          "path": "/api/v1/relation-maps/{relationMapId}/criteria",
+          "mode": "write"
+        },
+        {
+          "group": "relationMaps",
+          "name": "cameo_expand_relation_map",
+          "method": "POST",
+          "path": "/api/v1/relation-maps/{relationMapId}/expand",
+          "mode": "write"
+        },
+        {
+          "group": "relationMaps",
+          "name": "cameo_collapse_relation_map",
+          "method": "POST",
+          "path": "/api/v1/relation-maps/{relationMapId}/collapse",
+          "mode": "write"
+        },
+        {
+          "group": "relationMaps",
+          "name": "cameo_render_relation_map",
+          "method": "POST",
+          "path": "/api/v1/relation-maps/{relationMapId}/render",
+          "mode": "write"
+        },
+        {
+          "group": "relationMaps",
+          "name": "cameo_verify_relation_map",
+          "method": "POST",
+          "path": "/api/v1/relation-maps/{relationMapId}/verify",
+          "mode": "read"
+        },
+        {
+          "group": "relationMaps",
+          "name": "cameo_compare_relation_maps",
+          "method": "POST",
+          "path": "/api/v1/relation-maps/compare",
+          "mode": "read"
+        },
+        {
+          "group": "snapshots",
+          "name": "cameo_create_snapshot",
+          "method": "POST",
+          "path": "/api/v1/snapshots",
+          "mode": "read"
+        },
+        {
+          "group": "snapshots",
+          "name": "cameo_list_snapshots",
+          "method": "GET",
+          "path": "/api/v1/snapshots",
+          "mode": "read"
+        },
+        {
+          "group": "snapshots",
+          "name": "cameo_get_snapshot",
+          "method": "GET",
+          "path": "/api/v1/snapshots/{snapshotId}",
+          "mode": "read"
+        },
+        {
+          "group": "snapshots",
+          "name": "cameo_delete_snapshot",
+          "method": "DELETE",
+          "path": "/api/v1/snapshots/{snapshotId}",
+          "mode": "write"
+        },
+        {
+          "group": "snapshots",
+          "name": "cameo_diff_snapshots",
+          "method": "POST",
+          "path": "/api/v1/snapshots/diff",
+          "mode": "read"
+        },
+        {
+          "group": "validation",
+          "name": "cameo_get_validation_capabilities",
+          "method": "GET",
+          "path": "/api/v1/validation/capabilities",
+          "mode": "read"
+        },
+        {
+          "group": "validation",
+          "name": "cameo_list_validation_suites",
+          "method": "GET",
+          "path": "/api/v1/validation/suites",
+          "mode": "read"
+        },
+        {
+          "group": "validation",
+          "name": "cameo_run_native_validation",
+          "method": "POST",
+          "path": "/api/v1/validation/run",
+          "mode": "read"
+        },
+        {
+          "group": "validation",
+          "name": "cameo_get_validation_result",
+          "method": "GET",
+          "path": "/api/v1/validation/results/{runId}",
+          "mode": "read"
+        },
+        {
+          "group": "probes",
+          "name": "cameo_list_probe_templates",
+          "method": "GET",
+          "path": "/api/v1/probes/templates",
+          "mode": "read"
+        },
+        {
+          "group": "probes",
+          "name": "cameo_execute_probe",
+          "method": "POST",
+          "path": "/api/v1/probes/execute",
+          "mode": "read"
+        },
+        {
+          "group": "specification",
+          "name": "cameo_get_specification",
+          "method": "GET",
+          "path": "/api/v1/elements/{elementId}/specification",
+          "mode": "read"
+        },
+        {
+          "group": "specification",
+          "name": "cameo_set_specification",
+          "method": "PUT",
+          "path": "/api/v1/elements/{elementId}/specification",
+          "mode": "write"
+        },
+        {
+          "group": "validation",
+          "name": "cameo_run_validation",
+          "method": "POST",
+          "path": "/api/v1/validation/run",
+          "mode": "read"
+        },
+        {
+          "group": "reports",
+          "name": "cameo_get_report_capabilities",
+          "method": "GET",
+          "path": "/api/v1/reports/capabilities",
+          "mode": "read"
+        },
+        {
+          "group": "reports",
+          "name": "cameo_list_report_templates",
+          "method": "GET",
+          "path": "/api/v1/reports/templates",
+          "mode": "read"
+        },
+        {
+          "group": "reports",
+          "name": "cameo_generate_report_preview",
+          "method": "POST",
+          "path": "/api/v1/reports/generate-preview",
+          "mode": "read"
+        },
+        {
+          "group": "reports",
+          "name": "cameo_generate_report",
+          "method": "POST",
+          "path": "/api/v1/reports/generate",
+          "mode": "write"
+        },
+        {
+          "group": "reports",
+          "name": "cameo_get_report_job",
+          "method": "GET",
+          "path": "/api/v1/reports/jobs/{jobId}",
+          "mode": "read"
+        },
+        {
+          "group": "requirements",
+          "name": "cameo_get_requirements_capabilities",
+          "method": "GET",
+          "path": "/api/v1/requirements/capabilities",
+          "mode": "read"
+        },
+        {
+          "group": "requirements",
+          "name": "cameo_export_requirements_preview",
+          "method": "POST",
+          "path": "/api/v1/requirements/export",
+          "mode": "read"
+        },
+        {
+          "group": "requirements",
+          "name": "cameo_import_requirements_preview",
+          "method": "POST",
+          "path": "/api/v1/requirements/import/preview",
+          "mode": "read"
+        },
+        {
+          "group": "importExport",
+          "name": "cameo_get_import_export_capabilities",
+          "method": "GET",
+          "path": "/api/v1/import-export/capabilities",
+          "mode": "read"
+        },
+        {
+          "group": "importExport",
+          "name": "cameo_export_requirements",
+          "method": "POST",
+          "path": "/api/v1/import-export/requirements/export",
+          "mode": "read"
+        },
+        {
+          "group": "importExport",
+          "name": "cameo_preview_requirements_import",
+          "method": "POST",
+          "path": "/api/v1/import-export/requirements/import-preview",
+          "mode": "read"
+        },
+        {
+          "group": "importExport",
+          "name": "cameo_apply_requirements_import",
+          "method": "POST",
+          "path": "/api/v1/import-export/requirements/apply",
+          "mode": "write"
+        },
+        {
+          "group": "simulation",
+          "name": "cameo_get_simulation_capabilities",
+          "method": "GET",
+          "path": "/api/v1/simulation/capabilities",
+          "mode": "read"
+        },
+        {
+          "group": "simulation",
+          "name": "cameo_list_simulation_configurations",
+          "method": "GET",
+          "path": "/api/v1/simulation/configurations",
+          "mode": "read"
+        },
+        {
+          "group": "simulation",
+          "name": "cameo_run_simulation_preview",
+          "method": "POST",
+          "path": "/api/v1/simulation/run-preview",
+          "mode": "read"
+        },
+        {
+          "group": "simulation",
+          "name": "cameo_run_simulation",
+          "method": "POST",
+          "path": "/api/v1/simulation/run",
+          "mode": "write"
+        },
+        {
+          "group": "simulation",
+          "name": "cameo_run_simulation_async",
+          "method": "POST",
+          "path": "/api/v1/simulation/run-async",
+          "mode": "write"
+        },
+        {
+          "group": "simulation",
+          "name": "cameo_get_simulation_result",
+          "method": "GET",
+          "path": "/api/v1/simulation/results/{runId}",
+          "mode": "read"
+        },
+        {
+          "group": "simulation",
+          "name": "cameo_terminate_simulation",
+          "method": "POST",
+          "path": "/api/v1/simulation/results/{runId}/terminate",
+          "mode": "write"
+        },
+        {
+          "group": "teamwork",
+          "name": "cameo_get_teamwork_capabilities",
+          "method": "GET",
+          "path": "/api/v1/teamwork/capabilities",
+          "mode": "read"
+        },
+        {
+          "group": "teamwork",
+          "name": "cameo_get_teamwork_project",
+          "method": "GET",
+          "path": "/api/v1/teamwork/project",
+          "mode": "read"
+        },
+        {
+          "group": "teamwork",
+          "name": "cameo_list_teamwork_descriptors",
+          "method": "GET",
+          "path": "/api/v1/teamwork/descriptors",
+          "mode": "read"
+        },
+        {
+          "group": "teamwork",
+          "name": "cameo_list_teamwork_branches",
+          "method": "GET",
+          "path": "/api/v1/teamwork/branches",
+          "mode": "read"
+        },
+        {
+          "group": "teamwork",
+          "name": "cameo_get_teamwork_history",
+          "method": "GET",
+          "path": "/api/v1/teamwork/history",
+          "mode": "read"
+        },
+        {
+          "group": "teamwork",
+          "name": "cameo_get_teamwork_locks",
+          "method": "GET",
+          "path": "/api/v1/teamwork/locks",
+          "mode": "read"
+        },
+        {
+          "group": "teamwork",
+          "name": "cameo_preview_teamwork_update",
+          "method": "POST",
+          "path": "/api/v1/teamwork/update-preview",
+          "mode": "read"
+        },
+        {
+          "group": "teamwork",
+          "name": "cameo_preview_teamwork_commit",
+          "method": "POST",
+          "path": "/api/v1/teamwork/commit-preview",
+          "mode": "read"
+        },
+        {
+          "group": "teamwork",
+          "name": "cameo_commit_teamwork",
+          "method": "POST",
+          "path": "/api/v1/teamwork/commit",
+          "mode": "write"
+        },
+        {
+          "group": "datahub",
+          "name": "cameo_get_datahub_capabilities",
+          "method": "GET",
+          "path": "/api/v1/datahub/capabilities",
+          "mode": "read"
+        },
+        {
+          "group": "datahub",
+          "name": "cameo_list_datahub_sources",
+          "method": "GET",
+          "path": "/api/v1/datahub/sources",
+          "mode": "read"
+        },
+        {
+          "group": "datahub",
+          "name": "cameo_preview_datahub_sync",
+          "method": "POST",
+          "path": "/api/v1/datahub/sync-preview",
+          "mode": "read"
+        },
+        {
+          "group": "criteria",
+          "name": "cameo_get_criteria_capabilities",
+          "method": "GET",
+          "path": "/api/v1/criteria/capabilities",
+          "mode": "read"
+        },
+        {
+          "group": "criteria",
+          "name": "cameo_list_criteria_templates",
+          "method": "GET",
+          "path": "/api/v1/criteria/templates",
+          "mode": "read"
+        },
+        {
+          "group": "criteria",
+          "name": "cameo_build_criteria_expression",
+          "method": "POST",
+          "path": "/api/v1/criteria/build",
+          "mode": "read"
+        },
+        {
+          "group": "criteria",
+          "name": "cameo_parse_criteria_expression",
+          "method": "POST",
+          "path": "/api/v1/criteria/parse",
+          "mode": "read"
+        },
+        {
+          "group": "criteria",
+          "name": "cameo_apply_criteria_template",
+          "method": "POST",
+          "path": "/api/v1/criteria/apply",
+          "mode": "write"
+        },
+        {
+          "group": "criteria",
+          "name": "cameo_capture_criteria_template_from_diff",
+          "method": "POST",
+          "path": "/api/v1/criteria/capture-template-from-diff",
+          "mode": "read"
+        },
+        {
+          "group": "profiles",
+          "name": "cameo_get_profile_capabilities",
+          "method": "GET",
+          "path": "/api/v1/profiles/capabilities",
+          "mode": "read"
+        },
+        {
+          "group": "profiles",
+          "name": "cameo_create_profile_preview",
+          "method": "POST",
+          "path": "/api/v1/profiles/create",
+          "mode": "read"
+        },
+        {
+          "group": "profiles",
+          "name": "cameo_create_stereotype_preview",
+          "method": "POST",
+          "path": "/api/v1/profiles/stereotypes/create",
+          "mode": "read"
+        },
+        {
+          "group": "profiles",
+          "name": "cameo_create_tag_preview",
+          "method": "POST",
+          "path": "/api/v1/profiles/tags/create",
+          "mode": "read"
+        },
+        {
+          "group": "profiles",
+          "name": "cameo_apply_profile_preview",
+          "method": "POST",
+          "path": "/api/v1/profiles/apply",
+          "mode": "read"
+        },
+        {
+          "group": "profiles",
+          "name": "cameo_set_profile_tags_preview",
+          "method": "PUT",
+          "path": "/api/v1/profiles/tags",
+          "mode": "read"
+        },
+        {
+          "group": "profiles",
+          "name": "cameo_export_profile_summary",
+          "method": "POST",
+          "path": "/api/v1/profiles/export-summary",
+          "mode": "read"
+        },
+        {
+          "group": "variants",
+          "name": "cameo_get_variant_capabilities",
+          "method": "GET",
+          "path": "/api/v1/variants/capabilities",
+          "mode": "read"
+        },
+        {
+          "group": "variants",
+          "name": "cameo_install_variant_pattern_preview",
+          "method": "POST",
+          "path": "/api/v1/variants/pattern/install-preview",
+          "mode": "read"
+        },
+        {
+          "group": "variants",
+          "name": "cameo_evaluate_variant_configuration",
+          "method": "POST",
+          "path": "/api/v1/variants/configurations/evaluate",
+          "mode": "read"
+        },
+        {
+          "group": "variants",
+          "name": "cameo_export_variant_configuration",
+          "method": "POST",
+          "path": "/api/v1/variants/configurations/export",
+          "mode": "read"
+        },
+        {
+          "group": "extensions",
+          "name": "cameo_get_extension_capabilities",
+          "method": "GET",
+          "path": "/api/v1/extensions/capabilities",
+          "mode": "read"
+        },
+        {
+          "group": "extensions",
+          "name": "cameo_list_extension_profiles",
+          "method": "GET",
+          "path": "/api/v1/extensions/profiles",
+          "mode": "read"
+        },
+        {
+          "group": "extensions",
+          "name": "cameo_scan_extensions",
+          "method": "POST",
+          "path": "/api/v1/extensions/model-scan",
+          "mode": "read"
+        },
+        {
+          "group": "extensions",
+          "name": "cameo_install_extension_pattern_preview",
+          "method": "POST",
+          "path": "/api/v1/extensions/pattern/install-preview",
+          "mode": "read"
+        },
+        {
+          "group": "extensions",
+          "name": "cameo_refuse_compliance_claim",
+          "method": "POST",
+          "path": "/api/v1/extensions/compliance-claim",
+          "mode": "read"
+        },
+        {
+          "group": "typedDiagrams",
+          "name": "cameo_get_typed_diagram_capabilities",
+          "method": "GET",
+          "path": "/api/v1/typed-diagrams/capabilities",
+          "mode": "read"
+        },
+        {
+          "group": "typedDiagrams",
+          "name": "cameo_list_typed_diagrams",
+          "method": "GET",
+          "path": "/api/v1/typed-diagrams",
+          "mode": "read"
+        },
+        {
+          "group": "typedDiagrams",
+          "name": "cameo_inspect_typed_diagram",
+          "method": "POST",
+          "path": "/api/v1/typed-diagrams/inspect",
+          "mode": "read"
+        },
+        {
+          "group": "typedDiagrams",
+          "name": "cameo_create_sequence_message_preview",
+          "method": "POST",
+          "path": "/api/v1/typed-diagrams/sequence/messages",
+          "mode": "read"
+        },
+        {
+          "group": "typedDiagrams",
+          "name": "cameo_create_state_transition_preview",
+          "method": "POST",
+          "path": "/api/v1/typed-diagrams/state/transitions",
+          "mode": "read"
+        },
+        {
+          "group": "typedDiagrams",
+          "name": "cameo_create_parametric_binding_preview",
+          "method": "POST",
+          "path": "/api/v1/typed-diagrams/parametric/bindings",
+          "mode": "read"
+        },
+        {
+          "group": "typedDiagrams",
+          "name": "cameo_apply_diagram_legend_preview",
+          "method": "POST",
+          "path": "/api/v1/typed-diagrams/legends/apply",
+          "mode": "read"
+        },
+        {
+          "group": "macros",
+          "name": "cameo_execute_macro",
+          "method": "POST",
+          "path": "/api/v1/macros/execute",
+          "mode": "write"
+        }
+      ]
+    }
+  },
+  "project": {
+    "name": "GEN7 DEMO",
+    "filePath": "C:\\Users\\opt2\\Documents\\GEN7 DEMO.mdzip",
+    "isRemote": false,
+    "isDirty": false,
+    "primaryModelId": "eee_1045467100313_135436_1",
+    "primaryModelName": "Model"
+  },
+  "diagramTypes": {
+    "count": 20,
+    "diagramTypes": [
+      {
+        "canonical": "Class",
+        "nativeType": "Class Diagram",
+        "family": "uml",
+        "aliases": [
+          "class",
+          "ClassDiagram",
+          "Class Diagram"
+        ]
+      },
+      {
+        "canonical": "Package",
+        "nativeType": "Package Diagram",
+        "family": "uml",
+        "aliases": [
+          "package",
+          "PackageDiagram",
+          "Package Diagram"
+        ]
+      },
+      {
+        "canonical": "UseCase",
+        "nativeType": "Use Case Diagram",
+        "family": "uml",
+        "aliases": [
+          "usecase",
+          "use case",
+          "UseCaseDiagram",
+          "Use Case Diagram"
+        ]
+      },
+      {
+        "canonical": "Activity",
+        "nativeType": "Activity Diagram",
+        "family": "uml",
+        "aliases": [
+          "activity",
+          "ActivityDiagram",
+          "Activity Diagram"
+        ]
+      },
+      {
+        "canonical": "Sequence",
+        "nativeType": "Sequence Diagram",
+        "family": "uml",
+        "aliases": [
+          "sequence",
+          "SequenceDiagram",
+          "Sequence Diagram"
+        ]
+      },
+      {
+        "canonical": "StateMachine",
+        "nativeType": "State Machine Diagram",
+        "family": "uml",
+        "aliases": [
+          "statemachine",
+          "state machine",
+          "StateMachineDiagram",
+          "State Machine Diagram"
+        ]
+      },
+      {
+        "canonical": "Component",
+        "nativeType": "Component Diagram",
+        "family": "uml",
+        "aliases": [
+          "component",
+          "ComponentDiagram",
+          "Component Diagram"
+        ]
+      },
+      {
+        "canonical": "Deployment",
+        "nativeType": "Deployment Diagram",
+        "family": "uml",
+        "aliases": [
+          "deployment",
+          "DeploymentDiagram",
+          "Deployment Diagram"
+        ]
+      },
+      {
+        "canonical": "CompositeStructure",
+        "nativeType": "Composite Structure Diagram",
+        "family": "uml",
+        "aliases": [
+          "compositestructure",
+          "composite structure",
+          "CompositeStructureDiagram",
+          "Composite Structure Diagram"
+        ]
+      },
+      {
+        "canonical": "Object",
+        "nativeType": "Object Diagram",
+        "family": "uml",
+        "aliases": [
+          "object",
+          "ObjectDiagram",
+          "Object Diagram"
+        ]
+      },
+      {
+        "canonical": "Communication",
+        "nativeType": "Communication Diagram",
+        "family": "uml",
+        "aliases": [
+          "communication",
+          "CommunicationDiagram",
+          "Communication Diagram"
+        ]
+      },
+      {
+        "canonical": "InteractionOverview",
+        "nativeType": "Interaction Overview Diagram",
+        "family": "uml",
+        "aliases": [
+          "interactionoverview",
+          "interaction overview",
+          "InteractionOverviewDiagram",
+          "Interaction Overview Diagram"
+        ]
+      },
+      {
+        "canonical": "Timing",
+        "nativeType": "Timing Diagram",
+        "family": "uml",
+        "aliases": [
+          "timing",
+          "TimingDiagram",
+          "Timing Diagram"
+        ]
+      },
+      {
+        "canonical": "Profile",
+        "nativeType": "Profile Diagram",
+        "family": "uml",
+        "aliases": [
+          "profile",
+          "ProfileDiagram",
+          "Profile Diagram"
+        ]
+      },
+      {
+        "canonical": "BDD",
+        "nativeType": "SysML Block Definition Diagram",
+        "family": "sysml",
+        "aliases": [
+          "bdd",
+          "BlockDefinitionDiagram",
+          "Block Definition Diagram",
+          "SysML BDD",
+          "SysML Block Definition Diagram"
+        ]
+      },
+      {
+        "canonical": "IBD",
+        "nativeType": "SysML Internal Block Diagram",
+        "family": "sysml",
+        "aliases": [
+          "ibd",
+          "InternalBlockDiagram",
+          "Internal Block Diagram",
+          "SysML IBD",
+          "SysML Internal Block Diagram"
+        ]
+      },
+      {
+        "canonical": "Requirement Diagram",
+        "nativeType": "SysML Requirement Diagram",
+        "family": "sysml",
+        "aliases": [
+          "requirement",
+          "requirements",
+          "RequirementDiagram",
+          "Requirement Diagram",
+          "SysML Requirement Diagram"
+        ]
+      },
+      {
+        "canonical": "Parametric Diagram",
+        "nativeType": "SysML Parametric Diagram",
+        "family": "sysml",
+        "aliases": [
+          "parametric",
+          "ParametricDiagram",
+          "Parametric Diagram",
+          "SysML Parametric Diagram"
+        ]
+      },
+      {
+        "canonical": "RelationMap",
+        "nativeType": "Relation Map Diagram",
+        "family": "analysis",
+        "aliases": [
+          "relation map",
+          "relationship map",
+          "RelationMap",
+          "Relation Map",
+          "Relation Map Diagram",
+          "Relationship Map",
+          "Relationship Map Diagram"
+        ]
+      },
+      {
+        "canonical": "Content Diagram",
+        "nativeType": "Content Diagram",
+        "family": "analysis",
+        "aliases": [
+          "content",
+          "content diagram",
+          "ContentDiagram",
+          "Content Diagram"
+        ]
+      }
+    ]
+  },
+  "matrixKinds": {
+    "count": 5,
+    "matrixKinds": [
+      {
+        "kind": "refine",
+        "nativeType": "Refine Requirement Matrix",
+        "aliases": [
+          "refine",
+          "refine matrix",
+          "refine requirement matrix"
+        ],
+        "validatedRowTypeExamples": [
+          "Activity"
+        ],
+        "validatedColumnTypeExamples": [
+          "Requirement"
+        ]
+      },
+      {
+        "kind": "derive",
+        "nativeType": "Derive Requirement Matrix",
+        "aliases": [
+          "derive",
+          "derive matrix",
+          "derive requirement matrix"
+        ],
+        "validatedRowTypeExamples": [
+          "Requirement"
+        ],
+        "validatedColumnTypeExamples": [
+          "Requirement"
+        ]
+      },
+      {
+        "kind": "satisfy",
+        "nativeType": "Satisfy Requirement Matrix",
+        "aliases": [
+          "satisfy",
+          "satisfy matrix",
+          "satisfy requirement matrix"
+        ],
+        "validatedRowTypeExamples": [
+          "Block",
+          "Component",
+          "Property"
+        ],
+        "validatedColumnTypeExamples": [
+          "Requirement"
+        ]
+      },
+      {
+        "kind": "allocation",
+        "nativeType": "SysML Allocation Matrix",
+        "aliases": [
+          "allocation",
+          "allocation matrix",
+          "system allocation matrix",
+          "sysml allocation matrix"
+        ],
+        "validatedRowTypeExamples": [
+          "Block",
+          "Property",
+          "UseCase"
+        ],
+        "validatedColumnTypeExamples": [
+          "Block",
+          "Property",
+          "Component"
+        ]
+      },
+      {
+        "kind": "dependency",
+        "nativeType": "Dependency Matrix",
+        "aliases": [
+          "dependency",
+          "dependency matrix"
+        ],
+        "validatedRowTypeExamples": [
+          "Activity",
+          "OpaqueAction",
+          "Block",
+          "Requirement"
+        ],
+        "validatedColumnTypeExamples": [
+          "Activity",
+          "OpaqueAction",
+          "Block",
+          "Requirement"
+        ]
+      }
+    ]
+  },
+  "simulation": {
+    "family": "simulation",
+    "mode": "probe-first",
+    "projectState": {
+      "open": true,
+      "name": "GEN7 DEMO",
+      "filePath": "C:\\Users\\opt2\\Documents\\GEN7 DEMO.mdzip",
+      "remote": false,
+      "dirty": false
+    },
+    "available": false,
+    "status": "missing-plugin",
+    "classProbe": {
+      "allFound": false,
+      "classesFound": [],
+      "classesMissing": [
+        "com.nomagic.magicdraw.simulation.SimulationManager",
+        "com.nomagic.magicdraw.simulation.execution.SimulationResult",
+        "com.nomagic.magicdraw.simulation.execution.SimulationSession"
+      ],
+      "classes": [
+        {
+          "className": "com.nomagic.magicdraw.simulation.SimulationManager",
+          "found": false,
+          "errorType": "java.lang.ClassNotFoundException",
+          "message": "com.nomagic.magicdraw.simulation.SimulationManager"
+        },
+        {
+          "className": "com.nomagic.magicdraw.simulation.execution.SimulationResult",
+          "found": false,
+          "errorType": "java.lang.ClassNotFoundException",
+          "message": "com.nomagic.magicdraw.simulation.execution.SimulationResult"
+        },
+        {
+          "className": "com.nomagic.magicdraw.simulation.execution.SimulationSession",
+          "found": false,
+          "errorType": "java.lang.ClassNotFoundException",
+          "message": "com.nomagic.magicdraw.simulation.execution.SimulationSession"
+        }
+      ]
+    },
+    "pluginDirectoriesFound": [],
+    "executionEnabled": false,
+    "safeDefault": "No simulation execution without explicit allowExecute and live runtime proof."
+  },
+  "simulationConfigurations": {
+    "family": "simulation",
+    "mode": "unsupported",
+    "projectState": {
+      "open": true,
+      "name": "GEN7 DEMO",
+      "filePath": "C:\\Users\\opt2\\Documents\\GEN7 DEMO.mdzip",
+      "remote": false,
+      "dirty": false
+    },
+    "available": false,
+    "status": "unsupported",
+    "reason": "Simulation Toolkit runtime classes were not found.",
+    "nextAction": "Install/enable Simulation Toolkit and rerun live_probe_simulation.py.",
+    "capabilities": {
+      "family": "simulation",
+      "mode": "probe-first",
+      "projectState": {
+        "open": true,
+        "name": "GEN7 DEMO",
+        "filePath": "C:\\Users\\opt2\\Documents\\GEN7 DEMO.mdzip",
+        "remote": false,
+        "dirty": false
+      },
+      "available": false,
+      "status": "missing-plugin",
+      "classProbe": {
+        "allFound": false,
+        "classesFound": [],
+        "classesMissing": [
+          "com.nomagic.magicdraw.simulation.SimulationManager",
+          "com.nomagic.magicdraw.simulation.execution.SimulationResult",
+          "com.nomagic.magicdraw.simulation.execution.SimulationSession"
+        ],
+        "classes": [
+          {
+            "className": "com.nomagic.magicdraw.simulation.SimulationManager",
+            "found": false,
+            "errorType": "java.lang.ClassNotFoundException",
+            "message": "com.nomagic.magicdraw.simulation.SimulationManager"
+          },
+          {
+            "className": "com.nomagic.magicdraw.simulation.execution.SimulationResult",
+            "found": false,
+            "errorType": "java.lang.ClassNotFoundException",
+            "message": "com.nomagic.magicdraw.simulation.execution.SimulationResult"
+          },
+          {
+            "className": "com.nomagic.magicdraw.simulation.execution.SimulationSession",
+            "found": false,
+            "errorType": "java.lang.ClassNotFoundException",
+            "message": "com.nomagic.magicdraw.simulation.execution.SimulationSession"
+          }
+        ]
+      },
+      "pluginDirectoriesFound": [],
+      "executionEnabled": false,
+      "safeDefault": "No simulation execution without explicit allowExecute and live runtime proof."
+    }
+  },
+  "profiles": {
+    "family": "profiles",
+    "mode": "core-profile-api",
+    "projectState": {
+      "open": true,
+      "name": "GEN7 DEMO",
+      "filePath": "C:\\Users\\opt2\\Documents\\GEN7 DEMO.mdzip",
+      "remote": false,
+      "dirty": false
+    },
+    "available": true,
+    "status": "available",
+    "writeMode": "preview-first",
+    "summaryReadSupported": true,
+    "typedProfileWriteSupported": false,
+    "classProbe": {
+      "allFound": true,
+      "classesFound": [
+        "com.nomagic.uml2.ext.magicdraw.mdprofiles.Profile",
+        "com.nomagic.uml2.ext.magicdraw.mdprofiles.Stereotype",
+        "com.nomagic.uml2.ext.jmi.helpers.StereotypesHelper",
+        "com.nomagic.uml2.ext.jmi.helpers.TagsHelper"
+      ],
+      "classesMissing": [],
+      "classes": [
+        {
+          "className": "com.nomagic.uml2.ext.magicdraw.mdprofiles.Profile",
+          "found": true,
+          "loadedName": "com.nomagic.uml2.ext.magicdraw.mdprofiles.Profile",
+          "codeSource": "file:/C:/Program%20Files/CATIAMagic24x/lib/com.nomagic.magicdraw.uml2-2024.2.0-58-969a3237.jar"
+        },
+        {
+          "className": "com.nomagic.uml2.ext.magicdraw.mdprofiles.Stereotype",
+          "found": true,
+          "loadedName": "com.nomagic.uml2.ext.magicdraw.mdprofiles.Stereotype",
+          "codeSource": "file:/C:/Program%20Files/CATIAMagic24x/lib/com.nomagic.magicdraw.uml2-2024.2.0-58-969a3237.jar"
+        },
+        {
+          "className": "com.nomagic.uml2.ext.jmi.helpers.StereotypesHelper",
+          "found": true,
+          "loadedName": "com.nomagic.uml2.ext.jmi.helpers.StereotypesHelper",
+          "codeSource": "file:/C:/Program%20Files/CATIAMagic24x/lib/md_api.jar"
+        },
+        {
+          "className": "com.nomagic.uml2.ext.jmi.helpers.TagsHelper",
+          "found": true,
+          "loadedName": "com.nomagic.uml2.ext.jmi.helpers.TagsHelper",
+          "codeSource": "file:/C:/Program%20Files/CATIAMagic24x/lib/md_api.jar"
+        }
+      ]
+    }
+  },
+  "typedDiagrams": {
+    "family": "typedDiagrams",
+    "mode": "native-read-plus-preview",
+    "projectState": {
+      "open": true,
+      "name": "GEN7 DEMO",
+      "filePath": "C:\\Users\\opt2\\Documents\\GEN7 DEMO.mdzip",
+      "remote": false,
+      "dirty": false
+    },
+    "available": true,
+    "status": "available",
+    "sequenceApiProbe": {
+      "allFound": true,
+      "classesFound": [
+        "com.nomagic.magicdraw.openapi.uml.PresentationElementsManager",
+        "com.nomagic.magicdraw.uml.symbols.DiagramPresentationElement",
+        "com.nomagic.uml2.ext.jmi.helpers.InteractionHelper"
+      ],
+      "classesMissing": [],
+      "classes": [
+        {
+          "className": "com.nomagic.magicdraw.openapi.uml.PresentationElementsManager",
+          "found": true,
+          "loadedName": "com.nomagic.magicdraw.openapi.uml.PresentationElementsManager",
+          "codeSource": "file:/C:/Program%20Files/CATIAMagic24x/lib/md_api.jar"
+        },
+        {
+          "className": "com.nomagic.magicdraw.uml.symbols.DiagramPresentationElement",
+          "found": true,
+          "loadedName": "com.nomagic.magicdraw.uml.symbols.DiagramPresentationElement",
+          "codeSource": "file:/C:/Program%20Files/CATIAMagic24x/lib/md_api.jar"
+        },
+        {
+          "className": "com.nomagic.uml2.ext.jmi.helpers.InteractionHelper",
+          "found": true,
+          "loadedName": "com.nomagic.uml2.ext.jmi.helpers.InteractionHelper",
+          "codeSource": "file:/C:/Program%20Files/CATIAMagic24x/lib/md_api.jar"
+        }
+      ]
+    },
+    "writeMode": "diagram-type-gated-preview"
+  },
+  "extensions": {
+    "family": "extensions",
+    "mode": "profile-and-plugin-probe",
+    "projectState": {
+      "open": true,
+      "name": "GEN7 DEMO",
+      "filePath": "C:\\Users\\opt2\\Documents\\GEN7 DEMO.mdzip",
+      "remote": false,
+      "dirty": false
+    },
+    "available": true,
+    "nativeExtensionDetected": true,
+    "status": "native-plugin-detected",
+    "pluginDirectoriesFound": [
+      {
+        "name": "com.nomagic.magiccybersecuritydesigner",
+        "path": "C:\\Program Files\\CATIAMagic24x\\plugins\\com.nomagic.magiccybersecuritydesigner"
+      },
+      {
+        "name": "com.nomagic.magicdraw.riskanalysis",
+        "path": "C:\\Program Files\\CATIAMagic24x\\plugins\\com.nomagic.magicdraw.riskanalysis"
+      }
+    ],
+    "readOnlyScanSupported": true,
+    "nativePatternWriteSupported": false,
+    "complianceClaimsSupported": false
+  },
+  "requirements": {
+    "feature": "requirements",
+    "path": "/api/v1/requirements/capabilities",
+    "available": false,
+    "installed": false,
+    "licensed": "unknown",
+    "mode": "unsupported",
+    "classesFound": [],
+    "classesMissing": [
+      "com.nomagic.requirements.reqif.ReqIFUtils",
+      "com.nomagic.requirements.reqif.mapping.ReqIFMappingManager"
+    ],
+    "pluginDirectoriesFound": [],
+    "warnings": [
+      "No matching plugin directory was found under the local CATIA/Cameo plugins folder.",
+      "One or more expected native API classes were not loadable from the bridge classloader."
+    ],
+    "nextProbe": "/api/v1/probes/execute"
+  },
+  "environment": {
+    "success": true,
+    "result": "{\"applicationVersionError\":\"groovy.lang.MissingMethodException: No signature of method: com.nomagic.magicdraw.core.Application.getVersion() is applicable for argument types: () values: []\",\"environmentEditionError\":\"groovy.lang.MissingMethodException: No signature of method: static com.nomagic.magicdraw.core.ApplicationEnvironment.getEditionName() is applicable for argument types: () values: []\",\"buildNumberError\":\"groovy.lang.MissingMethodException: No signature of method: static com.nomagic.magicdraw.core.ApplicationEnvironment.getBuildNumber() is applicable for argument types: () values: []\",\"installRoot\":\"C:\\\\Program Files\\\\CATIAMagic24x\\\\\",\"systemProperties\":{\"com.nomagic.esi.contextual-resource-editing-enabled\":\"true\",\"java.specification.version\":\"17\",\"java.version\":\"17.0.12\",\"java.vm.version\":\"17.0.12+7\",\"java.runtime.version\":\"17.0.12+7\",\"java.vm.specification.version\":\"17\",\"java.vendor.version\":\"Temurin-17.0.12+7\",\"java.version.date\":\"2024-07-16\",\"java.class.version\":\"61.0\",\"os.version\":\"10.0\"},\"plugins\":[{\"id\":\"com.nomagic.magicdraw.commonintegrators\",\"name\":\"Abstract MagicDraw integrator with other applications\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.autostyler\",\"name\":\"AutoStyler\",\"version\":\"2024x Refresh2\"},{\"id\":\"AutomatonPlugin\",\"name\":\"Automaton\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.boundElementNameSupport.BoundElementNamePlugin\",\"name\":\"Bound element name creator\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.corbaidl\",\"name\":\"CORBA IDL tools\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.cbm\",\"name\":\"Cameo Business Modeler\",\"version\":\"2024x Refresh2\"},{\"id\":\"Cameo Concept Modeler\",\"name\":\"Cameo Concept Modeler\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.dmn\",\"name\":\"Cameo Data Modeler\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.claude.cameo.bridge\",\"name\":\"Cameo MCP Bridge\",\"version\":\"2.3.5\"},{\"id\":\"com.nomagic.requirements\",\"name\":\"Cameo Requirements Modeler\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.riskanalysis\",\"name\":\"Cameo Safety and Reliability Analyzer\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.dassault_systemes.modeler.cscd\",\"name\":\"Cameo Systems Cybersecurity Designer\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.ce\",\"name\":\"Code Engineering\",\"version\":\"2024x Refresh2\"},{\"id\":\"ContentDiagramPlugin\",\"name\":\"Content Diagram\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.imagetoclipboard\",\"name\":\"Copy diagram as image to system clipboard\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.datamarkingsandclassification\",\"name\":\"Data Markings and Classification\",\"version\":\"2024x Refresh2\"},{\"id\":\"DependencyMatrixPlugin\",\"name\":\"Dependency Matrix\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.diagramfilter.DiagramContentFilterPlugin\",\"name\":\"Diagram Content Filter\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.diagramtable\",\"name\":\"Diagram Table\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.dialogtable\",\"name\":\"Dialog Table\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.ecore\",\"name\":\"ECore Export\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.eclipseocl\",\"name\":\"Eclipse OCL plugin\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.emfuml2xmi.v2\",\"name\":\"Eclipse UML2 (v2.x) XMI Export/Import\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.emfuml2xmi.v3\",\"name\":\"Eclipse UML2 (v3.x) XMI Export/Import\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.emfuml2xmi.v4\",\"name\":\"Eclipse UML2 (v4.x) XMI Export/Import\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.emfuml2xmi.v5\",\"name\":\"Eclipse UML2 (v5.x) XMI Export/Import\",\"version\":\"2024x Refresh2\"},{\"id\":\"elementreferenceintext\",\"name\":\"Element Reference In Text\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.ea\",\"name\":\"Enterprise Architect Import\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.fileattachments\",\"name\":\"File Attachments\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.fileattachmentsmerge\",\"name\":\"File Attachments Merge\",\"version\":\"2024x Refresh2\"},{\"id\":\"FindInDiagram\",\"name\":\"Find in Diagram\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.ganttchartdiagram\",\"name\":\"Gantt Chart Diagram\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.migrationtransformation\",\"name\":\"Generic model transformation\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.glossary\",\"name\":\"Glossary\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.htmldiff\",\"name\":\"Html Diff\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.iso26262\",\"name\":\"ISO 26262 Functional Safety\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.imagelibrary\",\"name\":\"Image Library\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.importexport\",\"name\":\"Import Export Plugin\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.informationflows\",\"name\":\"Information Flows Management\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.jpython\",\"name\":\"JPython interpreter\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.legend.LegendPlugin\",\"name\":\"Legend\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.mdzipxpublisher\",\"name\":\"MDZipX Publisher\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.mof\",\"name\":\"MOF Export/Import\",\"version\":\"2024x Refresh2\"},{\"id\":\"Magic Concept Modeler\",\"name\":\"Magic Concept Modeler\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.dassault_systemes.modeler.mscd\",\"name\":\"Magic Systems Cybersecurity Designer\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.dassault_systemes.eearchitect\",\"name\":\"Magic Systems EE Architect\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.magicupsell\",\"name\":\"Magic Up-Sell\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.modelmetrics\",\"name\":\"Metrics\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.migrationframework\",\"name\":\"Model migration framework\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.modeltransformations\",\"name\":\"ModelTransformations\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.composition.validation\",\"name\":\"Project Composition Validation Rules\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.merge\",\"name\":\"Project Merge\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.merge.core\",\"name\":\"Project Merge Core\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.projectstatistics\",\"name\":\"Project Statistics\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.raaml\",\"name\":\"RAAML Commons\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.visualization.relationshipmap\",\"name\":\"Relation Map\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.reportattachments\",\"name\":\"Report Attachments\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.reportdesigner\",\"name\":\"Report Designer\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.magicreport\",\"name\":\"Report Wizard\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.reversefromcp\",\"name\":\"Reverse from classpath (in browser)\",\"version\":\"2024x Refresh2\"},{\"id\":\"RobustnessDiagramPlugin\",\"name\":\"Robustness diagram tools\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.ds\",\"name\":\"SSO 3D Experience\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.sequencereverse\",\"name\":\"Sequence Diagram Generation from Java Source\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.suspect\",\"name\":\"Suspect Links\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.plugins.impl.sysml\",\"name\":\"SysML\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.togaf\",\"name\":\"TOGAF\",\"version\":\"2024x Refresh2\"},{\"id\":\"UAFPlugin\",\"name\":\"UAF 1.2\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.umlprojectstatistics\",\"name\":\"UML Project Statistics\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.upsellapi\",\"name\":\"Up-Sell API\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.usageanalytics\",\"name\":\"Usage Analytics\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.usagesdependencies\",\"name\":\"Usages and Dependencies plugin\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.usecasedescriptor\",\"name\":\"Use Case descriptions extensions used for modeling use cases and generating reports for them.\",\"version\":\"2024x Refresh2\"},{\"id\":\"UserInterfaceModeling\",\"name\":\"User Interface Modeling\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.magicdraw.variabilitycore\",\"name\":\"Variability Core\",\"version\":\"2024x Refresh2\"},{\"id\":\"com.nomagic.zachman\",\"name\":\"Zachman Framework\",\"version\":\"19.0 SP1\"}],\"project\":\"GEN7 DEMO\",\"projectFile\":\"C:\\\\Users\\\\opt2\\\\Documents\\\\GEN7 DEMO.mdzip\",\"usedProfiles\":[\"AV-1\",\"AcV-2\",\"Acquisition View Packages\",\"Actions\",\"Actual Resources Packages\",\"All Views Packages\",\"Architecture Management Packages\",\"Architecture Meta-Data Packages\",\"Capability View Packages\",\"Concepts Packages\",\"DSL Customization\",\"Data and Information View Packages\",\"Dependency Matrix Profile\",\"Deployed Resources Packages\",\"Extra stereotypes\",\"Find By Text\",\"Logical Packages\",\"MagicDraw Profile\",\"Measurements\",\"OV-1\",\"Operational View Packages\",\"Operations Packages\",\"Packages\",\"Personnel Packages\",\"Physical Resource Packages\",\"Products\",\"Project View Packages\",\"Projects Packages\",\"Report Profile\",\"Reports\",\"Resources Packages\",\"Security Packages\",\"Service Oriented View Packages\",\"Service Packages\",\"Services Packages\",\"Services View Packages\",\"StandardProfile\",\"Standards Packages\",\"Standards View\",\"Strategic View Packages\",\"Strategy Packages\",\"SysML\",\"SysML constraints\",\"Systems View Packages\",\"Technical Standards View Packages\",\"Traceability customization\",\"UAF\",\"UAF Constraints\",\"UAF Customization\",\"UAF EA Packages\",\"UAF Packages\",\"UAF Products\",\"Validation Profile\",\"additional_stereotypes\",\"additional_stereotypes\",\"analysis patterns\",\"customizations for traceability\",\"sysphs_profile\"]}",
+    "output": "",
+    "engine": "groovy"
+  },
+  "topLevel": {
+    "rootId": "eee_1045467100313_135436_1",
+    "depth": 1,
+    "view": "compact",
+    "tree": {
+      "id": "eee_1045467100313_135436_1",
+      "type": "Model",
+      "name": "Model",
+      "stereotypes": [
+        "ArchitecturalDescription"
+      ],
+      "children": [
+        {
+          "id": "_2024x_2_30a0126_1790834791791_396825_21539",
+          "type": "StringTaggedValue",
+          "name": "",
+          "stereotypes": [],
+          "children": []
+        },
+        {
+          "id": "_2024x_2_30a0126_1790834791793_44257_21628",
+          "type": "Comment",
+          "name": "",
+          "stereotypes": [],
+          "children": []
+        },
+        {
+          "id": "_2024x_2_30a0126_1790834791809_146914_21859",
+          "type": "BooleanTaggedValue",
+          "name": "",
+          "stereotypes": [],
+          "children": []
+        },
+        {
+          "id": "_2024x_2_30a0126_1790834791816_568432_22309",
+          "type": "Package",
+          "name": "Actual Resources",
+          "stereotypes": [
+            "Actual Resources",
+            "CustomSort"
+          ],
+          "childCount": 6,
+          "children": []
+        },
+        {
+          "id": "_2024x_2_30a0126_1790834791794_418861_21658",
+          "type": "Package",
+          "name": "Architecture Management",
+          "stereotypes": [
+            "Architecture Management",
+            "CustomSort"
+          ],
+          "childCount": 13,
+          "children": []
+        },
+        {
+          "id": "_18_0beta_8f90291_1391000707955_594012_6218",
+          "type": "Package",
+          "name": "MD Customization for Requirements",
+          "stereotypes": [
+            "auxiliaryResource"
+          ],
+          "childCount": 7,
+          "children": []
+        },
+        {
+          "id": "_12_0EAPbeta_be00301_1156851270584_552173_1",
+          "type": "Package",
+          "name": "MD Customization for SysML",
+          "stereotypes": [
+            "auxiliaryResource"
+          ],
+          "childCount": 7,
+          "children": []
+        },
+        {
+          "id": "_18_0beta_9150291_1392280884421_448498_10673",
+          "type": "Package",
+          "name": "MD Customization for ViewsViewpoints",
+          "stereotypes": [
+            "auxiliaryResource"
+          ],
+          "childCount": 1,
+          "children": []
+        },
+        {
+          "id": "_16_0_f00036a_1231407438231_896004_323",
+          "type": "Package",
+          "name": "Measurements Library",
+          "stereotypes": [
+            "ModelLibrary",
+            "auxiliaryResource",
+            "ignoreAuxFilter"
+          ],
+          "childCount": 20,
+          "children": []
+        },
+        {
+          "id": "_2024x_2_30a0126_1790834791813_968545_22151",
+          "type": "Package",
+          "name": "Operational",
+          "stereotypes": [
+            "Operational",
+            "CustomSort"
+          ],
+          "childCount": 13,
+          "children": []
+        },
+        {
+          "id": "_2024x_2_30a0126_1790834791815_251092_22236",
+          "type": "Package",
+          "name": "Personnel",
+          "stereotypes": [
+            "Personnel",
+            "CustomSort"
+          ],
+          "childCount": 14,
+          "children": []
+        },
+        {
+          "id": "_2024x_2_30a0126_1790834791810_297406_21949",
+          "type": "Package",
+          "name": "Projects",
+          "stereotypes": [
+            "Projects",
+            "CustomSort"
+          ],
+          "childCount": 9,
+          "children": []
+        },
+        {
+          "id": "_16_5_1_28750452_1244550774812_439588_2010",
+          "type": "Profile",
+          "name": "Report Profile",
+          "stereotypes": [
+            "auxiliaryResource"
+          ],
+          "childCount": 10,
+          "children": []
+        },
+        {
+          "id": "_2024x_2_30a0126_1790834791814_458213_22200",
+          "type": "Package",
+          "name": "Resources",
+          "stereotypes": [
+            "Resources",
+            "CustomSort"
+          ],
+          "childCount": 14,
+          "children": []
+        },
+        {
+          "id": "_2024x_2_30a0126_1790834791817_314990_22364",
+          "type": "Package",
+          "name": "Security",
+          "stereotypes": [
+            "Security",
+            "CustomSort"
+          ],
+          "childCount": 11,
+          "children": []
+        },
+        {
+          "id": "_2024x_2_30a0126_1790834791812_216214_22042",
+          "type": "Package",
+          "name": "Services",
+          "stereotypes": [
+            "Services",
+            "CustomSort"
+          ],
+          "childCount": 14,
+          "children": []
+        },
+        {
+          "id": "_2024x_2_30a0126_1790834791808_740859_21748",
+          "type": "Package",
+          "name": "Standards",
+          "stereotypes": [
+            "Standards",
+            "CustomSort"
+          ],
+          "childCount": 7,
+          "children": []
+        },
+        {
+          "id": "_2024x_2_30a0126_1790834791791_649151_21522",
+          "type": "Package",
+          "name": "Strategy",
+          "stereotypes": [
+            "Strategy",
+            "CustomSort"
+          ],
+          "childCount": 13,
+          "children": []
+        },
+        {
+          "id": "_2024x_2_30a0126_1790834791810_255614_21924",
+          "type": "Package",
+          "name": "Summary & Overview",
+          "stereotypes": [
+            "Summary & Overview",
+            "CustomSort"
+          ],
+          "childCount": 5,
+          "children": []
+        },
+        {
+          "id": "_11_5EAPbeta_be00301_1147434586638_637562_1900",
+          "type": "Profile",
+          "name": "SysML",
+          "stereotypes": [
+            "auxiliaryResource"
+          ],
+          "childCount": 14,
+          "children": []
+        },
+        {
+          "id": "_15_1_f00036a_1212649805624_203986_1091",
+          "type": "Profile",
+          "name": "UAF",
+          "stereotypes": [
+            "auxiliaryResource"
+          ],
+          "childCount": 17,
+          "children": []
+        },
+        {
+          "id": "_16_5beta1_8f40297_1233054591921_14615_3851",
+          "type": "Profile",
+          "name": "UAF Constraints",
+          "stereotypes": [
+            "auxiliaryResource",
+            "Info"
+          ],
+          "childCount": 11,
+          "children": []
+        },
+        {
+          "id": "_16_5beta1_8f40297_1233054360625_688919_3715",
+          "type": "Profile",
+          "name": "UAF Customization",
+          "stereotypes": [
+            "auxiliaryResource"
+          ],
+          "childCount": 12,
+          "children": []
+        },
+        {
+          "id": "magicdraw_uml_standard_profile_v_0001",
+          "type": "Package",
+          "name": "UML Standard Profile",
+          "stereotypes": [
+            "auxiliaryResource"
+          ],
+          "childCount": 6,
+          "children": []
+        }
+      ]
+    }
+  },
+  "calls": [
+    {
+      "kind": "mcp-call",
+      "seq": 1,
+      "tool": "cameo_status",
+      "label": "Bridge health and compatibility",
+      "args": {},
+      "ms": 158,
+      "ok": true,
+      "bytes": 26155
+    },
+    {
+      "kind": "mcp-call",
+      "seq": 2,
+      "tool": "cameo_get_capabilities",
+      "label": "Bridge capability manifest",
+      "args": {},
+      "ms": 124,
+      "ok": true,
+      "bytes": 26122
+    },
+    {
+      "kind": "mcp-call",
+      "seq": 3,
+      "tool": "cameo_get_project",
+      "label": "Open project",
+      "args": {},
+      "ms": 224,
+      "ok": true,
+      "bytes": 194
+    },
+    {
+      "kind": "mcp-call",
+      "seq": 4,
+      "tool": "cameo_list_diagram_types",
+      "label": "Supported diagram types",
+      "args": {},
+      "ms": 3,
+      "ok": true,
+      "bytes": 3455
+    },
+    {
+      "kind": "mcp-call",
+      "seq": 5,
+      "tool": "cameo_list_matrix_kinds",
+      "label": "Native matrix kinds",
+      "args": {},
+      "ms": 2,
+      "ok": true,
+      "bytes": 1296
+    },
+    {
+      "kind": "mcp-call",
+      "seq": 6,
+      "tool": "cameo_get_simulation_capabilities",
+      "label": "Simulation Toolkit probe",
+      "args": {},
+      "ms": 144,
+      "ok": true,
+      "bytes": 1297
+    },
+    {
+      "kind": "mcp-call",
+      "seq": 7,
+      "tool": "cameo_list_simulation_configurations",
+      "label": "Simulation configurations",
+      "args": {},
+      "ms": 105,
+      "ok": true,
+      "bytes": 1703
+    },
+    {
+      "kind": "mcp-call",
+      "seq": 8,
+      "tool": "cameo_get_profile_capabilities",
+      "label": "Profile capabilities",
+      "args": {},
+      "ms": 151,
+      "ok": true,
+      "bytes": 1593
+    },
+    {
+      "kind": "mcp-call",
+      "seq": 9,
+      "tool": "cameo_get_typed_diagram_capabilities",
+      "label": "Typed diagram capabilities",
+      "args": {},
+      "ms": 178,
+      "ok": true,
+      "bytes": 1280
+    },
+    {
+      "kind": "mcp-call",
+      "seq": 10,
+      "tool": "cameo_get_extension_capabilities",
+      "label": "Extension capabilities",
+      "args": {},
+      "ms": 187,
+      "ok": true,
+      "bytes": 708
+    },
+    {
+      "kind": "mcp-call",
+      "seq": 11,
+      "tool": "cameo_get_requirements_capabilities",
+      "label": "Requirements import/export",
+      "args": {},
+      "ms": 103,
+      "ok": true,
+      "bytes": 564
+    },
+    {
+      "kind": "mcp-call",
+      "seq": 12,
+      "tool": "cameo_execute_macro",
+      "label": "Read application version, plugins and profiles",
+      "args": {
+        "script": "<groovy 1370 chars>"
+      },
+      "ms": 207,
+      "ok": true,
+      "bytes": 11086
+    },
+    {
+      "kind": "mcp-call",
+      "seq": 13,
+      "tool": "cameo_get_containment_tree",
+      "label": "Top-level packages",
+      "args": {
+        "depth": 1
+      },
+      "ms": 316,
+      "ok": true,
+      "bytes": 4345
+    }
+  ]
+}

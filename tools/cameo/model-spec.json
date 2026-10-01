@@ -1,0 +1,1706 @@
+{
+  "generatedBy": "scripts/export-mbse-spec.mjs",
+  "engineModel": "1.0.0",
+  "study": {
+    "id": "ECS-LOOPA-2026-01",
+    "title": "Cooling Loop A evolution study",
+    "system": "AI Factory Cooling System",
+    "site": "Hall 2 (demonstration case)",
+    "modelVersion": "1.0.0"
+  },
+  "provenanceNote": "Values in this file are computed by the GEN7 deterministic engineering calculator (src/engineering/physics.js) outside Cameo. The Cameo agent writes them into the model and labels them as such; the Simulation Toolkit is not installed on the target workstation.",
+  "fluids": {
+    "coolant": {
+      "name": "PG25",
+      "densityKgPerL": 1.02,
+      "cpKJPerKgK": 3.85,
+      "source": "MEASURED (plant constant shared with the DI pipeline)"
+    },
+    "facilityWater": {
+      "name": "Facility water",
+      "densityKgPerL": 1,
+      "cpKJPerKgK": 4.18,
+      "source": "ASSUMPTION (water)"
+    }
+  },
+  "boundary": {
+    "facilityWaterSupplyC": 26,
+    "facilityWaterFlowKgS": 32,
+    "ambientDesignDryBulbC": 35,
+    "note": "Design-day facility water conditions at the Loop A heat-exchanger interface (FW-A). Same values for V1 and V2."
+  },
+  "limits": {
+    "maxReturnC": 40,
+    "maxSupplyC": 32,
+    "minFlowLpmPerKw": 1.5,
+    "maxLoopDpKpa": 150,
+    "minFailureRetentionPct": 50,
+    "maxPumpPowerPct": 1,
+    "designMarginPct": 10
+  },
+  "loads": {
+    "designBasisKw": 900,
+    "r17Kw": 120,
+    "futureClusterRacks": 4,
+    "futureRackKw": 120
+  },
+  "observations": {
+    "loopA": {
+      "p95Kw": 869.1,
+      "maxKw": 875.1,
+      "usableKw": 1000,
+      "method": "heat = flow × 1.02 kg/L × 3.85 kJ/kg·K × (return − supply), summed over CDU-A1 + CDU-A2"
+    },
+    "loopB": {
+      "p95Kw": 483.9,
+      "usableKw": 1000
+    },
+    "movable": [
+      {
+        "job": "ft-sweep-17",
+        "racks": [
+          "A-07"
+        ],
+        "p95Kw": 38.7
+      }
+    ],
+    "source": "Seeded plant telemetry (same dataset and grooming pipeline as the Decision Intelligence run)"
+  },
+  "scenarios": [
+    {
+      "id": "S1",
+      "name": "Normal load",
+      "loadKw": 869.1,
+      "basis": "Measured Loop A heat p95 over 24 h (869.1 kW), the same figure as the Decision Intelligence run."
+    },
+    {
+      "id": "S2",
+      "name": "Original design load",
+      "loadKw": 900,
+      "basis": "Basis of design of Loop A (900 kW)."
+    },
+    {
+      "id": "S3",
+      "name": "High AI load",
+      "loadKw": 989.1,
+      "basis": "S1 + R-17 at its design IT load (869.1 + 120 kW), without moving any workload."
+    },
+    {
+      "id": "S4",
+      "name": "Projected future AI factory load",
+      "loadKw": 1469.1,
+      "basis": "S3 + Future High-Density Cluster (4 × 120 kW)."
+    }
+  ],
+  "stakeholderNeed": {
+    "id": "STK-001",
+    "name": "Future compute density",
+    "text": "Hall 2 shall host the Future High-Density Cluster (4 racks at 120 kW) on row 4 after R-17."
+  },
+  "requirements": [
+    {
+      "id": "REQ-THERM-001",
+      "name": "Nominal cooling capacity",
+      "text": "Loop A shall have a validated cooling capacity of at least the original design load (900 kW) plus 10 % engineering margin.",
+      "check": "capacity",
+      "scope": [
+        "S2"
+      ],
+      "kind": "performance"
+    },
+    {
+      "id": "REQ-THERM-002",
+      "name": "Maximum coolant outlet temperature",
+      "text": "The coolant temperature leaving the cold plates (Loop A return) shall not exceed 40 °C in the operating envelope (S1–S3).",
+      "check": "returnTemp",
+      "scope": [
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "kind": "performance"
+    },
+    {
+      "id": "REQ-THERM-003",
+      "name": "Maximum coolant supply temperature",
+      "text": "The coolant supplied to the cold plates shall not exceed 32 °C (W32 class) in the operating envelope (S1–S3).",
+      "check": "supplyTemp",
+      "scope": [
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "kind": "performance"
+    },
+    {
+      "id": "REQ-FLOW-001",
+      "name": "Minimum coolant flow",
+      "text": "Loop A shall deliver at least 1.5 L/min of coolant per kW of heat load in the operating envelope (S1–S3).",
+      "check": "flowRatio",
+      "scope": [
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "kind": "performance"
+    },
+    {
+      "id": "REQ-PRESS-001",
+      "name": "Maximum pressure drop",
+      "text": "The Loop A pressure drop at operating flow shall not exceed 150 kPa in the operating envelope (S1–S3).",
+      "check": "pressure",
+      "scope": [
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "kind": "performance"
+    },
+    {
+      "id": "REQ-AVAIL-001",
+      "name": "Cooling availability",
+      "text": "After the loss of any single circulation pump, Loop A shall retain at least 50 % of the usable capacity recorded in DCIM (redundancy class N, 2 × 50 %).",
+      "check": "singleFailure",
+      "scope": [
+        "S2"
+      ],
+      "kind": "availability"
+    },
+    {
+      "id": "REQ-EFF-001",
+      "name": "Cooling efficiency",
+      "text": "Pumping electrical power shall not exceed 1 % of the heat removed at the original design load.",
+      "check": "pumpPower",
+      "scope": [
+        "S2"
+      ],
+      "kind": "efficiency"
+    },
+    {
+      "id": "REQ-FUTURE-001",
+      "name": "Projected future AI thermal load",
+      "text": "At the projected future AI factory load (S4), Loop A shall meet REQ-THERM-002, REQ-THERM-003, REQ-FLOW-001 and REQ-PRESS-001 with at least 10 % capacity margin.",
+      "check": "future",
+      "scope": [
+        "S4"
+      ],
+      "kind": "future",
+      "derivedFrom": [
+        "REQ-THERM-002",
+        "REQ-THERM-003",
+        "REQ-FLOW-001",
+        "REQ-PRESS-001"
+      ]
+    }
+  ],
+  "functions": [
+    {
+      "id": "F1",
+      "name": "Capture GPU heat",
+      "performedBy": "IT Cooling System"
+    },
+    {
+      "id": "F2",
+      "name": "Circulate coolant to the racks",
+      "performedBy": "Loop A"
+    },
+    {
+      "id": "F3",
+      "name": "Transfer heat to facility water",
+      "performedBy": "Heat Exchange System"
+    },
+    {
+      "id": "F4",
+      "name": "Reject or recover heat",
+      "performedBy": "Cooling Plant"
+    },
+    {
+      "id": "F5",
+      "name": "Control temperature, flow and pressure",
+      "performedBy": "Cooling Control System"
+    }
+  ],
+  "system": {
+    "name": "AI Factory Cooling System",
+    "subsystems": [
+      {
+        "id": "AIC",
+        "name": "AI Compute System",
+        "parts": [
+          "GPU Cluster 01 (A-01…A-04)",
+          "GPU Cluster 02 (A-05…A-08)",
+          "GPU Cluster 03 (B-01…B-07)",
+          "Future High-Density Cluster (planned)"
+        ]
+      },
+      {
+        "id": "ITC",
+        "name": "IT Cooling System",
+        "parts": [
+          "GPU cold plates",
+          "Rack coolant manifolds",
+          "Row supply / return headers"
+        ]
+      },
+      {
+        "id": "PCS",
+        "name": "Primary Cooling System",
+        "parts": [
+          "Loop A",
+          "Loop B"
+        ]
+      },
+      {
+        "id": "HXS",
+        "name": "Heat Exchange System",
+        "parts": [
+          "CDU heat exchangers (Loop A)",
+          "CDU heat exchangers (Loop B)"
+        ]
+      },
+      {
+        "id": "FWS",
+        "name": "Facility Water System",
+        "parts": [
+          "Facility pumps",
+          "Facility distribution",
+          "Buffer tank"
+        ]
+      },
+      {
+        "id": "HRJ",
+        "name": "Heat Rejection",
+        "parts": [
+          "Dry coolers",
+          "External environment"
+        ]
+      },
+      {
+        "id": "HRC",
+        "name": "Heat Recovery",
+        "parts": [
+          "Heat-recovery interface",
+          "Recoverable thermal output"
+        ]
+      },
+      {
+        "id": "CCS",
+        "name": "Cooling Control System",
+        "parts": [
+          "Temperature sensors",
+          "Pressure sensors",
+          "Flow sensors",
+          "Valves",
+          "Pump control",
+          "Thermal controller"
+        ]
+      }
+    ],
+    "loopB": {
+      "cdus": [
+        "CDU-B1",
+        "CDU-B2"
+      ],
+      "usableCapacityKw": 1000,
+      "status": "UNCHANGED"
+    }
+  },
+  "interfaces": [
+    {
+      "id": "IF-ITC-A",
+      "name": "Loop A ↔ IT cooling network",
+      "flows": "Coolant (PG25) supply and return",
+      "between": [
+        "Loop A",
+        "IT Cooling System"
+      ],
+      "impact": "Same coolant and connection points; flow at S4 2494 L/min, Δp 84 kPa (≤ 150).",
+      "changed": true
+    },
+    {
+      "id": "IF-FW-A",
+      "name": "Loop A ↔ facility water (FW-A)",
+      "flows": "Heat to facility water",
+      "between": [
+        "Loop A",
+        "Facility Water System"
+      ],
+      "impact": "Same flow; heat transferred up to 1469 kW, facility return 37 °C at S4.",
+      "changed": true
+    },
+    {
+      "id": "IF-CTL-A",
+      "name": "Loop A ↔ cooling control",
+      "flows": "Measurements and set-points",
+      "between": [
+        "Loop A",
+        "Cooling Control System"
+      ],
+      "impact": "New signals: FM-203/204, TS-205/206, DPT-201; new controller TC-201.",
+      "changed": true
+    },
+    {
+      "id": "IF-PWR-A",
+      "name": "Loop A ↔ electrical supply",
+      "flows": "Pump electrical power",
+      "between": [
+        "Loop A",
+        "Electrical distribution"
+      ],
+      "impact": "Four pump drives instead of two; installed pump power 14 kW.",
+      "changed": true
+    },
+    {
+      "id": "IF-TEL-A",
+      "name": "Loop A ↔ rack power telemetry",
+      "flows": "Rack power (feed-forward)",
+      "between": [
+        "Loop A",
+        "AI Compute System"
+      ],
+      "impact": "New: rack power telemetry feeds the controller (feed-forward).",
+      "changed": true
+    }
+  ],
+  "context": {
+    "parts": [
+      {
+        "key": "compute",
+        "name": "aiCompute",
+        "type": "AI Compute System",
+        "doc": "GPU clusters 01–03 and the Future High-Density Cluster. Electrical power in, heat out."
+      },
+      {
+        "key": "coldplates",
+        "name": "coldPlates",
+        "type": "GPU Cold Plates",
+        "doc": "Direct-to-chip cold plates on the GPUs and CPUs."
+      },
+      {
+        "key": "rackmani",
+        "name": "rackManifolds",
+        "type": "Rack Coolant Manifolds",
+        "doc": "In-rack supply and return manifolds (rack-level CDUs are not used in Hall 2)."
+      },
+      {
+        "key": "loopA",
+        "name": "loopA",
+        "type": "Loop A",
+        "doc": "Primary cooling loop serving row 4 (CDU-A1, CDU-A2)."
+      },
+      {
+        "key": "loopB",
+        "name": "loopB",
+        "type": "Loop B",
+        "doc": "Primary cooling loop serving row 5 (CDU-B1, CDU-B2). Unchanged by this study."
+      },
+      {
+        "key": "hx",
+        "name": "heatExchange",
+        "type": "Heat Exchange System",
+        "doc": "CDU liquid-to-liquid plate heat exchangers."
+      },
+      {
+        "key": "fw",
+        "name": "facilityWater",
+        "type": "Facility Water System",
+        "doc": "Facility pumps, distribution and buffer tank."
+      },
+      {
+        "key": "plant",
+        "name": "coolingPlant",
+        "type": "Cooling Plant",
+        "doc": "Central cooling plant."
+      },
+      {
+        "key": "reject",
+        "name": "heatRejection",
+        "type": "Heat Rejection",
+        "doc": "Dry coolers to the external environment."
+      },
+      {
+        "key": "recover",
+        "name": "heatRecovery",
+        "type": "Heat Recovery",
+        "doc": "Heat-recovery interface (recoverable thermal output)."
+      },
+      {
+        "key": "control",
+        "name": "coolingControl",
+        "type": "Cooling Control System",
+        "doc": "Sensors, valves, pump control and thermal controllers."
+      }
+    ],
+    "chain": [
+      [
+        "compute",
+        "coldplates",
+        "Heat"
+      ],
+      [
+        "coldplates",
+        "rackmani",
+        "Coolant (PG25)"
+      ],
+      [
+        "rackmani",
+        "loopA",
+        "Coolant (PG25)"
+      ],
+      [
+        "rackmani",
+        "loopB",
+        "Coolant (PG25)"
+      ],
+      [
+        "loopA",
+        "hx",
+        "Heat"
+      ],
+      [
+        "loopB",
+        "hx",
+        "Heat"
+      ],
+      [
+        "hx",
+        "fw",
+        "Facility Water"
+      ],
+      [
+        "fw",
+        "plant",
+        "Facility Water"
+      ],
+      [
+        "plant",
+        "reject",
+        "Heat"
+      ],
+      [
+        "plant",
+        "recover",
+        "Heat"
+      ],
+      [
+        "control",
+        "loopA",
+        "Control Signal"
+      ],
+      [
+        "control",
+        "loopB",
+        "Control Signal"
+      ]
+    ]
+  },
+  "thermalFlow": [
+    "GPU electrical power",
+    "GPU heat",
+    "Cold plate",
+    "Coolant",
+    "CDU",
+    "Loop A / Loop B",
+    "Heat exchanger",
+    "Facility water",
+    "Cooling plant",
+    "Heat rejection / recovery"
+  ],
+  "assumptions": [
+    {
+      "id": "A1",
+      "text": "Steady-state, system-level thermal-hydraulic model. No transient, no CFD: the purpose is architecture, requirements, parametrics and verification."
+    },
+    {
+      "id": "A2",
+      "text": "Coolant PG25 (1.02 kg/L, 3.85 kJ/kg·K) — the constants of the plant telemetry. Facility water 1.0 kg/L, 4.18 kJ/kg·K."
+    },
+    {
+      "id": "A3",
+      "text": "Facility water at the Loop A interface: 26 °C supply, 32 kg/s, identical for V1 and V2 (design day)."
+    },
+    {
+      "id": "A4",
+      "text": "Original basis of design of Loop A: 900 kW (DCIM records 2 × 500 kW usable)."
+    },
+    {
+      "id": "A5",
+      "text": "Projected future load: Future High-Density Cluster of 4 racks at 120 kW design IT, added on Loop A after R-17. A planning assumption for this study."
+    },
+    {
+      "id": "A6",
+      "text": "All heat captured by the cold plates enters Loop A (liquid-capture ratio 1.0 for the NVL72-class racks)."
+    },
+    {
+      "id": "A7",
+      "text": "Heat exchangers: counter-flow ε-NTU. Pumps: quadratic head curves with affinity laws; parallel pumps share flow equally."
+    },
+    {
+      "id": "A8",
+      "text": "Loop A v1 parameters are calibrated so the model reproduces the measured operating point (≈ 30 °C supply, ≈ 8.4 K ΔT, ≈ 125 kPa at 869 kW). Loop A v2 parameters are design choices of the proposal."
+    },
+    {
+      "id": "A9",
+      "text": "Limits (40 °C return, 32 °C supply, 1.5 L/min/kW, 150 kPa) are study values to be confirmed against the GPU vendor cold-plate specification and the CDU datasheets."
+    },
+    {
+      "id": "A10",
+      "text": "No cost data was provided: CAPEX is described by its drivers, not estimated. No carbon intensity is applied: no CO₂e is calculated."
+    }
+  ],
+  "equations": [
+    {
+      "id": "EQ-Q",
+      "name": "Thermal transfer",
+      "expr": "Q = ṁ · cp · ΔT",
+      "note": "Q heat (kW), ṁ coolant mass flow (kg/s), cp specific heat (kJ/kg·K), ΔT return − supply (K)."
+    },
+    {
+      "id": "EQ-FLOW",
+      "name": "Flow control",
+      "expr": "q = max(Q / (ρ · cp · ΔTset), Q · 1.5 / 60), capped at q_max",
+      "note": "Controller target; when the pumps are at full speed, flow is capped and ΔT rises."
+    },
+    {
+      "id": "EQ-HX",
+      "name": "Heat exchanger (ε-NTU, counter-flow)",
+      "expr": "Q = ε · Cmin · (T_return − T_fw,in) ; ε = (1 − e^(−NTU(1−Cr))) / (1 − Cr·e^(−NTU(1−Cr))) ; NTU = UA / Cmin",
+      "note": "Fixes the return temperature for a given load; supply = return − Q / (ṁ·cp)."
+    },
+    {
+      "id": "EQ-DP",
+      "name": "Pressure loss",
+      "expr": "Δp = Δp0 + K · q²",
+      "note": "Manifolds, heat exchangers, cold plates and valves lumped in K."
+    },
+    {
+      "id": "EQ-PUMP",
+      "name": "Pump curve and maximum flow",
+      "expr": "H = H0 · s² − a · (q / n)² ; q_max where H(s = 1) = Δp(q)",
+      "note": "n pumps in parallel share the flow."
+    },
+    {
+      "id": "EQ-PWR",
+      "name": "Pump electrical power",
+      "expr": "P = q · Δp / η",
+      "note": "q in m³/s, Δp in kPa, η wire-to-water efficiency."
+    },
+    {
+      "id": "EQ-MARGIN",
+      "name": "Thermal margin",
+      "expr": "margin = capacity / load − 1",
+      "note": "Capacity = highest load that meets every envelope requirement (found by bisection)."
+    }
+  ],
+  "configs": {
+    "v1": {
+      "id": "v1",
+      "name": "Loop A v1",
+      "label": "Current baseline",
+      "provenance": "CALIBRATED to the plant telemetry",
+      "values": {
+        "capacityKw": 1002.4,
+        "maxFlowLpm": 1740,
+        "maxPumpPowerKw": 7.82,
+        "singleFailureCapacityKw": 627.6,
+        "pumpsPerCdu": 1,
+        "cdus": 2,
+        "pumpShutoffHeadKpa": 180,
+        "pumpCurveCoeff": 0.1508,
+        "systemStaticDpKpa": 15,
+        "systemDpCoeff": 0.1585,
+        "hxUaKwPerK": 172,
+        "deltaTSetpointK": 8.4,
+        "pumpWireToWaterEff": 0.55
+      },
+      "bindingLimit": "return ≤ 40 °C",
+      "scenarios": [
+        {
+          "id": "S1",
+          "name": "Normal load",
+          "loadKw": 869.1,
+          "status": "PASS",
+          "marginPct": 15.3,
+          "violations": [],
+          "supplyC": 30.2,
+          "returnC": 38.6,
+          "deltaTK": 8.4,
+          "flowLpm": 1581,
+          "flowLpmPerKw": 1.82,
+          "dpKpa": 125,
+          "pumpKw": 5.99,
+          "flowCapped": false,
+          "facilityReturnC": 32.5
+        },
+        {
+          "id": "S2",
+          "name": "Original design load",
+          "loadKw": 900,
+          "status": "PASS",
+          "marginPct": 11.4,
+          "violations": [],
+          "supplyC": 30.4,
+          "returnC": 38.8,
+          "deltaTK": 8.4,
+          "flowLpm": 1637,
+          "flowLpmPerKw": 1.82,
+          "dpKpa": 133,
+          "pumpKw": 6.6,
+          "flowCapped": false,
+          "facilityReturnC": 32.7
+        },
+        {
+          "id": "S3",
+          "name": "High AI load",
+          "loadKw": 989.1,
+          "status": "LOW MARGIN",
+          "marginPct": 1.3,
+          "violations": [],
+          "supplyC": 31.1,
+          "returnC": 39.8,
+          "deltaTK": 8.7,
+          "flowLpm": 1740,
+          "flowLpmPerKw": 1.76,
+          "dpKpa": 148,
+          "pumpKw": 7.82,
+          "flowCapped": true,
+          "facilityReturnC": 33.4
+        },
+        {
+          "id": "S4",
+          "name": "Projected future AI factory load",
+          "loadKw": 1469.1,
+          "status": "FAIL",
+          "marginPct": -31.8,
+          "violations": [
+            "return ≤ 40 °C",
+            "supply ≤ 32 °C",
+            "flow ≥ 1.5 L/min/kW"
+          ],
+          "supplyC": 33.6,
+          "returnC": 46.5,
+          "deltaTK": 12.9,
+          "flowLpm": 1740,
+          "flowLpmPerKw": 1.18,
+          "dpKpa": 148,
+          "pumpKw": 7.82,
+          "flowCapped": true,
+          "facilityReturnC": 37
+        }
+      ],
+      "components": [
+        {
+          "tag": "CDU-A1",
+          "name": "Coolant distribution unit A1",
+          "kind": "cdu",
+          "status": "UNCHANGED"
+        },
+        {
+          "tag": "CDU-A2",
+          "name": "Coolant distribution unit A2",
+          "kind": "cdu",
+          "status": "UNCHANGED"
+        },
+        {
+          "tag": "P-101",
+          "name": "Circulation pump (CDU-A1), variable speed",
+          "kind": "pump",
+          "cdu": "CDU-A1",
+          "status": "UNCHANGED"
+        },
+        {
+          "tag": "P-102",
+          "name": "Circulation pump (CDU-A2), variable speed",
+          "kind": "pump",
+          "cdu": "CDU-A2",
+          "status": "UNCHANGED"
+        },
+        {
+          "tag": "HX-101",
+          "name": "Plate heat exchanger (CDU-A1), UA 86 kW/K",
+          "kind": "hx",
+          "cdu": "CDU-A1",
+          "status": "UNCHANGED"
+        },
+        {
+          "tag": "HX-102",
+          "name": "Plate heat exchanger (CDU-A2), UA 86 kW/K",
+          "kind": "hx",
+          "cdu": "CDU-A2",
+          "status": "UNCHANGED"
+        },
+        {
+          "tag": "SM-101",
+          "name": "Supply manifold DN150, direct return",
+          "kind": "manifold",
+          "status": "UNCHANGED"
+        },
+        {
+          "tag": "RM-101",
+          "name": "Return manifold DN150",
+          "kind": "manifold",
+          "status": "UNCHANGED"
+        },
+        {
+          "tag": "CV-101",
+          "name": "Facility-side control valve (CDU-A1)",
+          "kind": "valve",
+          "cdu": "CDU-A1",
+          "status": "UNCHANGED"
+        },
+        {
+          "tag": "CV-102",
+          "name": "Facility-side control valve (CDU-A2)",
+          "kind": "valve",
+          "cdu": "CDU-A2",
+          "status": "UNCHANGED"
+        },
+        {
+          "tag": "FM-101",
+          "name": "Flow meter (CDU-A1)",
+          "kind": "sensor",
+          "cdu": "CDU-A1",
+          "status": "UNCHANGED"
+        },
+        {
+          "tag": "FM-102",
+          "name": "Flow meter (CDU-A2)",
+          "kind": "sensor",
+          "cdu": "CDU-A2",
+          "status": "UNCHANGED"
+        },
+        {
+          "tag": "TS-101",
+          "name": "Supply temperature (CDU-A1)",
+          "kind": "sensor",
+          "cdu": "CDU-A1",
+          "status": "UNCHANGED"
+        },
+        {
+          "tag": "TS-102",
+          "name": "Return temperature (CDU-A1)",
+          "kind": "sensor",
+          "cdu": "CDU-A1",
+          "status": "UNCHANGED"
+        },
+        {
+          "tag": "TS-103",
+          "name": "Supply temperature (CDU-A2)",
+          "kind": "sensor",
+          "cdu": "CDU-A2",
+          "status": "UNCHANGED"
+        },
+        {
+          "tag": "TS-104",
+          "name": "Return temperature (CDU-A2)",
+          "kind": "sensor",
+          "cdu": "CDU-A2",
+          "status": "UNCHANGED"
+        },
+        {
+          "tag": "PS-101",
+          "name": "Pressure (CDU-A1 discharge)",
+          "kind": "sensor",
+          "cdu": "CDU-A1",
+          "status": "UNCHANGED"
+        },
+        {
+          "tag": "PS-102",
+          "name": "Pressure (CDU-A2 discharge)",
+          "kind": "sensor",
+          "cdu": "CDU-A2",
+          "status": "UNCHANGED"
+        },
+        {
+          "tag": "TC-101",
+          "name": "Thermal controller, conventional PID",
+          "kind": "controller",
+          "status": "UNCHANGED"
+        }
+      ],
+      "control": "PID on supply temperature with a fixed 8.4 K ΔT set-point",
+      "topology": {
+        "coolant": [
+          [
+            "RM-101",
+            "P-101"
+          ],
+          [
+            "RM-101",
+            "P-102"
+          ],
+          [
+            "P-101",
+            "HX-101"
+          ],
+          [
+            "P-102",
+            "HX-102"
+          ],
+          [
+            "HX-101",
+            "SM-101"
+          ],
+          [
+            "HX-102",
+            "SM-101"
+          ]
+        ],
+        "facility": [
+          [
+            "CV-101",
+            "HX-101"
+          ],
+          [
+            "CV-102",
+            "HX-102"
+          ]
+        ],
+        "signal": [
+          [
+            "TS-101",
+            "TC-101"
+          ],
+          [
+            "TS-102",
+            "TC-101"
+          ],
+          [
+            "FM-101",
+            "TC-101"
+          ],
+          [
+            "PS-101",
+            "TC-101"
+          ],
+          [
+            "TS-103",
+            "TC-101"
+          ],
+          [
+            "TS-104",
+            "TC-101"
+          ],
+          [
+            "FM-102",
+            "TC-101"
+          ],
+          [
+            "PS-102",
+            "TC-101"
+          ]
+        ],
+        "command": [
+          [
+            "TC-101",
+            "P-101"
+          ],
+          [
+            "TC-101",
+            "P-102"
+          ],
+          [
+            "TC-101",
+            "CV-101"
+          ],
+          [
+            "TC-101",
+            "CV-102"
+          ]
+        ]
+      }
+    },
+    "v2": {
+      "id": "v2",
+      "name": "Loop A v2",
+      "label": "Proposed evolution",
+      "provenance": "DESIGN (proposed engineering evolution)",
+      "values": {
+        "capacityKw": 1715.7,
+        "maxFlowLpm": 3480,
+        "maxPumpPowerKw": 14,
+        "singleFailureCapacityKw": 1715.7,
+        "pumpsPerCdu": 2,
+        "cdus": 2,
+        "pumpShutoffHeadKpa": 180,
+        "pumpCurveCoeff": 0.1446,
+        "systemStaticDpKpa": 15,
+        "systemDpCoeff": 0.04,
+        "hxUaKwPerK": 650,
+        "deltaTSetpointK": 9,
+        "pumpWireToWaterEff": 0.62
+      },
+      "bindingLimit": "return ≤ 40 °C",
+      "scenarios": [
+        {
+          "id": "S1",
+          "name": "Normal load",
+          "loadKw": 869.1,
+          "status": "PASS",
+          "marginPct": 97.4,
+          "violations": [],
+          "supplyC": 26.5,
+          "returnC": 35.5,
+          "deltaTK": 9,
+          "flowLpm": 1475,
+          "flowLpmPerKw": 1.7,
+          "dpKpa": 39,
+          "pumpKw": 1.55,
+          "flowCapped": false,
+          "facilityReturnC": 32.5
+        },
+        {
+          "id": "S2",
+          "name": "Original design load",
+          "loadKw": 900,
+          "status": "PASS",
+          "marginPct": 90.6,
+          "violations": [],
+          "supplyC": 26.5,
+          "returnC": 35.5,
+          "deltaTK": 9,
+          "flowLpm": 1528,
+          "flowLpmPerKw": 1.7,
+          "dpKpa": 41,
+          "pumpKw": 1.68,
+          "flowCapped": false,
+          "facilityReturnC": 32.7
+        },
+        {
+          "id": "S3",
+          "name": "High AI load",
+          "loadKw": 989.1,
+          "status": "PASS",
+          "marginPct": 73.5,
+          "violations": [],
+          "supplyC": 26.9,
+          "returnC": 35.9,
+          "deltaTK": 9,
+          "flowLpm": 1679,
+          "flowLpmPerKw": 1.7,
+          "dpKpa": 46,
+          "pumpKw": 2.09,
+          "flowCapped": false,
+          "facilityReturnC": 33.4
+        },
+        {
+          "id": "S4",
+          "name": "Projected future AI factory load",
+          "loadKw": 1469.1,
+          "status": "PASS",
+          "marginPct": 16.8,
+          "violations": [],
+          "supplyC": 29.4,
+          "returnC": 38.4,
+          "deltaTK": 9,
+          "flowLpm": 2494,
+          "flowLpmPerKw": 1.7,
+          "dpKpa": 84,
+          "pumpKw": 5.64,
+          "flowCapped": false,
+          "facilityReturnC": 37
+        }
+      ],
+      "components": [
+        {
+          "tag": "CDU-A1",
+          "name": "Coolant distribution unit A1 (upgraded skid)",
+          "kind": "cdu",
+          "status": "MODIFIED"
+        },
+        {
+          "tag": "CDU-A2",
+          "name": "Coolant distribution unit A2 (upgraded skid)",
+          "kind": "cdu",
+          "status": "MODIFIED"
+        },
+        {
+          "tag": "P-201A",
+          "name": "Circulation pump A (CDU-A1), variable speed, parallel",
+          "kind": "pump",
+          "cdu": "CDU-A1",
+          "status": "MODIFIED",
+          "replaces": "P-101"
+        },
+        {
+          "tag": "P-201B",
+          "name": "Circulation pump B (CDU-A1), variable speed, parallel",
+          "kind": "pump",
+          "cdu": "CDU-A1",
+          "status": "ADDED"
+        },
+        {
+          "tag": "P-202A",
+          "name": "Circulation pump A (CDU-A2), variable speed, parallel",
+          "kind": "pump",
+          "cdu": "CDU-A2",
+          "status": "MODIFIED",
+          "replaces": "P-102"
+        },
+        {
+          "tag": "P-202B",
+          "name": "Circulation pump B (CDU-A2), variable speed, parallel",
+          "kind": "pump",
+          "cdu": "CDU-A2",
+          "status": "ADDED"
+        },
+        {
+          "tag": "HX-201",
+          "name": "Plate heat exchanger (CDU-A1), UA 325 kW/K",
+          "kind": "hx",
+          "cdu": "CDU-A1",
+          "status": "MODIFIED",
+          "replaces": "HX-101"
+        },
+        {
+          "tag": "HX-202",
+          "name": "Plate heat exchanger (CDU-A2), UA 325 kW/K",
+          "kind": "hx",
+          "cdu": "CDU-A2",
+          "status": "MODIFIED",
+          "replaces": "HX-102"
+        },
+        {
+          "tag": "SM-201",
+          "name": "Supply manifold DN200, reverse return",
+          "kind": "manifold",
+          "status": "MODIFIED",
+          "replaces": "SM-101"
+        },
+        {
+          "tag": "RM-201",
+          "name": "Return manifold DN200, reverse return",
+          "kind": "manifold",
+          "status": "MODIFIED",
+          "replaces": "RM-101"
+        },
+        {
+          "tag": "CV-101",
+          "name": "Facility-side control valve (CDU-A1)",
+          "kind": "valve",
+          "cdu": "CDU-A1",
+          "status": "UNCHANGED"
+        },
+        {
+          "tag": "CV-102",
+          "name": "Facility-side control valve (CDU-A2)",
+          "kind": "valve",
+          "cdu": "CDU-A2",
+          "status": "UNCHANGED"
+        },
+        {
+          "tag": "FM-101",
+          "name": "Flow meter (CDU-A1)",
+          "kind": "sensor",
+          "cdu": "CDU-A1",
+          "status": "UNCHANGED"
+        },
+        {
+          "tag": "FM-102",
+          "name": "Flow meter (CDU-A2)",
+          "kind": "sensor",
+          "cdu": "CDU-A2",
+          "status": "UNCHANGED"
+        },
+        {
+          "tag": "FM-203",
+          "name": "Branch flow meter, row 4 north",
+          "kind": "sensor",
+          "status": "ADDED"
+        },
+        {
+          "tag": "FM-204",
+          "name": "Branch flow meter, row 4 south",
+          "kind": "sensor",
+          "status": "ADDED"
+        },
+        {
+          "tag": "TS-101",
+          "name": "Supply temperature (CDU-A1)",
+          "kind": "sensor",
+          "cdu": "CDU-A1",
+          "status": "UNCHANGED"
+        },
+        {
+          "tag": "TS-102",
+          "name": "Return temperature (CDU-A1)",
+          "kind": "sensor",
+          "cdu": "CDU-A1",
+          "status": "UNCHANGED"
+        },
+        {
+          "tag": "TS-103",
+          "name": "Supply temperature (CDU-A2)",
+          "kind": "sensor",
+          "cdu": "CDU-A2",
+          "status": "UNCHANGED"
+        },
+        {
+          "tag": "TS-104",
+          "name": "Return temperature (CDU-A2)",
+          "kind": "sensor",
+          "cdu": "CDU-A2",
+          "status": "UNCHANGED"
+        },
+        {
+          "tag": "TS-205",
+          "name": "Rack-row return temperature, north",
+          "kind": "sensor",
+          "status": "ADDED"
+        },
+        {
+          "tag": "TS-206",
+          "name": "Rack-row return temperature, south",
+          "kind": "sensor",
+          "status": "ADDED"
+        },
+        {
+          "tag": "PS-101",
+          "name": "Pressure (CDU-A1 discharge)",
+          "kind": "sensor",
+          "cdu": "CDU-A1",
+          "status": "UNCHANGED"
+        },
+        {
+          "tag": "PS-102",
+          "name": "Pressure (CDU-A2 discharge)",
+          "kind": "sensor",
+          "cdu": "CDU-A2",
+          "status": "UNCHANGED"
+        },
+        {
+          "tag": "DPT-201",
+          "name": "Differential pressure across the row headers",
+          "kind": "sensor",
+          "status": "ADDED"
+        },
+        {
+          "tag": "TC-201",
+          "name": "Thermal controller, adaptive (feed-forward)",
+          "kind": "controller",
+          "status": "MODIFIED",
+          "replaces": "TC-101"
+        }
+      ],
+      "control": "Adaptive: feed-forward from rack power telemetry, ΔT set-point 9.0 K, differential-pressure reset",
+      "topology": {
+        "coolant": [
+          [
+            "RM-201",
+            "P-201A"
+          ],
+          [
+            "RM-201",
+            "P-201B"
+          ],
+          [
+            "RM-201",
+            "P-202A"
+          ],
+          [
+            "RM-201",
+            "P-202B"
+          ],
+          [
+            "P-201A",
+            "HX-201"
+          ],
+          [
+            "P-201B",
+            "HX-201"
+          ],
+          [
+            "P-202A",
+            "HX-202"
+          ],
+          [
+            "P-202B",
+            "HX-202"
+          ],
+          [
+            "HX-201",
+            "SM-201"
+          ],
+          [
+            "HX-202",
+            "SM-201"
+          ]
+        ],
+        "facility": [
+          [
+            "CV-101",
+            "HX-201"
+          ],
+          [
+            "CV-102",
+            "HX-202"
+          ]
+        ],
+        "signal": [
+          [
+            "TS-101",
+            "TC-201"
+          ],
+          [
+            "TS-102",
+            "TC-201"
+          ],
+          [
+            "FM-101",
+            "TC-201"
+          ],
+          [
+            "PS-101",
+            "TC-201"
+          ],
+          [
+            "TS-103",
+            "TC-201"
+          ],
+          [
+            "TS-104",
+            "TC-201"
+          ],
+          [
+            "FM-102",
+            "TC-201"
+          ],
+          [
+            "PS-102",
+            "TC-201"
+          ],
+          [
+            "FM-203",
+            "TC-201"
+          ],
+          [
+            "FM-204",
+            "TC-201"
+          ],
+          [
+            "TS-205",
+            "TC-201"
+          ],
+          [
+            "TS-206",
+            "TC-201"
+          ],
+          [
+            "DPT-201",
+            "TC-201"
+          ]
+        ],
+        "command": [
+          [
+            "TC-201",
+            "P-201A"
+          ],
+          [
+            "TC-201",
+            "P-201B"
+          ],
+          [
+            "TC-201",
+            "P-202A"
+          ],
+          [
+            "TC-201",
+            "P-202B"
+          ],
+          [
+            "TC-201",
+            "CV-101"
+          ],
+          [
+            "TC-201",
+            "CV-102"
+          ]
+        ]
+      }
+    }
+  },
+  "verification": {
+    "v1": [
+      {
+        "id": "REQ-THERM-001",
+        "name": "Nominal cooling capacity",
+        "verdict": "PASS",
+        "value": "1002 kW",
+        "limit": "≥ 990 kW",
+        "basis": "Capacity (highest load meeting every envelope limit; binding: return ≤ 40 °C)."
+      },
+      {
+        "id": "REQ-THERM-002",
+        "name": "Maximum coolant outlet temperature",
+        "verdict": "PASS",
+        "value": "39.8 °C (S3)",
+        "limit": "≤ 40 °C",
+        "basis": "Highest return temperature over S1–S3."
+      },
+      {
+        "id": "REQ-THERM-003",
+        "name": "Maximum coolant supply temperature",
+        "verdict": "PASS",
+        "value": "31.1 °C (S3)",
+        "limit": "≤ 32 °C",
+        "basis": "Highest supply temperature over S1–S3."
+      },
+      {
+        "id": "REQ-FLOW-001",
+        "name": "Minimum coolant flow",
+        "verdict": "PASS",
+        "value": "1.76 L/min/kW (S3)",
+        "limit": "≥ 1.5",
+        "basis": "Lowest flow per kW over S1–S3."
+      },
+      {
+        "id": "REQ-PRESS-001",
+        "name": "Maximum pressure drop",
+        "verdict": "PASS",
+        "value": "148 kPa (S3)",
+        "limit": "≤ 150 kPa",
+        "basis": "Highest loop pressure drop over S1–S3."
+      },
+      {
+        "id": "REQ-AVAIL-001",
+        "name": "Cooling availability",
+        "verdict": "PASS",
+        "value": "628 kW",
+        "limit": "≥ 500 kW",
+        "basis": "Capacity after a single pump failure (one CDU pump lost ⇒ that CDU and its heat exchanger are out of service)."
+      },
+      {
+        "id": "REQ-EFF-001",
+        "name": "Cooling efficiency",
+        "verdict": "PASS",
+        "value": "0.73 % (6.6 kW)",
+        "limit": "≤ 1 %",
+        "basis": "Pump electrical power ÷ heat removed at S2."
+      },
+      {
+        "id": "REQ-FUTURE-001",
+        "name": "Projected future AI thermal load",
+        "verdict": "FAIL",
+        "value": "violates return ≤ 40 °C, supply ≤ 32 °C, flow ≥ 1.5 L/min/kW",
+        "limit": "no violation and margin ≥ 10 %",
+        "basis": "S4 = 1469.1 kW; capacity 1002 kW ⇒ margin -31.8 %."
+      }
+    ],
+    "v2": [
+      {
+        "id": "REQ-THERM-001",
+        "name": "Nominal cooling capacity",
+        "verdict": "PASS",
+        "value": "1716 kW",
+        "limit": "≥ 990 kW",
+        "basis": "Capacity (highest load meeting every envelope limit; binding: return ≤ 40 °C)."
+      },
+      {
+        "id": "REQ-THERM-002",
+        "name": "Maximum coolant outlet temperature",
+        "verdict": "PASS",
+        "value": "35.9 °C (S3)",
+        "limit": "≤ 40 °C",
+        "basis": "Highest return temperature over S1–S3."
+      },
+      {
+        "id": "REQ-THERM-003",
+        "name": "Maximum coolant supply temperature",
+        "verdict": "PASS",
+        "value": "26.9 °C (S3)",
+        "limit": "≤ 32 °C",
+        "basis": "Highest supply temperature over S1–S3."
+      },
+      {
+        "id": "REQ-FLOW-001",
+        "name": "Minimum coolant flow",
+        "verdict": "PASS",
+        "value": "1.7 L/min/kW (S1)",
+        "limit": "≥ 1.5",
+        "basis": "Lowest flow per kW over S1–S3."
+      },
+      {
+        "id": "REQ-PRESS-001",
+        "name": "Maximum pressure drop",
+        "verdict": "PASS",
+        "value": "46 kPa (S3)",
+        "limit": "≤ 150 kPa",
+        "basis": "Highest loop pressure drop over S1–S3."
+      },
+      {
+        "id": "REQ-AVAIL-001",
+        "name": "Cooling availability",
+        "verdict": "PASS",
+        "value": "1716 kW",
+        "limit": "≥ 500 kW",
+        "basis": "Capacity after a single pump failure (one of the parallel pumps lost; both heat exchangers stay in service)."
+      },
+      {
+        "id": "REQ-EFF-001",
+        "name": "Cooling efficiency",
+        "verdict": "PASS",
+        "value": "0.19 % (1.7 kW)",
+        "limit": "≤ 1 %",
+        "basis": "Pump electrical power ÷ heat removed at S2."
+      },
+      {
+        "id": "REQ-FUTURE-001",
+        "name": "Projected future AI thermal load",
+        "verdict": "PASS",
+        "value": "margin 16.8 %",
+        "limit": "no violation and margin ≥ 10 %",
+        "basis": "S4 = 1469.1 kW; capacity 1716 kW ⇒ margin 16.8 %."
+      }
+    ]
+  },
+  "comparison": [
+    {
+      "k": "Validated capacity",
+      "v1": "1002 kW",
+      "v2": "1716 kW"
+    },
+    {
+      "k": "Limit that binds first",
+      "v1": "return ≤ 40 °C",
+      "v2": "return ≤ 40 °C"
+    },
+    {
+      "k": "Maximum flow (pumps at full speed)",
+      "v1": "1740 L/min",
+      "v2": "3480 L/min"
+    },
+    {
+      "k": "Flow at S4 (1469.1 kW)",
+      "v1": "1740 L/min (capped)",
+      "v2": "2494 L/min"
+    },
+    {
+      "k": "ΔT at S4",
+      "v1": "12.9 K",
+      "v2": "9 K"
+    },
+    {
+      "k": "Supply / return at S4",
+      "v1": "33.6 / 46.5 °C",
+      "v2": "29.4 / 38.4 °C"
+    },
+    {
+      "k": "Pressure drop at S4",
+      "v1": "148 kPa",
+      "v2": "84 kPa"
+    },
+    {
+      "k": "Pump power at S4",
+      "v1": "7.8 kW",
+      "v2": "5.6 kW"
+    },
+    {
+      "k": "Future-load margin (S4)",
+      "v1": "-31.8 %",
+      "v2": "16.8 %"
+    },
+    {
+      "k": "Capacity after one pump failure",
+      "v1": "628 kW",
+      "v2": "1716 kW"
+    },
+    {
+      "k": "Maximum pumping power (installed)",
+      "v1": "7.8 kW",
+      "v2": "14 kW"
+    },
+    {
+      "k": "Requirements verified",
+      "v1": "7/8",
+      "v2": "8/8"
+    }
+  ],
+  "changes": [
+    {
+      "tag": "CDU-A1",
+      "name": "Coolant distribution unit A1 (upgraded skid)",
+      "status": "MODIFIED",
+      "replaces": null
+    },
+    {
+      "tag": "CDU-A2",
+      "name": "Coolant distribution unit A2 (upgraded skid)",
+      "status": "MODIFIED",
+      "replaces": null
+    },
+    {
+      "tag": "P-201A",
+      "name": "Circulation pump A (CDU-A1), variable speed, parallel",
+      "status": "MODIFIED",
+      "replaces": "P-101"
+    },
+    {
+      "tag": "P-201B",
+      "name": "Circulation pump B (CDU-A1), variable speed, parallel",
+      "status": "ADDED",
+      "replaces": null
+    },
+    {
+      "tag": "P-202A",
+      "name": "Circulation pump A (CDU-A2), variable speed, parallel",
+      "status": "MODIFIED",
+      "replaces": "P-102"
+    },
+    {
+      "tag": "P-202B",
+      "name": "Circulation pump B (CDU-A2), variable speed, parallel",
+      "status": "ADDED",
+      "replaces": null
+    },
+    {
+      "tag": "HX-201",
+      "name": "Plate heat exchanger (CDU-A1), UA 325 kW/K",
+      "status": "MODIFIED",
+      "replaces": "HX-101"
+    },
+    {
+      "tag": "HX-202",
+      "name": "Plate heat exchanger (CDU-A2), UA 325 kW/K",
+      "status": "MODIFIED",
+      "replaces": "HX-102"
+    },
+    {
+      "tag": "SM-201",
+      "name": "Supply manifold DN200, reverse return",
+      "status": "MODIFIED",
+      "replaces": "SM-101"
+    },
+    {
+      "tag": "RM-201",
+      "name": "Return manifold DN200, reverse return",
+      "status": "MODIFIED",
+      "replaces": "RM-101"
+    },
+    {
+      "tag": "FM-203",
+      "name": "Branch flow meter, row 4 north",
+      "status": "ADDED",
+      "replaces": null
+    },
+    {
+      "tag": "FM-204",
+      "name": "Branch flow meter, row 4 south",
+      "status": "ADDED",
+      "replaces": null
+    },
+    {
+      "tag": "TS-205",
+      "name": "Rack-row return temperature, north",
+      "status": "ADDED",
+      "replaces": null
+    },
+    {
+      "tag": "TS-206",
+      "name": "Rack-row return temperature, south",
+      "status": "ADDED",
+      "replaces": null
+    },
+    {
+      "tag": "DPT-201",
+      "name": "Differential pressure across the row headers",
+      "status": "ADDED",
+      "replaces": null
+    },
+    {
+      "tag": "TC-201",
+      "name": "Thermal controller, adaptive (feed-forward)",
+      "status": "MODIFIED",
+      "replaces": "TC-101"
+    }
+  ],
+  "tradeoffs": [
+    {
+      "k": "Equipment",
+      "text": "Pumps 2 → 4; heat-exchanger UA 172 → 650 kW/K; manifolds DN150 → DN200; sensors 8 → 13."
+    },
+    {
+      "k": "Pumping power",
+      "text": "Installed maximum 7.8 → 14 kW. At the same loads (S1–S3) V2 draws less (S1 6 → 1.6 kW, S2 6.6 → 1.7 kW, S3 7.8 → 2.1 kW) because the DN200 manifolds lower the loop resistance; at S4 V2 draws 5.6 kW."
+    },
+    {
+      "k": "Control complexity",
+      "text": "Adaptive controller with feed-forward from rack power telemetry, ΔP reset and four pumps to stage: more configuration, tuning and testing than a single PID loop."
+    },
+    {
+      "k": "CAPEX",
+      "text": "Higher: two added pumps and drives, larger heat exchangers, re-piped manifolds, seven added sensors. Not estimated — no cost data was provided."
+    },
+    {
+      "k": "Maintenance",
+      "text": "Four pumps instead of two to maintain; seven more instruments to calibrate. Pump redundancy allows maintenance without taking a CDU out."
+    },
+    {
+      "k": "Space",
+      "text": "Larger plate heat exchangers and a second pump per skid: CDU footprint to be confirmed with the vendor."
+    },
+    {
+      "k": "Implementation risk",
+      "text": "Manifold replacement needs a planned Loop A outage or a staged cut-over; controller migration must be commissioned and tested."
+    },
+    {
+      "k": "Facility interface",
+      "text": "Same facility water flow (32 kg/s); at S4 the facility water returns at 37 °C. The cooling plant must accept 1469 kW from Loop A — to confirm with the facility team."
+    }
+  ],
+  "options": {
+    "s4Kw": 1469.1,
+    "neededKw": 1616.01,
+    "v1CapacityKw": 1002.3693677605158,
+    "list": [
+      {
+        "id": "A",
+        "name": "Increase operating limits",
+        "action": "Accept 45 °C return and 35 °C supply on Loop A v1.",
+        "result": "Loop A v1 capacity rises to 1160 kW, then flow becomes the limit (pumps at full speed).",
+        "meetsFuture": false,
+        "constraints": [
+          "REQ-THERM-002 and REQ-THERM-003 come from the cold-plate specification: changing them needs GPU vendor re-qualification.",
+          "Still short of the 1616 kW needed at S4 with margin."
+        ]
+      },
+      {
+        "id": "B",
+        "name": "Redistribute compute workload",
+        "action": "Move the workload policy allows to move (ft-sweep-17) to Loop B.",
+        "result": "Loop B can accept 425 kW with margin, but only 38.7 kW is movable; Loop A at S4 falls to 1430.4 kW.",
+        "meetsFuture": false,
+        "constraints": [
+          "The Future High-Density Cluster is installed on Loop A (row 4): its heat cannot be moved by scheduling.",
+          "Critical and high-priority jobs are not movable under the current policy."
+        ]
+      },
+      {
+        "id": "C",
+        "name": "Reduce compute performance",
+        "action": "Power-cap Loop A racks so the loop keeps a 10 % margin (≤ 911 kW).",
+        "result": "558 kW of IT power must be capped at S4 (38 % of the projected Loop A load).",
+        "meetsFuture": false,
+        "constraints": [
+          "The projected compute would not be delivered: the expansion that defines S4 could not run at its design load."
+        ]
+      },
+      {
+        "id": "D",
+        "name": "Evolve Cooling Loop A",
+        "action": "Study an engineering evolution of Loop A against the authoritative system model.",
+        "result": "S4 (1469.1 kW) exceeds the validated capacity of Loop A v1 (1002 kW) by 46.6 %: an engineering question, not an operating one.",
+        "meetsFuture": null,
+        "constraints": [
+          "Needs an architecture study, verification evidence and a human engineering decision."
+        ]
+      }
+    ],
+    "escalate": true,
+    "rule": "An operational option is sufficient only if it meets REQ-FUTURE-001 (S4 with ≥ 10 % margin) without breaking another requirement or the projected demand.",
+    "conclusion": "Operational mitigation cannot provide the required long-term engineering margin."
+  },
+  "conclusion": {
+    "v1": "The current Loop A v1 architecture does not satisfy REQ-FUTURE-001 under the projected AI Factory thermal load (1469.1 kW) while maintaining the required engineering margin: capacity 1002 kW, margin -31.8 %, return ≤ 40 °C, supply ≤ 32 °C, flow ≥ 1.5 L/min/kW not met.",
+    "v2": "The evaluated Loop A v2 architecture satisfies the same requirement under identical boundary conditions and restores positive thermal margin: capacity 1716 kW, margin 16.8 % at S4."
+  }
+}
