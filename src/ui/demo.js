@@ -5,6 +5,7 @@ import { modelCost } from '../engine/telemetry.js';
 import { explainerMarkup, STEP_TEXT } from './grooming.js';
 import { explainGrooming } from '../scenarios/ai-factory/explain.js';
 import { COMPANIONS, skillName } from '../domain/positioning.js';
+import { mountFactory } from './factory.js';
 
 const STATES = [
   { id: 'INGESTING', label: 'Observe', c: '#7e95a8' }, { id: 'GROOMING', label: 'Groom', c: 'var(--lean)' }, { id: 'SYSTEM1', label: 'Triage · System 1', c: 'var(--s1)' },
@@ -146,6 +147,7 @@ export function mountDemo(el, app) {
   <div class="demo-head">
     <div><span class="eyebrow"><i class="pip"></i>Live demo · AI factory · simulated scenario</span><h1 class="h2">One rack. One loop. <span id="demo-h-tail">Four specialists.</span></h1></div>
   </div>
+  <section class="glass fx" id="factory" aria-label="AI factory · physical view"></section>
   <div class="glass incident-bar">
     <div><div class="req-switch seg" role="group" aria-label="Request">${Object.values(sc.requests).map(r => `<button type="button" data-req="${r.key}" aria-pressed="${r.key === engine.requestKey}" title="${esc(r.label)}"><b>${esc(r.key)}</b> ${esc(r.short)}</button>`).join('')}</div>
       <div id="incident-head"></div></div>
@@ -188,6 +190,8 @@ export function mountDemo(el, app) {
   <div id="run-error"></div>
   <section class="panel log" aria-labelledby="log-title"><div class="panel-title"><span class="eyebrow" id="log-title">${icon('message', 14)} Exchange log</span><button class="btn sm ghost" id="to-technical">Full trace in Technical view ${icon('arrow', 14)}</button></div><div class="log-list" id="log"></div></section>`;
 
+  const factory = mountFactory($('#factory', el), app);
+
   // ---------- Controls ----------
   $('#btn-run', el).addEventListener('click', () => engine.toggle());
   el.querySelectorAll('[data-req]').forEach(b => b.addEventListener('click', () => {
@@ -211,6 +215,7 @@ export function mountDemo(el, app) {
     const { run, metrics } = app.live();
     inc = run.incident ?? sc.incident;
     renderControls(run);
+    factory.update(run);
     $('#incident-head', el).innerHTML = `<div class="incident-id"><span class="tag mcp">${icon('rack', 13)} ${esc(inc.id)}</span><span class="small muted">${esc(inc.site)} · received ${new Date(inc.detectedAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' })}</span></div>
       <div class="incident-title">${esc(inc.title)}</div><div class="incident-sub">${esc(inc.rack)} · ${esc(inc.model)} · ${inc.itKw} kW design IT · ${esc(inc.position)} · ${esc(inc.plannedForLabel)}</div>`;
     { const tail = $('#demo-h-tail', el), want = engine.requestCfg?.kind === 'simple' ? 'One small model decides.' : 'Four specialists.'; if (tail && tail.textContent !== want) tail.textContent = want; }

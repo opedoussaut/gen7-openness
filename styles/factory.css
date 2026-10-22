@@ -1,0 +1,123 @@
+@charset "UTF-8";
+/* AI factory scene — the physical system above the live demo (src/ui/factory.js).
+   Neutral by default; soft blue when a system or element is involved; green / red only for the capacity verdict. */
+.fx { margin-top: 6px; padding: 16px 22px 14px; background: var(--surface); backdrop-filter: none; -webkit-backdrop-filter: none; contain: layout paint; }
+/* solid surface (no backdrop blur): the scene animates, and a blurred backdrop would repaint on every frame */
+.fx-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 20px; align-items: center; }
+.fx-title { display: flex; align-items: center; gap: 12px; white-space: nowrap; }
+.fx-title .eyebrow { color: var(--ink-2); }
+.fx-phase { font-size: 12px; font-weight: 600; color: var(--mcp); background: var(--mcp-soft); border-radius: 999px; padding: 3px 11px; }
+.fx[data-phase="ready"] .fx-phase { color: var(--muted); background: var(--line-2); }
+.fx[data-phase="outcome"] .fx-phase { color: var(--ok); background: var(--ok-soft); }
+.fx-caption { margin: 0; font-size: 15px; line-height: 1.45; color: var(--ink); min-width: 0; }
+.fx-toggle { justify-self: end; }
+.fx.collapsed { padding-bottom: 14px; }
+.fx-body { margin-top: 10px; }
+.fx-stage { min-height: 120px; }
+.fx-svg { display: block; width: 100%; height: auto; max-height: 300px; font-family: var(--font); }
+.fx-link { display: flex; align-items: center; gap: 8px; margin-top: 6px; padding-top: 10px; border-top: 1px solid var(--line-2); font-size: 13px; color: var(--muted); }
+.fx-link svg { transform: rotate(90deg); color: var(--mcp); flex: none; }
+.fx-link b { color: var(--ink-2); font-weight: 600; }
+
+/* text */
+.fx-svg text { fill: var(--ink-2); }
+.fx-svg .lbl { font-size: 13px; font-weight: 600; fill: var(--ink-2); }
+.fx-svg .sub { font-size: 12px; fill: var(--muted); }
+.fx-svg .rid { font-size: 13px; font-weight: 700; fill: var(--ink); }
+.fx-svg .rkw { font-size: 12.5px; font-weight: 600; fill: var(--ink-2); font-variant-numeric: tabular-nums; }
+
+/* engineering systems */
+.fx-sys .pill { fill: #fff; stroke: var(--line); stroke-width: 1.2; transition: fill .4s, stroke .4s; }
+.fx-sys svg { color: var(--faint); transition: color .4s; }
+.fx-sys .sname { font-size: 13px; font-weight: 600; fill: var(--muted); }
+.fx-sys .sdot { fill: var(--line); transition: fill .4s; }
+.fx-sys .tether { stroke: var(--mcp-2); stroke-width: 1.4; stroke-dasharray: 3 4; fill: none; opacity: 0; transition: opacity .4s; }
+.fx-sys[data-state="consulted"] .pill { fill: var(--mcp-soft); stroke: #bcd9f1; }
+.fx-sys[data-state="consulted"] svg, .fx-sys[data-state="active"] svg { color: var(--mcp); }
+.fx-sys[data-state="consulted"] .sname, .fx-sys[data-state="active"] .sname { fill: var(--mcp); }
+.fx-sys[data-state="consulted"] .sdot { fill: var(--mcp-2); }
+.fx-sys[data-state="consulted"] .tether { opacity: .45; }
+.fx-sys[data-state="active"] .pill { fill: #fff; stroke: var(--mcp); stroke-width: 1.8; }
+.fx-sys[data-state="active"] .sdot { fill: var(--mcp); animation: fx-pulse 1.1s ease-in-out infinite; }
+.fx-sys[data-state="active"] .tether { opacity: 1; }
+
+/* grid feed and busway */
+.fx-grid rect { fill: #fff; stroke: var(--line); stroke-width: 1.2; }
+.fx-grid svg { color: var(--muted); }
+.fx-grid .feed { fill: none; stroke: #c9d5df; stroke-width: 3; }
+.fx-bus .bar { fill: #d5dee6; transition: fill .4s; }
+.fx-bus .tap { stroke: #d5dee6; stroke-width: 2; }
+.fx-bus[data-state="consulted"] .bar, .fx-bus[data-state="active"] .bar { fill: #9cc6ea; }
+
+/* racks */
+.fx-rack .cab, .fx-slot .cab, .fx-cdu .cab { fill: #fff; stroke: #cfdae4; stroke-width: 1.3; transition: fill .4s, stroke .4s; }
+.fx-rack .tray { stroke: var(--line-2); stroke-width: 1.2; }
+.fx-rack .led { fill: #c9d5df; }
+.fx-rack .load { fill: #d6e8f7; transition: y .7s var(--ease), height .7s var(--ease), fill .4s; }
+.fx-rack[data-state="measured"] .led { fill: var(--ok); }
+.fx-rack[data-state="proposed"] .cab { stroke: var(--warn); stroke-width: 2; }
+.fx-rack[data-state="proposed"] .load { fill: var(--warn-soft); }
+.fx-rack[data-state="proposed"] .rkw, .fx-rack[data-state="released"] .rkw { fill: var(--warn); }
+.fx-rack[data-state="released"] .cab { stroke: var(--warn); stroke-dasharray: 5 4; }
+.fx-rack[data-state="released"] .load { fill: var(--line-2); }
+
+/* the requested slot */
+.fx-slot .cab { fill: transparent; stroke: #b6c4d1; stroke-dasharray: 6 5; }
+.fx-slot .tag { font-size: 11px; font-weight: 700; letter-spacing: 1.4px; fill: var(--faint); }
+.fx-slot .sub2 { font-size: 12px; }
+.fx-slot[data-state="idle"] .rkw { fill: var(--faint); }
+.fx-slot[data-state="requested"] .cab { fill: var(--mcp-soft); stroke: var(--mcp); stroke-width: 2; animation: fx-breathe 2.4s ease-in-out infinite; }
+.fx-slot[data-state="requested"] .tag, .fx-slot[data-state="requested"] .sub2 { fill: var(--mcp); }
+.fx-slot[data-state="short"] .cab { fill: var(--bad-soft); stroke: var(--bad); stroke-width: 2; }
+.fx-slot[data-state="short"] .tag, .fx-slot[data-state="short"] .sub2 { fill: var(--bad); }
+.fx-slot[data-state="ok"] .cab, .fx-slot[data-state="reserved"] .cab { fill: var(--ok-soft); stroke: var(--ok); stroke-width: 2; }
+.fx-slot[data-state="installed"] .cab { fill: var(--ok-soft); stroke: var(--ok); stroke-width: 2; stroke-dasharray: none; }
+.fx-slot[data-state="ok"] .tag, .fx-slot[data-state="ok"] .sub2, .fx-slot[data-state="installed"] .tag, .fx-slot[data-state="installed"] .sub2, .fx-slot[data-state="reserved"] .tag, .fx-slot[data-state="reserved"] .sub2 { fill: var(--ok); }
+.fx-slot[data-state="review"] .cab { fill: var(--warn-soft); stroke: var(--warn); stroke-width: 2; }
+.fx-slot[data-state="review"] .tag, .fx-slot[data-state="review"] .sub2 { fill: var(--warn); }
+
+/* liquid loop and CDUs */
+.fx-pipes .pipe { fill: none; stroke-width: 6; stroke-linecap: round; }
+.fx-pipes .pipe.ret { stroke: #f1d9c9; }
+.fx-pipes .pipe.sup { stroke: #cfe3f5; }
+.fx-pipes .drop { stroke: #dfe7ee; stroke-width: 2; }
+.fx-pipes .flow { fill: none; stroke-width: 2; stroke-dasharray: 2 14; stroke-linecap: round; opacity: 0; }
+.fx-pipes .flow.ret { stroke: #d99a73; }
+.fx-pipes .flow.sup { stroke: var(--mcp-2); }
+.fx.running .fx-pipes .flow { opacity: .9; animation: fx-flow 1.6s linear infinite; }
+.fx-pipes[data-state="short"] .pipe.ret { stroke: #f0c2b4; }
+.fx-cdu .fan { fill: none; stroke: #d5dee6; stroke-width: 1.5; }
+.fx-cdu .fan-b ellipse { fill: #e6edf3; stroke: #cfdae4; stroke-width: 1; }
+.fx-cdus[data-state="measured"] .fan-b ellipse, .fx-cdus[data-state="ok"] .fan-b ellipse, .fx-cdus[data-state="short"] .fan-b ellipse { fill: #d6e8f7; stroke: #9cc6ea; }
+.fx-cdus[data-state="measured"] .cab, .fx-cdus[data-state="ok"] .cab, .fx-cdus[data-state="short"] .cab { stroke: var(--mcp-2); stroke-width: 1.8; }
+.fx-cdus[data-state="short"] .cab { stroke: var(--bad); }
+.fx-cdus[data-state="ok"] .cab { stroke: var(--ok); }
+.fx.running .fx-cdu .fan-b > ellipse { animation: fx-spin 3s linear infinite; }
+
+/* capacity readout */
+.fx-read .card { fill: var(--page); stroke: var(--line); stroke-width: 1.2; transition: fill .4s, stroke .4s; }
+.fx-read .k { font-size: 11.5px; fill: var(--muted); }
+.fx-read .v { font-size: 18px; font-weight: 700; fill: var(--ink); font-variant-numeric: tabular-nums; }
+.fx-read .v.sm { font-size: 14px; font-weight: 600; fill: var(--ink-2); }
+.fx-read .v[data-sign="ok"] { fill: var(--ok); }
+.fx-read .v[data-sign="short"] { fill: var(--bad); }
+.fx-read[data-state="short"] .card { fill: var(--bad-soft); stroke: #efc9ca; }
+.fx-read[data-state="ok"] .card { fill: var(--ok-soft); stroke: #bfe3d4; }
+
+@keyframes fx-flow { to { stroke-dashoffset: -32; } }
+@keyframes fx-spin { from { rotate: 0deg; } to { rotate: 360deg; } }
+@keyframes fx-pulse { 50% { opacity: .35; } }
+@keyframes fx-breathe { 50% { fill-opacity: .55; } }
+
+@media (max-width: 1180px) {
+  .fx-head { grid-template-columns: minmax(0, 1fr) auto; }
+  .fx-caption { grid-column: 1 / -1; grid-row: 2; }
+}
+@media (max-width: 720px) {
+  .fx { padding: 14px 14px 12px; }
+  .fx-stage { overflow-x: auto; }
+  .fx-svg { min-width: 680px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fx *, .fx.running * { animation: none !important; transition: none !important; }
+}
